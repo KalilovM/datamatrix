@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  role      Role
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  permissions Permission[]
+
+  Session Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+enum Role {
+  ADMIN
+  COMPANY_ADMIN
+  COMPANY_USER
+}
+
+enum Entity {
+  COMPANY
+  USER
+  NOMENCLATURE
+  AGGREGATION
+  DISAGGREGATION
+  AGGREGATED_ARCHIVE
+}
+
+enum Action {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+}
+
+model Permission {
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  entity Entity
+  action Action
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Company {
+  id              String         @id @default(uuid())
+  name            String
+  token           String         @unique @default(uuid())
+  subscriptionEnd DateTime // Admin sets the expiration date manually
+  isActive        Boolean        @default(true) // Computed based on subscriptionEnd
+  users           User[]
+  nomenclatures   Nomenclature[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Nomenclature {
+  id             String          @id @default(uuid())
+  name           String
+  configurations Configuration[]
+  codes          Code[]
+  company        Company         @relation(fields: [companyId], references: [id])
+  companyId      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  GeneratedCode GeneratedCode[]
+}
+
+model Code {
+  id             String       @id @default(uuid())
+  value          String       @unique
+  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId String
+  used           Boolean      @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model Configuration {
+  id             String       @id @default(uuid())
+  basePiece      Int          @default(1)
+  pieceInPack    Int
+  packInPallet   Int
+  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  GeneratedCode GeneratedCode[]
+}
+
+model GeneratedCode {
+  id              String          @id @default(uuid())
+  value           String          @unique
+  type            CodeType // PACK or PALLET
+  nomenclature    Nomenclature    @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId  String
+  configuration   Configuration   @relation(fields: [configurationId], references: [id])
+  configurationId String
+  parent          GeneratedCode?  @relation("ParentChild", fields: [parentId], references: [id])
+  parentId        String?
+  children        GeneratedCode[] @relation("ParentChild")
+
+  createdAt DateTime @default(now())
+}
+
+enum CodeType {
+  PACK
+  PALLET
+}
+
+model ServiceInfo {
+  id           String @id @default(uuid())
+  contactEmail String
+  contactPhone String
+
+  updatedAt DateTime @updatedAt
+}
+
+model BankDetails {
+  id                String @id @default(uuid())
+  bankName          String
+  bankAccountNumber String
+  BIC               String
+  currency          String
+
+  updatedAt DateTime @updatedAt
+}
