@@ -12,7 +12,7 @@ type AuthStore = {
   isAuthenticated: boolean;
   setUser: (user: User) => void;
   clearUser: () => void;
-  fetchUser: () => Promise<void>;
+  fetchUser: () => void;
 };
 
 const useAuthStore = create<AuthStore>(set => ({

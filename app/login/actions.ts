@@ -2,19 +2,20 @@
 
 import { createSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
-
-const testUser = {
-  id: '1',
-  username: 'admin',
-  password: 'admin',
-  role: 'admin',
-};
+import prisma from '@/lib/prisma';
+import useAuthStore from '@/stores/useAuthStore';
 
 export async function login(prevState: any, formData: FormData) {
-  // 1. Fetching user from database
   const username = formData.get('username') as string;
   const password = formData.get('password') as string;
-  if (username !== testUser.username || password !== testUser.password) {
+
+  const user = await prisma.user.findUnique({
+    where: {
+      username,
+    },
+  });
+
+  if (!user || user.password !== password) {
     return {
       errors: {
         username: ['Неверный логин или пароль'],
@@ -22,6 +23,15 @@ export async function login(prevState: any, formData: FormData) {
     };
   }
 
-  await createSession(testUser.id, testUser.role);
+  await createSession(user.id, user.role);
+
+  const setUser = useAuthStore.getState().setUser;
+  setUser({
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+  });
+
   redirect('/companies');
 }

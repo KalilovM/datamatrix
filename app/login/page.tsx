@@ -1,8 +1,7 @@
 'use client';
 
-import LogoIcon from '@/app/components/svgs/LogoIcon';
-import EyeIcon from '@/app/components/svgs/EyeIcon';
-import EyeSlashIcon from '@/app/components/svgs/EyeSlashIcon';
+import LogoIcon from '@/app/components/LogoIcon';
+import { EyeIcon, EyeSlashIcon } from '@/app/components/Icons';
 import Link from 'next/link';
 import { useState, useActionState } from 'react';
 import { login } from '@/app/login/actions';
