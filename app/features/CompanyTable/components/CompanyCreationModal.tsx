@@ -3,12 +3,17 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Modal } from '../../Modal';
 import { UserCreationModal } from './UserCreationModal';
-import { UserSelect } from './UserSelect';
 import {
   CompanyFormValues,
   companySchema,
   CompanyCreationModalProps,
 } from '@/types/company/types';
+import { Controller } from 'react-hook-form';
+import Select from 'react-select';
+
+interface UserOptions {
+  users: { id: string; username: string; email: string }[];
+}
 
 export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
   isOpen,
@@ -17,15 +22,14 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
 }) => {
   const [companyToken, setCompanyToken] = useState('');
   const [isUserModalOpen, setUserModalOpen] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<
-    { id: string; username: string; email: string }[]
-  >([]);
+  const [userOptions, setUserOptions] = useState<UserOptions>({ users: [] });
 
   const {
     register,
     handleSubmit,
     reset,
     setValue,
+    control,
     formState: { errors },
   } = useForm<CompanyFormValues>({
     resolver: zodResolver(companySchema),
@@ -36,18 +40,30 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
   });
 
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch('/api/users');
+        if (!res.ok) throw new Error('Failed to fetch users');
+        const users = await res.json();
+        setUserOptions({ users });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     if (isOpen) {
-      const generateToken = () =>
-        Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      setCompanyToken(generateToken());
+      const generatedToken = Math.random().toString(36).substring(2, 18);
+      setCompanyToken(generatedToken);
+      setValue('token', generatedToken); // Set the token in the form
+      fetchUsers();
     }
-  }, [isOpen]);
+  }, [isOpen, setValue]);
 
   const onSubmitHandler = (data: CompanyFormValues) => {
+    console.log(data); // Logs form data
     onSubmit({
       ...data,
       token: companyToken,
-      userId: selectedUsers.map(user => user.id),
     });
     handleClose();
   };
@@ -57,13 +73,11 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
     username: string;
     email: string;
   }) => {
-    setSelectedUsers(prev => [...prev, newUser]);
     setUserModalOpen(false);
   };
 
   const handleClose = () => {
     reset(); // Reset form to default values
-    setSelectedUsers([]); // Clear selected users
     onClose();
   };
 
@@ -91,7 +105,6 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
               </span>
             )}
           </div>
-
           {/* Subscription End Date */}
           <div>
             <label className="block font-bold">Дата окончания подписки</label>
@@ -107,7 +120,6 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
               </span>
             )}
           </div>
-
           {/* Company Token */}
           <div>
             <label className="block font-bold">Токен компании</label>
@@ -118,20 +130,41 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
               readOnly
             />
           </div>
-
           {/* Company Administrators */}
           <div>
             <label className="block font-bold">Администраторы</label>
-            <UserSelect
-              selectedUsers={selectedUsers}
-              onUsersSelect={setSelectedUsers}
-              onUserRemove={userId =>
-                setSelectedUsers(prev =>
-                  prev.filter(user => user.id !== userId),
-                )
-              }
-              onCreateNewUser={() => setUserModalOpen(true)}
+            <Controller
+              control={control}
+              name="userId"
+              render={({ field: { onChange, value, name } }) => (
+                <Select
+                  options={userOptions.users.map(user => ({
+                    value: user.id,
+                    label: user.username,
+                  }))}
+                  isMulti
+                  value={value?.map((id: string) => {
+                    const user = userOptions.users.find(user => user.id === id);
+                    return user
+                      ? { value: user.id, label: user.username }
+                      : null;
+                  })}
+                  onChange={selectedOptions => {
+                    onChange(
+                      selectedOptions
+                        ? selectedOptions.map(option => option.value)
+                        : [],
+                    );
+                  }}
+                  name={name}
+                />
+              )}
             />
+            {errors.userId && (
+              <span className="text-sm text-red-600">
+                {errors.userId.message}
+              </span>
+            )}
           </div>
         </form>
       </Modal>

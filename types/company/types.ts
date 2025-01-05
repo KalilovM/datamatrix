@@ -19,7 +19,7 @@ export const companySchema = z.object({
   subscriptionEnd: z.string().refine(date => !isNaN(Date.parse(date)), {
     message: 'Неверный формат даты',
   }),
-  token: z.string().readonly(),
+  token: z.string(),
   userId: z
     .array(z.string())
     .nonempty('Необходимо выбрать хотя бы одного пользователя'),
