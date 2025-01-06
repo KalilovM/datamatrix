@@ -30,7 +30,7 @@ export const UserSelect: React.FC<UserSelectProps> = ({ control }) => {
   return (
     <Controller
       control={control}
-      name="userId"
+      name="userIds"
       render={({ field: { onChange, value, name, ref } }) => (
         <Select
           name={name}

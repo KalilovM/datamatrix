@@ -20,7 +20,7 @@ export const companySchema = z.object({
     message: 'Неверный формат даты',
   }),
   token: z.string(),
-  userId: z
+  userIds: z
     .array(z.string())
     .nonempty('Необходимо выбрать хотя бы одного пользователя'),
 });

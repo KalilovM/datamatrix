@@ -18,6 +18,7 @@ interface SessionWithUser extends Session {
     username: string;
     email: string;
     role: Role;
+    companyId: string | null;
   };
 }
 
@@ -114,6 +115,7 @@ export async function getSession(
           username: true,
           email: true,
           role: true,
+          companyId: true,
         },
       },
     },

@@ -15,7 +15,11 @@ export default function CompanyTable({ onSelect }: CompanyTableProps) {
   const [tableHeight, setTableHeight] = useState(0);
   const [isCompanyModalOpen, setCompanyModalOpen] = useState(false);
 
-  const { data: companies = [], isLoading } = useQuery<Company[]>({
+  const {
+    data: companies = [],
+    isLoading,
+    refetch,
+  } = useQuery<Company[]>({
     queryKey: ['companies'],
     queryFn: async () => {
       const res = await fetch('/api/companies');
@@ -51,13 +55,18 @@ export default function CompanyTable({ onSelect }: CompanyTableProps) {
 
   const handleCompanySubmit = async (company: CompanyFormValues) => {
     try {
-      // await fetch('/api/companies', {
-      //   method: 'POST',
-      //   body: JSON.stringify(company),
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
+      const res = await fetch('/api/companies', {
+        method: 'POST',
+        body: JSON.stringify(company),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!res.ok) {
+        throw new Error('Failed to create company');
+      }
+      refetch();
+
       console.log(company);
     } catch (e: unknown) {
       console.error('Failed to create company:', e);
