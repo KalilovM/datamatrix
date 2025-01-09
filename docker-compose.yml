@@ -37,5 +37,14 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
     command: npx prisma migrate dev
 
+  nginx:
+    image: nginx:latest
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
 volumes:
   postgres_data:
