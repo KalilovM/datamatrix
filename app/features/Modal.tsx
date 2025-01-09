@@ -37,7 +37,7 @@ export const Modal: React.FC<ModalProps> = ({
           <div className="flex justify-end border-t p-4">
             <button
               onClick={onAction}
-              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               {actionText}
             </button>

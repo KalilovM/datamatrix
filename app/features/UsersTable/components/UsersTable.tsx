@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
+import { UserCreationModal } from './UserCreationModal';
 import { User } from '@prisma/client';
 import { TableHeading } from './TableHeader';
 import { TableRow } from './TableRow';
+import { UserFormValues } from '@/types/company/types';
 
 interface UsersTableProps {
   selectedCompanyId?: string | null;
@@ -10,9 +12,14 @@ interface UsersTableProps {
 
 export default function UsersTable({ selectedCompanyId }: UsersTableProps) {
   const tableBodyRef = useRef<HTMLDivElement>(null);
+  const [isUserModalOpen, setUserModalOpen] = useState(false);
   const [tableHeight, setTableHeight] = useState(0);
 
-  const { data: users = [], isLoading } = useQuery<User[]>({
+  const {
+    data: users = [],
+    isLoading,
+    refetch,
+  } = useQuery<User[]>({
     queryKey: ['users', selectedCompanyId],
     queryFn: async () => {
       const endpoint = selectedCompanyId
@@ -28,8 +35,32 @@ export default function UsersTable({ selectedCompanyId }: UsersTableProps) {
   });
 
   const handleCreate = () => {
-    console.log('Create new user');
+    setUserModalOpen(true);
   };
+
+  const handleUserSubmit = async (newUser: UserFormValues) => {
+    const user = {
+      username: newUser.username,
+      email: newUser.email,
+      password: newUser.password,
+      role: newUser.role,
+      companyId: newUser.companyId,
+    };
+    try {
+      await fetch('/api/users', {
+        method: 'POST',
+        body: JSON.stringify(user),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      refetch();
+    } catch (e: unknown) {
+      console.error('Failed to create user:', e);
+    }
+  };
+
   useEffect(() => {
     const calculateHeight = () => {
       const navbarHeight = document.querySelector('nav')?.clientHeight || 0;
@@ -60,6 +91,12 @@ export default function UsersTable({ selectedCompanyId }: UsersTableProps) {
         onCreate={handleCreate}
         onSearch={handleSearch}
       />
+      {/* User Creation Modal */}
+      <UserCreationModal
+        isOpen={isUserModalOpen}
+        onClose={() => setUserModalOpen(false)} // Close the modal
+        onSubmit={handleUserSubmit} // Handle user submission
+      />
       <div
         ref={tableBodyRef}
         className="flex flex-col divide-y divide-gray-200 overflow-y-auto"
@@ -78,9 +115,9 @@ export default function UsersTable({ selectedCompanyId }: UsersTableProps) {
 function SkeletonRow() {
   return (
     <div className="flex animate-pulse items-center justify-between px-8 py-4">
-      <div className="h-4 flex-1 rounded bg-gray-300"></div>
-      <div className="ml-4 h-4 flex-1 rounded bg-gray-300"></div>
-      <div className="ml-4 h-4 w-8 flex-shrink-0 rounded bg-gray-300"></div>
+      <div className="h-4 flex-1 rounded-lg bg-gray-300"></div>
+      <div className="ml-4 h-4 flex-1 rounded-lg bg-gray-300"></div>
+      <div className="ml-4 h-4 w-8 flex-shrink-0 rounded-lg bg-gray-300"></div>
     </div>
   );
 }

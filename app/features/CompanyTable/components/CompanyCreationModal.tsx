@@ -85,7 +85,7 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
           <input
             {...register('name')}
             type="text"
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded-lg border px-3 py-2"
           />
           {errors.name && (
             <span className="text-sm text-red-600">{errors.name.message}</span>
@@ -97,7 +97,7 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
           <input
             {...register('subscriptionEnd')}
             type="date"
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded-lg border px-3 py-2"
             onChange={e => setValue('subscriptionEnd', e.target.value)}
           />
           {errors.subscriptionEnd && (
@@ -111,7 +111,7 @@ export const CompanyCreationModal: React.FC<CompanyCreationModalProps> = ({
           <label className="block font-bold">Токен компании</label>
           <input
             type="text"
-            className="w-full rounded border bg-gray-100 px-3 py-2 text-gray-700"
+            className="w-full rounded-lg border bg-gray-100 px-3 py-2 text-gray-700"
             value={companyToken}
             readOnly
           />

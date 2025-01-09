@@ -105,9 +105,9 @@ export default function CompanyTable({ onSelect }: CompanyTableProps) {
 function SkeletonRow() {
   return (
     <div className="flex animate-pulse items-center justify-between px-8 py-4">
-      <div className="h-4 flex-1 rounded bg-gray-300"></div>
-      <div className="ml-4 h-4 flex-1 rounded bg-gray-300"></div>
-      <div className="ml-4 h-4 w-8 flex-shrink-0 rounded bg-gray-300"></div>
+      <div className="h-4 flex-1 rounded-lg bg-gray-300"></div>
+      <div className="ml-4 h-4 flex-1 rounded-lg bg-gray-300"></div>
+      <div className="ml-4 h-4 w-8 flex-shrink-0 rounded-lg bg-gray-300"></div>
     </div>
   );
 }
