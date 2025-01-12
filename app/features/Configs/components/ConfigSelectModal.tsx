@@ -1,9 +1,7 @@
-'use client';
-
-import React, { useState } from 'react';
-import CreatableSelect from 'react-select/creatable';
 import { Modal } from '@/app/features/Modal';
+import { useEffect, useState } from 'react';
 import ConfigCreateModal from './ConfigCreateModal';
+import CreatableSelect from 'react-select/creatable';
 
 interface Option {
   label: string;
@@ -13,74 +11,86 @@ interface Option {
   };
 }
 
+export async function fetchConfigurations() {
+  const res = await fetch(`/api/configurations`, {
+    cache: 'no-store',
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch configurations');
+  }
+
+  return res.json();
+}
+
 export default function ConfigSelectModal({
   isOpen,
   onClose,
   onAdd,
+  nomenclatureId,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (configs: Option[]) => void;
+  nomenclatureId: string;
 }) {
-  const [options, setOptions] = useState<Option[]>([
-    {
-      value: {
-        packCount: 5,
-        palletCount: 100,
-      },
-      label: '1-5-100',
-    },
-    {
-      value: {
-        packCount: 6,
-        palletCount: 200,
-      },
-      label: '1-6-200',
-    },
-    {
-      value: {
-        packCount: 8,
-        palletCount: 300,
-      },
-      label: '1-8-300',
-    },
-  ]);
-  const [selectedConfigs, setSelectedConfigs] = useState<Option[]>([]);
-  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  const [options, setOptions] = useState<Option[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<Option[]>([]); // Track selected options
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false); // Manage create modal visibility
 
-  const handleCreateOption = (label: string) => {
-    setCreateModalOpen(true);
-  };
+  useEffect(() => {
+    if (isOpen) {
+      fetchConfigurations()
+        .then(data => {
+          setOptions(data);
+        })
+        .catch(error => {
+          console.error('Failed to fetch configurations:', error);
+        });
+    }
+  }, [isOpen]);
 
-  const handleNewConfig = (newConfig: { label: string; value: string }) => {
-    console.log(newConfig);
-    const newOption = { value: newConfig.value, label: newConfig.label };
-    setOptions(prev => [...prev, newOption]);
-    setSelectedConfigs(prev => [...prev, newOption]);
+  const handleChange = (newValue: Option[]) => {
+    setSelectedOptions(newValue);
   };
 
   const handleAdd = () => {
-    onAdd(selectedConfigs);
+    onAdd(selectedOptions);
+    setSelectedOptions([]); // Clear selected options after adding
     onClose();
+  };
+
+  const handleCreate = (newConfig: Option) => {
+    console.log(newConfig);
+    // Add new config to options and select it
+    setOptions(prevOptions => [...prevOptions, newConfig]);
+    setSelectedOptions(prevSelected => [...prevSelected, newConfig]);
+    setCreateModalOpen(false); // Close create modal
   };
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} title="Add Configs">
+      <Modal isOpen={isOpen} onClose={onClose} title="Добавление конфигурации">
         <div className="space-y-4">
           <CreatableSelect
             isMulti
             isClearable
-            options={options}
-            value={selectedConfigs}
-            onChange={newValue => setSelectedConfigs(newValue as Option[])}
-            onCreateOption={handleCreateOption} // Opens the modal to create a new config
+            options={options} // Fetched options from the server
+            placeholder="Выберите или создайте конфигурацию"
+            onChange={handleChange}
+            onCreateOption={() => setCreateModalOpen(true)} // Open the create modal
           />
           <button
             onClick={handleAdd}
-            className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white"
+            disabled={selectedOptions.length === 0}
+            className={`mt-4 rounded-md bg-blue-600 px-4 py-2 text-white ${
+              selectedOptions.length === 0
+                ? 'cursor-not-allowed bg-gray-400'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
-            Add Selected Configs
+            Добавить
           </button>
         </div>
       </Modal>
@@ -89,10 +99,8 @@ export default function ConfigSelectModal({
       <ConfigCreateModal
         isOpen={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        onCreate={newConfig => {
-          handleNewConfig(newConfig);
-          setCreateModalOpen(false); // Close the modal after creation
-        }}
+        onCreate={handleCreate} // Pass handleCreate to update options and selected configs
+        nomenclatureId={nomenclatureId}
       />
     </>
   );

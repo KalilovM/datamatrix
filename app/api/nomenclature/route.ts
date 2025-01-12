@@ -71,3 +71,41 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getSession(req);
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+    const user = session.user;
+
+    if (!user?.companyId) {
+      return NextResponse.json(
+        { message: 'User does not have a company' },
+        { status: 400 },
+      );
+    }
+
+    const { name } = await req.json();
+
+    const newNomenclature = await prisma.nomenclature.create({
+      data: {
+        name,
+        company: {
+          connect: {
+            id: user.companyId,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(newNomenclature, { status: 201 });
+  } catch (error: unknown) {
+    console.error('POST /api/nomenclatures', error);
+    return NextResponse.json(
+      { message: 'Something went wrong' },
+      { status: 500 },
+    );
+  }
+}

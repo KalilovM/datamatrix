@@ -6,7 +6,7 @@
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+  binaryTargets = ["linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -88,11 +88,11 @@ model Company {
 
 model Nomenclature {
   id             String          @id @default(uuid())
-  name           String
+  name           String?
   configurations Configuration[]
   codes          Code[]
-  company        Company         @relation(fields: [companyId], references: [id])
-  companyId      String
+  company        Company?        @relation(fields: [companyId], references: [id])
+  companyId      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

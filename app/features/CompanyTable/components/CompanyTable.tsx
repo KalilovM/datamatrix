@@ -30,25 +30,6 @@ export default function CompanyTable({ onSelect }: CompanyTableProps) {
     },
   });
 
-  useEffect(() => {
-    const calculateHeight = () => {
-      const navbarHeight = document.querySelector('nav')?.clientHeight || 0;
-      const tableHeadHeight =
-        tableBodyRef.current?.previousElementSibling?.clientHeight || 0;
-      const containerPadding = 32 * 2 + 4;
-      const availableHeight =
-        window.innerHeight - navbarHeight - tableHeadHeight - containerPadding;
-      setTableHeight(availableHeight);
-    };
-
-    calculateHeight();
-    window.addEventListener('resize', calculateHeight);
-
-    return () => {
-      window.removeEventListener('resize', calculateHeight);
-    };
-  }, []);
-
   const handleCreate = () => {
     setCompanyModalOpen(true);
   };
@@ -84,7 +65,6 @@ export default function CompanyTable({ onSelect }: CompanyTableProps) {
       <div
         ref={tableBodyRef}
         className="flex flex-col divide-y divide-gray-200 overflow-y-auto"
-        style={{ height: `${tableHeight}px` }}
       >
         {isLoading
           ? Array.from({ length: 10 }).map((_, index) => (

@@ -7,23 +7,39 @@ export default function ConfigCreateModal({
   isOpen,
   onClose,
   onCreate,
+  nomenclatureId,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (newConfig: { label: string; value: string }) => void;
+  nomenclatureId: string;
 }) {
   const [packCount, setPackCount] = useState('');
   const [palletCount, setPalletCount] = useState('');
 
-  const handleCreate = () => {
-    const newConfig = {
-      value: {
-        packCount,
-        palletCount,
-      },
-      label: `1-${packCount}-${palletCount}`,
+  const handleCreate = async () => {
+    const body = {
+      nomenclatureId,
+      packCount,
+      palletCount,
     };
-    onCreate(newConfig);
+    const response = await fetch('/api/configurations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    const newConfig = await response.json();
+    console.log(newConfig, 'backend');
+    const formattedConfig = {
+      label: `1-${newConfig.packCount}-${newConfig.palletCount}`,
+      value: {
+        packCount: newConfig.packCount,
+        palletCount: newConfig.palletCount,
+      },
+    };
+    onCreate(formattedConfig);
     onClose();
   };
 

@@ -13,7 +13,6 @@ interface UsersTableProps {
 export default function UsersTable({ selectedCompanyId }: UsersTableProps) {
   const tableBodyRef = useRef<HTMLDivElement>(null);
   const [isUserModalOpen, setUserModalOpen] = useState(false);
-  const [tableHeight, setTableHeight] = useState(0);
 
   const {
     data: users = [],
@@ -61,25 +60,6 @@ export default function UsersTable({ selectedCompanyId }: UsersTableProps) {
     }
   };
 
-  useEffect(() => {
-    const calculateHeight = () => {
-      const navbarHeight = document.querySelector('nav')?.clientHeight || 0;
-      const tableHeadHeight =
-        tableBodyRef.current?.previousElementSibling?.clientHeight || 0;
-      const containerPadding = 32 * 2 + 4;
-      const availableHeight =
-        window.innerHeight - navbarHeight - tableHeadHeight - containerPadding;
-      setTableHeight(availableHeight);
-    };
-
-    calculateHeight();
-    window.addEventListener('resize', calculateHeight);
-
-    return () => {
-      window.removeEventListener('resize', calculateHeight);
-    };
-  }, []);
-
   const handleSearch = (value: string) => {
     console.log('Search value:', value); // Implement search logic here
   };
@@ -87,7 +67,7 @@ export default function UsersTable({ selectedCompanyId }: UsersTableProps) {
   return (
     <div className="h-full w-full rounded-lg border border-blue-300 bg-white">
       <TableHeading
-        title="Users"
+        title="Пользователи"
         onCreate={handleCreate}
         onSearch={handleSearch}
       />
@@ -100,7 +80,6 @@ export default function UsersTable({ selectedCompanyId }: UsersTableProps) {
       <div
         ref={tableBodyRef}
         className="flex flex-col divide-y divide-gray-200 overflow-y-auto"
-        style={{ height: `${tableHeight}px` }}
       >
         {isLoading
           ? Array.from({ length: 10 }).map((_, index) => (

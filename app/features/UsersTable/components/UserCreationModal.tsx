@@ -98,7 +98,9 @@ export const UserCreationModal: React.FC<UserCreationModalProps> = ({
     >
       <form className="space-y-4">
         <div>
-          <label className="block">Имя пользователя</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Имя пользователя
+          </label>
           <input
             {...register('username')}
             type="text"
@@ -124,7 +126,9 @@ export const UserCreationModal: React.FC<UserCreationModalProps> = ({
         </div>
 
         <div>
-          <label className="block">Пароль</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Пароль
+          </label>
           <div className="relative">
             <input
               {...register('password')}
@@ -147,7 +151,9 @@ export const UserCreationModal: React.FC<UserCreationModalProps> = ({
         </div>
 
         <div>
-          <label className="block">Подтверждение пароля</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Подтверждение пароля
+          </label>
           <input
             {...register('confirmPassword')}
             type={showPassword ? 'text' : 'password'}
@@ -160,7 +166,9 @@ export const UserCreationModal: React.FC<UserCreationModalProps> = ({
           )}
         </div>
         <div>
-          <label className="block">Роль</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Роль
+          </label>
           <Controller
             name="role"
             control={control}
@@ -186,7 +194,9 @@ export const UserCreationModal: React.FC<UserCreationModalProps> = ({
         </div>
         {['COMPANY_ADMIN', 'COMPANY_USER'].includes(selectedRole) && (
           <div>
-            <label className="block">Компания</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Компания
+            </label>
             <Controller
               name="companyId"
               control={control}

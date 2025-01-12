@@ -16,7 +16,7 @@ export function TableHeader({ title, onCreate }: TableHeaderProps) {
   };
 
   return (
-    <div className="flex h-full flex-col rounded-t-lg border-b border-neutral-300 bg-white px-8 py-3">
+    <div className="flex flex-col rounded-t-lg border-b border-neutral-300 bg-white px-8 py-3">
       <div className="flex h-full items-center justify-between">
         <div className="text-xl font-bold leading-9">{title}</div>
         <div className="flex flex-row gap-3">
