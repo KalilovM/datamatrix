@@ -51,7 +51,9 @@ export async function POST(
     }
 
     const formData = await req.formData();
-    const files = formData.getAll('files');
+    const files = formData.getAll('files') as File[];
+
+    console.log(files);
 
     if (!nomenclatureId || !files || !Array.isArray(files)) {
       return NextResponse.json(
@@ -78,7 +80,6 @@ export async function POST(
 
       // Parse CSV rows
       const rows = parse(csvContent, {
-        columns: true,
         skip_empty_lines: true,
       });
 
@@ -89,8 +90,8 @@ export async function POST(
         },
       });
 
-      const codes = rows.map(row => ({
-        value: row.code,
+      const codes = rows.map((row: string[]) => ({
+        value: row[0],
         codePackId: codePack.id,
       }));
 

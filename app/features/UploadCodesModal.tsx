@@ -1,30 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Modal } from '@/app/features/Modal';
 import { UploadIcon, BinIcon } from '@/app/components/Icons';
-import { useRef } from 'react';
+import { uploadCodePacks } from './CodePacksTable/actions/uploadCodePacks';
+import { useRouter } from 'next/navigation';
 
 interface UploadCodesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (files: File[]) => void;
+  nomenclatureId: string;
 }
 
 export default function UploadCodesModal({
   isOpen,
   onClose,
-  onUpload,
+  nomenclatureId,
 }: UploadCodesModalProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
       setSelectedFiles([...selectedFiles, ...Array.from(files)]);
     }
-    event.target.files = null;
+    // Clear the file input value to allow selecting the same file again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleRemoveFile = (index: number) => {
@@ -33,16 +38,26 @@ export default function UploadCodesModal({
     setSelectedFiles(updatedFiles);
   };
 
-  const handleUpload = () => {
-    console.log('Handle upload codes modal');
-    onUpload(selectedFiles);
-    setSelectedFiles([]);
-    onClose();
+  const uploadFiles = uploadCodePacks.bind(null, nomenclatureId);
+
+  const handleUpload = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      const formData = new FormData();
+      selectedFiles.forEach(file => formData.append('files', file));
+      await uploadFiles(formData);
+      setSelectedFiles([]);
+      onClose();
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to upload files:', error);
+    }
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Загрузить Коды">
-      <div className="space-y-4">
+      <form className="space-y-4" onSubmit={handleUpload}>
         {/* Drag-and-Drop Area */}
         <div className="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-6 hover:border-blue-500 hover:bg-blue-50">
           <UploadIcon className="h-12 w-12 text-gray-500" />
@@ -51,6 +66,7 @@ export default function UploadCodesModal({
           </p>
           <input
             type="file"
+            name="files"
             accept=".csv"
             multiple
             className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
@@ -82,8 +98,7 @@ export default function UploadCodesModal({
 
         {/* Upload Button */}
         <button
-          type="button"
-          onClick={handleUpload}
+          type="submit"
           disabled={selectedFiles.length === 0}
           className={`mt-4 w-full rounded-md px-4 py-2 text-white ${
             selectedFiles.length === 0
@@ -93,7 +108,7 @@ export default function UploadCodesModal({
         >
           Загрузить
         </button>
-      </div>
+      </form>
     </Modal>
   );
 }

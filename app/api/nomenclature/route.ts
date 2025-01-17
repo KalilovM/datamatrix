@@ -15,18 +15,27 @@ export async function GET(req: NextRequest) {
         const nomenclatures = await prisma.nomenclature.findMany({
           include: {
             codePacks: {
-              select: {
-                codes: true,
+              include: {
+                _count: {
+                  select: {
+                    codes: true,
+                  },
+                },
               },
             },
           },
         });
+        const formattedNomenclatures = nomenclatures.map(nomenclature => {
+          const totalCodes = nomenclature.codePacks.reduce(
+            (sum, codePack) => sum + (codePack._count?.codes || 0),
+            0,
+          );
 
-        const formattedNomenclatures = nomenclatures.map(nomenclature => ({
-          ...nomenclature,
-          code_count: nomenclature._count?.codes || 0, // Add code_count to the response
-        }));
-
+          return {
+            ...nomenclature,
+            code_count: totalCodes,
+          };
+        });
         return NextResponse.json(formattedNomenclatures, { status: 200 });
       }
 

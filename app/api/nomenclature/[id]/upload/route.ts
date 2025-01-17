@@ -25,6 +25,7 @@ export async function POST(
     // Get uploaded files
     const formData = await req.formData();
     const files = formData.getAll('files') as File[];
+    console.log('files', files);
 
     if (!files || files.length === 0) {
       return NextResponse.json(
@@ -42,6 +43,7 @@ export async function POST(
         columns: false,
         skip_empty_lines: true,
       });
+      console.log('records', records);
 
       if (!records || !Array.isArray(records) || records.length === 0) {
         return NextResponse.json(
@@ -63,6 +65,7 @@ export async function POST(
         value: record[0], // Assuming each row has a single column with the code
         codePackId: codePack.id,
       }));
+      console.log('codes', codes);
 
       await prisma.code.createMany({
         data: codes,
