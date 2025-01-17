@@ -85,12 +85,13 @@ export default function NomenclatureTable({
         {nomenclatures.map(nomenclature => (
           <div
             key={nomenclature.id}
-            className="flex items-center px-8 py-4 hover:bg-gray-100"
+            className="flex cursor-pointer items-center px-8 py-4 hover:bg-gray-100"
+            onClick={() => router.push(`/nomenclature/edit/${nomenclature.id}`)}
           >
             {/* Name */}
             <div className="flex-1 text-left text-gray-900">
               {nomenclature.name}
-            </div>
+            </div>{' '}
             {/* Codes Count and Actions */}
             <div className="flex w-[200px] flex-shrink-0 justify-between gap-8">
               <span className="text-gray-600">{nomenclature.code_count}</span>
@@ -98,6 +99,9 @@ export default function NomenclatureTable({
                 <Button
                   icon={<EditIcon className="size-5" />}
                   className="bg-blue-600 px-2.5 py-2.5 text-white hover:bg-blue-700"
+                  onClick={() =>
+                    router.push(`/nomenclature/edit/${nomenclature.id}`)
+                  }
                 />
                 <Button
                   icon={<BinIcon className="size-5" />}

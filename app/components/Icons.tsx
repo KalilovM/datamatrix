@@ -205,3 +205,27 @@ export const CloseIcon = ({
     ></path>
   </svg>
 );
+
+export const UploadIcon = ({
+  fill = 'none',
+  stroke = 'currentColor',
+  strokeWidth = '1.5',
+  className = 'size-6',
+}: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill={fill}
+    stroke={stroke}
+    strokeWidth={strokeWidth}
+    className={className}
+    viewBox="0 0 48 48"
+  >
+    <path
+      stroke="#2563EB"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="3"
+      d="M23.51 32.061v-13.5m0 0 6 6m-6-6-6 6m-4.5 13.5a9 9 0 0 1-2.82-17.55 10.5 10.5 0 0 1 20.466-4.66 6 6 0 0 1 7.516 7.696 7.504 7.504 0 0 1-2.662 14.514z"
+    ></path>
+  </svg>
+);

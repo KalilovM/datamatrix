@@ -14,9 +14,9 @@ export async function GET(req: NextRequest) {
       case 'ADMIN': {
         const nomenclatures = await prisma.nomenclature.findMany({
           include: {
-            _count: {
+            codePacks: {
               select: {
-                codes: true, // Count the related codes
+                codes: true,
               },
             },
           },

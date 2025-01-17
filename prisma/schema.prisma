@@ -90,7 +90,7 @@ model Nomenclature {
   id             String          @id @default(uuid())
   name           String?
   configurations Configuration[]
-  codes          Code[]
+  codePacks      CodePack[]
   company        Company?        @relation(fields: [companyId], references: [id])
   companyId      String?
 
@@ -101,10 +101,21 @@ model Nomenclature {
 }
 
 model Code {
+  id         String   @id @default(uuid())
+  value      String   @unique
+  codePack   CodePack @relation(fields: [codePackId], references: [id])
+  codePackId String
+  used       Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model CodePack {
   id             String       @id @default(uuid())
-  value          String       @unique
+  name           String       @unique
   nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id])
   nomenclatureId String
+  codes          Code[]
   used           Boolean      @default(false)
 
   createdAt DateTime @default(now())

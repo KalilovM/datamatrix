@@ -1,7 +1,10 @@
+'use client';
+
 import { Modal } from '@/app/features/Modal';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ConfigCreateModal from './ConfigCreateModal';
 import CreatableSelect from 'react-select/creatable';
+import { useRouter } from 'next/navigation';
 
 interface Option {
   label: string;
@@ -11,62 +14,56 @@ interface Option {
   };
 }
 
-export async function fetchConfigurations() {
-  const res = await fetch(`/api/configurations`, {
-    cache: 'no-store',
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch configurations');
-  }
-
-  return res.json();
-}
-
 export default function ConfigSelectModal({
   isOpen,
-  onClose,
-  onAdd,
+  configOptions,
   nomenclatureId,
+  onClose,
 }: {
   isOpen: boolean;
+  configOptions: Option[];
   onClose: () => void;
-  onAdd: (configs: Option[]) => void;
   nomenclatureId: string;
 }) {
-  const [options, setOptions] = useState<Option[]>([]);
+  const [options, setOptions] = useState<Option[]>(configOptions);
   const [selectedOptions, setSelectedOptions] = useState<Option[]>([]); // Track selected options
   const [isCreateModalOpen, setCreateModalOpen] = useState(false); // Manage create modal visibility
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchConfigurations()
-        .then(data => {
-          setOptions(data);
-        })
-        .catch(error => {
-          console.error('Failed to fetch configurations:', error);
-        });
-    }
-  }, [isOpen]);
+  const router = useRouter();
 
   const handleChange = (newValue: Option[]) => {
     setSelectedOptions(newValue);
   };
 
-  const handleAdd = () => {
-    onAdd(selectedOptions);
-    setSelectedOptions([]); // Clear selected options after adding
-    onClose();
+  const handleAdd = async () => {
+    try {
+      console.log(selectedOptions);
+      const response = await fetch(
+        `/api/nomenclature/${nomenclatureId}/configs`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(selectedOptions),
+        },
+      );
+      if (!response.ok) {
+        throw new Error('Failed to add configurations');
+      }
+      setSelectedOptions([]);
+      onClose();
+      router.refresh();
+    } catch (error: unknown) {
+      console.error('Failed to add configurations', error);
+    }
   };
 
   const handleCreate = (newConfig: Option) => {
-    console.log(newConfig);
-    // Add new config to options and select it
+    console.log(configOptions);
     setOptions(prevOptions => [...prevOptions, newConfig]);
     setSelectedOptions(prevSelected => [...prevSelected, newConfig]);
-    setCreateModalOpen(false); // Close create modal
+    setCreateModalOpen(false);
   };
 
   return (
