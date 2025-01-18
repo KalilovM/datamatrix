@@ -1,5 +1,9 @@
 import { ReactNode } from 'react';
-import { CompanyIcon, NomenclatureIcon } from '@/app/components/Icons';
+import {
+  AggregationIcon,
+  CompanyIcon,
+  NomenclatureIcon,
+} from '@/app/components/Icons';
 
 export const sidebarItems: Array<{
   name: string;
@@ -15,5 +19,10 @@ export const sidebarItems: Array<{
     name: 'Номенклатура',
     href: '/nomenclature',
     icon: <NomenclatureIcon />,
+  },
+  {
+    name: 'Агрегация',
+    href: '/aggregation',
+    icon: <AggregationIcon />,
   },
 ];

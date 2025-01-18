@@ -8,7 +8,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-16 z-40 h-full w-64 bg-[#536AC2] px-3 py-4">
+    <aside className="fixed left-0 top-16 z-40 h-full w-64 bg-white px-3 py-4">
       <ul className="space-y-2 font-medium">
         {sidebarItems.map(item => (
           <li key={item.href}>

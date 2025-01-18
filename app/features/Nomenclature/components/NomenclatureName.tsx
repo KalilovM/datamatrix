@@ -20,7 +20,7 @@ export default function NomenclatureName({
       action={updateNomenclature}
       className="flex w-full flex-row gap-8 rounded-2xl border border-blue-300 bg-white px-4 py-4"
     >
-      <div className="flex w-full flex-col">
+      <div className="flex w-full flex-col pl-4 pr-8">
         <label htmlFor="name" className="text-neutral-600">
           Наименование
         </label>
@@ -33,7 +33,7 @@ export default function NomenclatureName({
           className="w-full rounded-lg border border-gray-300 p-2"
         />
       </div>
-      <div className="flex w-full flex-row items-center justify-end gap-2.5">
+      <div className="flex w-full flex-row items-center justify-end gap-2.5 pl-8 pr-4">
         <Link
           href="/nomenclature"
           className="rounded-lg bg-neutral-600 px-4 py-2 text-white hover:bg-neutral-700"

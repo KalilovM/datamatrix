@@ -3,7 +3,7 @@ import Avatar from '@/app/features/Avatar';
 
 export default function Navbar() {
   return (
-    <nav className="fixed top-0 flex h-16 w-full flex-row items-center justify-between bg-white px-10 shadow">
+    <nav className="fixed top-0 z-50 flex h-16 w-full flex-row items-center justify-between bg-white px-10 shadow">
       <LogoIconWithText />
       <Avatar />
     </nav>

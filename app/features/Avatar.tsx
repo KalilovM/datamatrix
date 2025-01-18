@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import InitialIcon from '@/app/features/InitialIcon';
 import useAuthStore from '@/stores/useAuthStore';
 import useInitializeAuth from '@/app/hooks/useInitializeAuth';
@@ -8,29 +8,67 @@ import { redirect } from 'next/navigation';
 
 export default function Avatar() {
   useInitializeAuth();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { user, isAuthenticated, clearUser } = useAuthStore();
 
+  const toggleMenu = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
+
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', {
-      method: 'GET',
-    });
-    clearUser();
-    setIsOpen(false);
-    redirect('/login');
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'GET' });
+      if (!res.ok) throw new Error('Logout failed');
+      clearUser();
+      setIsOpen(false);
+      redirect('/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    },
+    [setIsOpen],
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, handleClickOutside]);
 
   return (
     <div className="relative flex items-center space-x-3">
+      {/* Role */}
+      {isAuthenticated && user && (
+        <span className="text-sm text-gray-500">
+          {user.role === 'ADMIN' ? 'Администратор' : 'Пользователь'}
+        </span>
+      )}
       <button
         className="relative flex rounded-full bg-gray-800 text-sm focus:ring-4 focus:ring-gray-300"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleMenu}
       >
         <span className="sr-only">Open user menu</span>
         <InitialIcon initial={user?.username?.charAt(0).toUpperCase() || 'U'} />
       </button>
       <div
+        ref={dropdownRef}
         className={
           'absolute right-0 top-3/4 z-50 my-4 list-none divide-y divide-gray-100 rounded-lg bg-white text-base shadow ' +
           (isOpen ? 'block' : 'hidden')
