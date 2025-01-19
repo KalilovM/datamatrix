@@ -3,7 +3,6 @@ FROM node:18-alpine AS deps
 
 WORKDIR /app
 
-# Install dependencies
 COPY package.json package-lock.json* yarn.lock* ./
 RUN npm install --frozen-lockfile
 
@@ -18,6 +17,10 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy the source code
 COPY . .
 
+# Run Prisma commands
+RUN npx prisma generate
+RUN npx prisma migrate deploy
+
 # Build the Next.js application
 RUN npm run build
 
@@ -26,9 +29,11 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Copy built app
+# Copy built app and Prisma client
 COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/public ./public
 
 # Install production dependencies

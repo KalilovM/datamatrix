@@ -14,7 +14,7 @@
     "prisma:push": "npx prisma db push && npx prisma generate",
     "prisma:reset-dev": "run-s prisma:wipe prisma:seed dev",
     "prisma:seed": "tsx prisma/seed.js",
-    "prisma:setup": "prisma generate && prisma migrate deploy && prisma db push",
+    "prisma:setup": "prisma generate && prisma migrate deploy",
     "prisma:studio": "npx prisma studio",
     "prisma:wipe": "npx prisma migrate reset --force && npx prisma db push"
   },
