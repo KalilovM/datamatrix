@@ -35,7 +35,10 @@ services:
       - db
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
-    command: npx prisma migrate dev
+    command: npx prisma migrate dev --schema=/app/prisma/schema.prisma
+    volumes:
+      - .:/app
+      - /app/node_modules
 
   nginx:
     image: nginx:latest
