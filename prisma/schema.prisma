@@ -1,0 +1,196 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  username    String       @unique
+  password    String
+  role        Role
+  company     Company?     @relation(fields: [companyId], references: [id])
+  companyId   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  permissions Permission[]
+  sessions    Session[] // Renamed from "Session"
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  COMPANY_ADMIN
+  COMPANY_USER
+}
+
+enum Entity {
+  COMPANY
+  USER
+  NOMENCLATURE
+  AGGREGATION
+  DISAGGREGATION
+  AGGREGATED_ARCHIVE
+}
+
+enum Action {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+}
+
+model Permission {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  entity    Entity
+  action    Action
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Company {
+  id              String         @id @default(uuid())
+  name            String
+  token           String         @unique @default(uuid())
+  subscriptionEnd DateTime
+  isActive        Boolean        @default(true)
+  users           User[]
+  nomenclatures   Nomenclature[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  counteragents   Counteragent[] // Renamed from "Counteragent"
+  orders          Order[] // Renamed from "Orders"
+}
+
+model Nomenclature {
+  id                   String                @id @default(uuid())
+  name                 String?
+  modelArticle         String? // модель/артикул
+  color                String? // Цвет
+  size                 String? // размер
+  configurations       Configuration[]
+  codePacks            CodePack[]
+  company              Company?              @relation(fields: [companyId], references: [id])
+  companyId            String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  generatedCodePacks   GeneratedCodePack[]
+  generatedCodePallets GeneratedCodePallet[]
+}
+
+model Code {
+  id                  String             @id @default(uuid())
+  value               String             @unique
+  codePack            CodePack           @relation(fields: [codePackId], references: [id])
+  codePackId          String
+  used                Boolean            @default(false)
+  createdAt           DateTime           @default(now())
+  generatedCodePack   GeneratedCodePack? @relation(fields: [generatedCodePackId], references: [id])
+  generatedCodePackId String?
+}
+
+model CodePack {
+  id             String       @id @default(uuid())
+  name           String       @unique
+  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId String
+  codes          Code[]
+  used           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+}
+
+model Configuration {
+  id                   String                @id @default(uuid())
+  basePiece            Int                   @default(1)
+  pieceInPack          Int
+  packInPallet         Int
+  nomenclature         Nomenclature          @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId       String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  generatedCodePacks   GeneratedCodePack[]
+  generatedCodePallets GeneratedCodePallet[]
+}
+
+model GeneratedCodePack {
+  id                    String               @id @default(uuid())
+  value                 String               @unique
+  codes                 Code[]
+  nomenclature          Nomenclature         @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId        String
+  configuration         Configuration        @relation(fields: [configurationId], references: [id])
+  configurationId       String
+  createdAt             DateTime             @default(now())
+  generatedCodePallet   GeneratedCodePallet? @relation(fields: [generatedCodePalletId], references: [id])
+  generatedCodePalletId String?
+  order                 Order?               @relation(fields: [orderId], references: [id]) // Renamed from "Orders"
+  orderId               String?
+}
+
+model GeneratedCodePallet {
+  id                 String              @id @default(uuid())
+  value              String              @unique
+  generatedCodePacks GeneratedCodePack[]
+  nomenclature       Nomenclature        @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId     String
+  configuration      Configuration       @relation(fields: [configurationId], references: [id])
+  configurationId    String
+  createdAt          DateTime            @default(now())
+  order              Order?              @relation(fields: [orderId], references: [id]) // Renamed from "Orders"
+  orderId            String?
+}
+
+model ServiceInfo {
+  id           String   @id @default(uuid())
+  contactEmail String
+  contactPhone String
+  updatedAt    DateTime @updatedAt
+}
+
+model BankDetails {
+  id                String   @id @default(uuid())
+  bankName          String
+  bankAccountNumber String
+  bic               String // Renamed from "BIC"
+  currency          String
+  updatedAt         DateTime @updatedAt
+}
+
+model Counteragent {
+  id        String   @id @default(uuid())
+  name      String
+  inn       String // Renamed from "INN"
+  company   Company  @relation(fields: [companyId], references: [id])
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[] // Renamed from "Orders"
+}
+
+model Order {
+  id                   String                @id
+  company              Company               @relation(fields: [companyId], references: [id])
+  companyId            String
+  counteragent         Counteragent          @relation(fields: [counteragentId], references: [id]) // Renamed from "Counteragent"
+  counteragentId       String
+  generatedCodePallets GeneratedCodePallet[]
+  generatedCodePacks   GeneratedCodePack[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+}
