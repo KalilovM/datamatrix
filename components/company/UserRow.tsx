@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { BinIcon, EditIcon } from "../Icons";
 import { toast } from "react-toastify";
 import { User } from "@/app/users/defenitions";
+import Link from "next/link";
 
 interface UserRowProps {
   user: User;
@@ -23,11 +24,6 @@ export default function UserRow({
     onSelect(user.id);
   };
 
-  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    router.push(`/users/${user.id}/edit`);
-  };
-
   const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setModalOpen(true);
@@ -43,7 +39,7 @@ export default function UserRow({
         toast.error(error.message || "Ошибка при удалении пользователя");
       } else {
         toast.success("Пользователь успешно удален");
-        router.refresh(); // refresh the list
+        router.refresh();
       }
     } catch (err) {
       toast.error("Ошибка при удалении пользовалетя");
@@ -69,12 +65,12 @@ export default function UserRow({
         <div className="flex-1">{user.username}</div>
         <div className="flex-1 text-gray-600">{user.email}</div>
         <div className="flex flex-shrink-0 flex-row items-center">
-          <button
-            onClick={handleEdit}
+          <Link
             className="mr-4 bg-blue-500 px-2.5 py-2.5 text-white rounded-md"
+            href={`/users/${user.id}/edit`}
           >
             <EditIcon className="size-5" />
-          </button>
+          </Link>
           <button
             onClick={handleDeleteClick}
             className="bg-red-500 px-2.5 py-2.5 text-white rounded-md"

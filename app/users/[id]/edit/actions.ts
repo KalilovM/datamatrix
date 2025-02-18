@@ -67,7 +67,7 @@ export async function updateUser(
   });
 
   // Redirect upon successful update.
-  redirect("/users");
+  redirect("/companies");
 }
 
 export async function getUser(id: string) {

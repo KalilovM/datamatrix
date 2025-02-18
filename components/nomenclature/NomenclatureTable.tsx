@@ -8,7 +8,9 @@ interface CompaniesTableProps {
   nomenclatures: Nomenclature[];
 }
 
-export default function CompaniesTable({ nomenclatures }: CompaniesTableProps) {
+export default function NomenclatureTable({
+  nomenclatures,
+}: CompaniesTableProps) {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const router = useRouter();
   return (

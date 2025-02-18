@@ -4,6 +4,7 @@ import { Company } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { BinIcon, EditIcon } from "../Icons";
 import { toast } from "react-toastify";
+import Link from "next/link";
 
 interface CompanyRowProps {
   company: Company;
@@ -73,12 +74,12 @@ export default function CompanyRow({
           })}
         </div>
         <div className="flex flex-shrink-0 flex-row items-center">
-          <button
-            onClick={handleEdit}
+          <Link
             className="mr-4 bg-blue-500 px-2.5 py-2.5 text-white rounded-md"
+            href={`/companies/${company.id}/edit`}
           >
             <EditIcon className="size-5" />
-          </button>
+          </Link>
           <button
             onClick={handleDeleteClick}
             className="bg-red-500 px-2.5 py-2.5 text-white rounded-md"
