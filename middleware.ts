@@ -9,27 +9,28 @@ export default async function middleware(req: NextRequest) {
   const isProtectedRoute = protectedRoutes.includes(path);
   const isPublicRoute = publicRoutes.includes(path);
 
-  // Fetch session cookie
+  // Get the session cookie (if it exists)
   const sessionCookie = req.cookies.get("session")?.value;
 
-  // Decrypt session
-  let session = null;
-  if (sessionCookie) {
-    try {
-      session = await decrypt(sessionCookie);
-      if (!session) {
-        return NextResponse.redirect(new URL("/login", req.nextUrl));
-      }
-    } catch (error) {
-      console.error("Failed to decrypt session:", error);
-      return NextResponse.redirect(new URL("/login", req.nextUrl));
-    }
+  // Try to decrypt the session token.
+  // Note: decrypt catches its own errors and returns null on failure.
+  let session = sessionCookie ? await decrypt(sessionCookie) : null;
+
+  // If there was a session cookie but decryption failed (or returned a null payload)
+  if (sessionCookie && !session) {
+    const response = NextResponse.redirect(new URL("/login", req.nextUrl));
+    // Remove the invalid session cookie
+    response.cookies.delete("session");
+    return response;
   }
 
-  // Redirect logic
+  // Redirect logic:
+  // If the route is protected and there is no valid session, redirect to login.
   if (isProtectedRoute && !session?.userId) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));
-  } else if (isPublicRoute && session?.userId) {
+  }
+  // If the route is public (e.g. login) and the user already has a session, send them to a protected page.
+  else if (isPublicRoute && session?.userId) {
     return NextResponse.redirect(new URL("/companies", req.nextUrl));
   }
 
