@@ -1,33 +1,41 @@
-FROM node:16 AS builder
+FROM node:18-alpine AS deps
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* yarn.lock* ./
+RUN npm install --frozen-lockfile
 
-# Install dependencies
-RUN npm install
+# Stage 2: Build the application
+FROM node:18-alpine AS builder
 
-# Copy all source code into the container
+WORKDIR /app
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy the source code
 COPY . .
 
 # Build the Next.js application
 RUN npm run build
 
-# Stage 2: Production image
-FROM node:16-alpine AS production
+# Stage 3: Runtime
+FROM node:18-alpine AS runner
 
-# Set working directory
 WORKDIR /app
 
-# Copy only the necessary files from the build stage
-COPY --from=builder /app/node_modules ./node_modules
+# Copy built app and Prisma client
 COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/public ./public
 
-# Expose the port that the app will run on
+# Install production dependencies
+RUN npm install --production --frozen-lockfile
+
+# Expose the application port
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]
