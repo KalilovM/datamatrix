@@ -1,41 +1,27 @@
 FROM node:18-alpine AS deps
-
 WORKDIR /app
-
 COPY package.json package-lock.json* yarn.lock* ./
 RUN npm install --frozen-lockfile
 
-# Stage 2: Build the application
-FROM node:18-alpine AS builder
-
+# Stage 2: Runtime
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Copy dependencies
+# Copy node_modules from deps
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy the source code
+# Copy the entire source code into the image
 COPY . .
 
-# Build the Next.js application
-RUN npm run build
-
-# Stage 3: Runtime
-FROM node:18-alpine AS runner
-
-WORKDIR /app
-
-# Copy built app and Prisma client
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/public ./public
-
-# Install production dependencies
+# (Optionally, install production-only dependencies if needed)
 RUN npm install --production --frozen-lockfile
 
 # Expose the application port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "run", "start"]
+# Copy the docker-entrypoint script and make it executable
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Run the entrypoint script on container start
+ENTRYPOINT ["/bin/sh", "/docker-entrypoint.sh"]
