@@ -53,7 +53,7 @@ export async function encrypt(payload: { userId: string; role: string }) {
 
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("session")?.value;
   if (!token) return null;
 
   const session = await prisma.session.findUnique({

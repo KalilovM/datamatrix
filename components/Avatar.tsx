@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import InitialIcon from "@/components/InitialIcon";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { User } from "@prisma/client";
 
 export default function Avatar({ user }: { user: User }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const toggleMenu = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -15,10 +16,10 @@ export default function Avatar({ user }: { user: User }) {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/auth/logout", { method: "GET" });
+      const res = await fetch("/api/auth/logout", { method: "POST" });
       if (!res.ok) throw new Error("Logout failed");
       setIsOpen(false);
-      redirect("/login");
+      router.push("/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }

@@ -14,14 +14,3 @@ export async function UserProvider({
   if (!user) redirect("/login");
   return <>{children(user)}</>;
 }
-
-// Usage in page component
-// import { UserProvider } from './UserProvider'
-
-// export default function Page() {
-//   return (
-//     <UserProvider>
-//       {(user) => <ClientComponent user={user} />}
-//     </UserProvider>
-//   )
-// }
