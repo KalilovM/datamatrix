@@ -27,6 +27,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-select": "^5.10.0",
+    "react-toastify": "^11.0.3",
     "server-only": "^0.0.1",
     "tsx": "^4.19.2",
     "uuid": "^11.0.5",

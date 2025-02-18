@@ -14,7 +14,7 @@ model User {
   username    String       @unique
   password    String
   role        Role
-  company     Company?     @relation(fields: [companyId], references: [id])
+  company     Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
   companyId   String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -24,7 +24,7 @@ model User {
 
 model Session {
   id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
   userId    String
   expiresAt DateTime
@@ -56,7 +56,7 @@ enum Action {
 
 model Permission {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   entity    Entity
   action    Action
@@ -86,7 +86,7 @@ model Nomenclature {
   size                 String? // размер
   configurations       Configuration[]
   codePacks            CodePack[]
-  company              Company?              @relation(fields: [companyId], references: [id])
+  company              Company?              @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId            String?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -97,18 +97,18 @@ model Nomenclature {
 model Code {
   id                  String             @id @default(uuid())
   value               String             @unique
-  codePack            CodePack           @relation(fields: [codePackId], references: [id])
+  codePack            CodePack           @relation(fields: [codePackId], references: [id], onDelete: Cascade)
   codePackId          String
   used                Boolean            @default(false)
   createdAt           DateTime           @default(now())
-  generatedCodePack   GeneratedCodePack? @relation(fields: [generatedCodePackId], references: [id])
+  generatedCodePack   GeneratedCodePack? @relation(fields: [generatedCodePackId], references: [id], onDelete: SetNull)
   generatedCodePackId String?
 }
 
 model CodePack {
   id             String       @id @default(uuid())
   name           String       @unique
-  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id])
+  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
   nomenclatureId String
   codes          Code[]
   used           Boolean      @default(false)
@@ -120,7 +120,7 @@ model Configuration {
   basePiece            Int                   @default(1)
   pieceInPack          Int
   packInPallet         Int
-  nomenclature         Nomenclature          @relation(fields: [nomenclatureId], references: [id])
+  nomenclature         Nomenclature          @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
   nomenclatureId       String
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -137,9 +137,9 @@ model GeneratedCodePack {
   configuration         Configuration        @relation(fields: [configurationId], references: [id])
   configurationId       String
   createdAt             DateTime             @default(now())
-  generatedCodePallet   GeneratedCodePallet? @relation(fields: [generatedCodePalletId], references: [id])
+  generatedCodePallet   GeneratedCodePallet? @relation(fields: [generatedCodePalletId], references: [id], onDelete: SetNull)
   generatedCodePalletId String?
-  order                 Order?               @relation(fields: [orderId], references: [id]) // Renamed from "Orders"
+  order                 Order?               @relation(fields: [orderId], references: [id], onDelete: SetNull)
   orderId               String?
 }
 
@@ -147,12 +147,12 @@ model GeneratedCodePallet {
   id                 String              @id @default(uuid())
   value              String              @unique
   generatedCodePacks GeneratedCodePack[]
-  nomenclature       Nomenclature        @relation(fields: [nomenclatureId], references: [id])
-  nomenclatureId     String
-  configuration      Configuration       @relation(fields: [configurationId], references: [id])
-  configurationId    String
+  nomenclature       Nomenclature?       @relation(fields: [nomenclatureId], references: [id], onDelete: SetNull)
+  nomenclatureId     String?
+  configuration      Configuration?      @relation(fields: [configurationId], references: [id], onDelete: SetNull)
+  configurationId    String?
   createdAt          DateTime            @default(now())
-  order              Order?              @relation(fields: [orderId], references: [id]) // Renamed from "Orders"
+  order              Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
   orderId            String?
 }
 
@@ -176,7 +176,7 @@ model Counteragent {
   id        String   @id @default(uuid())
   name      String
   inn       String // Renamed from "INN"
-  company   Company  @relation(fields: [companyId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -185,9 +185,9 @@ model Counteragent {
 
 model Order {
   id                   String                @id
-  company              Company               @relation(fields: [companyId], references: [id])
+  company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId            String
-  counteragent         Counteragent          @relation(fields: [counteragentId], references: [id]) // Renamed from "Counteragent"
+  counteragent         Counteragent          @relation(fields: [counteragentId], references: [id], onDelete: Cascade)
   counteragentId       String
   generatedCodePallets GeneratedCodePallet[]
   generatedCodePacks   GeneratedCodePack[]
