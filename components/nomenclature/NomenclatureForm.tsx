@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import ConfigurationsUploadModal from "./ConfigurationsUploadModal";
 import CodesUploadModal from "./CodesUploadModal";
-import ConfigurationRow, { OptionType } from "./ConfigurationRow"; // adjust the path as needed
+import ConfigurationRow, { OptionType } from "./ConfigurationRow";
 
 // For codes, we still use file data.
 interface FileData {
@@ -20,7 +20,6 @@ const NomenclatureForm: React.FC = () => {
   const [codes, setCodes] = useState<FileData[]>([]);
   const [isCodesModalOpen, setIsCodesModalOpen] = useState<boolean>(false);
 
-  // Handler to add a new configuration option.
   const handleAddConfiguration = (option: OptionType[]) => {
     setConfigurations((prev) => [...prev, ...option]);
     setIsConfigModalOpen(false);
@@ -36,6 +35,24 @@ const NomenclatureForm: React.FC = () => {
             option.value.packInPallet === optionToDelete.value.packInPallet
           ),
       ),
+    );
+  };
+
+  // Handler to update a configuration option.
+  const handleEditConfiguration = (
+    oldOption: OptionType,
+    updatedOption: OptionType,
+  ) => {
+    setConfigurations((prev) =>
+      prev.map((option) => {
+        if (
+          option.value.peaceInPack === oldOption.value.peaceInPack &&
+          option.value.packInPallet === oldOption.value.packInPallet
+        ) {
+          return updatedOption;
+        }
+        return option;
+      }),
     );
   };
 
@@ -100,6 +117,7 @@ const NomenclatureForm: React.FC = () => {
                     key={`${option.value.peaceInPack}-${option.value.packInPallet}`}
                     option={option}
                     onDelete={handleDeleteConfiguration}
+                    onEdit={handleEditConfiguration}
                   />
                 ))
               )}

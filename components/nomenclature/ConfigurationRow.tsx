@@ -17,7 +17,7 @@ export interface OptionType {
 interface ConfigurationRowProps {
   option: OptionType;
   onDelete?: (option: OptionType) => void;
-  onEdit?: (updatedOption: OptionType) => void;
+  onEdit?: (oldOption: OptionType, updatedOption: OptionType) => void;
 }
 
 const ConfigurationRow: React.FC<ConfigurationRowProps> = ({
@@ -71,7 +71,7 @@ const ConfigurationRow: React.FC<ConfigurationRowProps> = ({
       value: { peaceInPack: editPeace, packInPallet: editPallet },
     };
     if (onEdit) {
-      onEdit(updatedOption);
+      onEdit(option, updatedOption);
     } else {
       toast.success("Конфигурация обновлена");
     }
