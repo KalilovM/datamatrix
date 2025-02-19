@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, FormEvent } from "react";
 import ConfigurationsUploadModal from "./ConfigurationsUploadModal";
 import CodesUploadModal from "./CodesUploadModal";
 import ConfigurationRow, { OptionType } from "./ConfigurationRow";
+import CodeRow from "./CodeRow";
 
 // For codes, we still use file data.
 interface FileData {
@@ -20,6 +21,7 @@ const NomenclatureForm: React.FC = () => {
   const [codes, setCodes] = useState<FileData[]>([]);
   const [isCodesModalOpen, setIsCodesModalOpen] = useState<boolean>(false);
 
+  // Handler to add new configuration(s) (here expecting an array).
   const handleAddConfiguration = (option: OptionType[]) => {
     setConfigurations((prev) => [...prev, ...option]);
     setIsConfigModalOpen(false);
@@ -62,38 +64,118 @@ const NomenclatureForm: React.FC = () => {
     setIsCodesModalOpen(false);
   };
 
+  const handleDeleteCode = (fileToDelete: FileData) => {
+    setCodes((prev) => prev.filter((file) => file !== fileToDelete));
+  };
+
+  // Handle form submission and send data to the API.
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    // Append configurations as a JSON string.
+    // You can choose to send the entire object (including the label)
+    // or just the value part. Here, we send the value.
+    formData.append(
+      "configurations",
+      JSON.stringify(configurations.map((option) => option.value)),
+    );
+
+    // Append codes as a JSON string.
+    formData.append("codes", JSON.stringify(codes));
+
+    try {
+      // Debug: log formData entries (note that JSON strings will be visible)
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+      const res = await fetch("/api/nomenclature", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        alert("Номенклатура успешно сохранена!");
+      } else {
+        alert("Ошибка при сохранении номенклатуры.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Произошла ошибка при сохранении.");
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-full gap-4">
-      <h1 className="leading-6 text-xl font-bold">Новая номенклатура</h1>
-      {/* Nomenclature Fields */}
-      <form className="flex flex-row w-full rounded-lg border border-blue-300 bg-white px-8 py-3 justify-between items-center">
-        <div className="w-1/2 flex flex-col">
-          <label htmlFor="name" className="block">
-            Наименование
-          </label>
-          <input
-            name="name"
-            type="text"
-            required
-            className="w-full rounded-lg border px-3 py-2 text-gray-700"
-          />
+      <form className="gap-4 flex flex-col" onSubmit={handleSubmit}>
+        <div className="flex items-center justify-between">
+          <h1 className="leading-6 text-xl font-bold">Новая номенклатура</h1>
+          <div className="flex flex-row gap-4">
+            <button
+              type="button"
+              className="bg-neutral-500 px-2.5 py-1.5 text-white rounded-md"
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md"
+            >
+              Сохранить
+            </button>
+          </div>
         </div>
-        <div className="flex flex-row gap-4">
-          <button
-            type="button"
-            className="bg-neutral-500 px-2.5 py-1.5 text-white rounded-md"
-          >
-            Отмена
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md"
-          >
-            Сохранить
-          </button>
+        {/* Nomenclature Fields */}
+        <div className="flex flex-col w-full rounded-lg border border-blue-300 bg-white px-8 py-3 justify-between items-center gap-4">
+          <div className="flex flex-row w-full gap-4">
+            <div className="w-1/2 flex flex-col">
+              <label htmlFor="name" className="block">
+                Наименование
+              </label>
+              <input
+                name="name"
+                type="text"
+                required
+                className="w-full rounded-lg border px-3 py-2 text-gray-700"
+              />
+            </div>
+            <div className="w-1/2 flex flex-col">
+              <label htmlFor="modelArticle" className="block">
+                Модель/Артикул
+              </label>
+              <input
+                name="modelArticle"
+                type="text"
+                required
+                className="w-full rounded-lg border px-3 py-2 text-gray-700"
+              />
+            </div>
+          </div>
+          <div className="flex flex-row w-full gap-4">
+            <div className="w-1/2 flex flex-col">
+              <label htmlFor="color" className="block">
+                Цвет
+              </label>
+              <input
+                name="color"
+                type="text"
+                required
+                className="w-full rounded-lg border px-3 py-2 text-gray-700"
+              />
+            </div>
+            <div className="w-1/2 flex flex-col">
+              <label htmlFor="size" className="block">
+                Размер
+              </label>
+              <input
+                name="size"
+                type="text"
+                required
+                className="w-full rounded-lg border px-3 py-2 text-gray-700"
+              />
+            </div>
+          </div>
         </div>
       </form>
-
       <div className="flex flex-row w-full gap-4 h-full">
         {/* Configurations Section */}
         <div className="w-1/2">
@@ -110,7 +192,7 @@ const NomenclatureForm: React.FC = () => {
             </div>
             <div className="table-rows-layout">
               {configurations.length === 0 ? (
-                <p className="p-4">Нет конфигураций</p>
+                <p className="px-8 py-4">Нет конфигураций</p>
               ) : (
                 configurations.map((option) => (
                   <ConfigurationRow
@@ -138,25 +220,14 @@ const NomenclatureForm: React.FC = () => {
                 Загрузить
               </button>
             </div>
-            <div className="p-4">
+            <div className="table-rows-layout">
               {codes.length === 0 ? (
-                <p>Нет кодов</p>
+                <p className="px-8 py-4">Нет кодов</p>
               ) : (
                 <ul>
                   {codes.map((file, index) => (
                     <li key={index} className="mb-2">
-                      {file.fileName}
-                      {/* Hidden inputs for form submission */}
-                      <input
-                        type="hidden"
-                        name={`codes[${index}][fileName]`}
-                        value={file.fileName}
-                      />
-                      <input
-                        type="hidden"
-                        name={`codes[${index}][content]`}
-                        value={file.content}
-                      />
+                      <CodeRow file={file} onDelete={handleDeleteCode} />
                     </li>
                   ))}
                 </ul>
