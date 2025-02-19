@@ -21,8 +21,8 @@ const NomenclatureForm: React.FC = () => {
   const [isCodesModalOpen, setIsCodesModalOpen] = useState<boolean>(false);
 
   // Handler to add a new configuration option.
-  const handleAddConfiguration = (option: OptionType) => {
-    setConfigurations((prev) => [...prev, option]);
+  const handleAddConfiguration = (option: OptionType[]) => {
+    setConfigurations((prev) => [...prev, ...option]);
     setIsConfigModalOpen(false);
   };
 
