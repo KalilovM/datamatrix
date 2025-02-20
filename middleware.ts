@@ -15,7 +15,6 @@ export default async function middleware(req: NextRequest) {
   // Try to decrypt the session token.
   // Note: decrypt catches its own errors and returns null on failure.
   let session = sessionCookie ? await decrypt(sessionCookie) : null;
-
   // If there was a session cookie but decryption failed (or returned a null payload)
   if (sessionCookie && !session) {
     const response = NextResponse.redirect(new URL("/login", req.nextUrl));

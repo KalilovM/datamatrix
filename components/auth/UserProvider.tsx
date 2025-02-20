@@ -11,6 +11,8 @@ export async function UserProvider({
   ) => React.ReactNode;
 }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect("/login");
+  }
   return <>{children(user)}</>;
 }

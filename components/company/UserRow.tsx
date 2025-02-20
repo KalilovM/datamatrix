@@ -31,9 +31,12 @@ export default function UserRow({
 
   const handleConfirmDelete = async () => {
     try {
-      const res = await fetch(`/api/users/${user.id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_API_URL}/api/users/${user.id}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (!res.ok) {
         const error = await res.json();
         toast.error(error.message || "Ошибка при удалении пользователя");

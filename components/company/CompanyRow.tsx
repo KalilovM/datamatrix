@@ -36,9 +36,12 @@ export default function CompanyRow({
 
   const handleConfirmDelete = async () => {
     try {
-      const res = await fetch(`/api/companies/${company.id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_API_URL}/api/companies/${company.id}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (!res.ok) {
         const error = await res.json();
         toast.error(error.message || "Ошибка при удалении компании");

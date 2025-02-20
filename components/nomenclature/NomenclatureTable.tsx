@@ -1,17 +1,20 @@
 "use client";
-import { useState } from "react";
-import { Nomenclature } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import NomenclatureRow from "../nomenclature/NomenclatureRow";
 
-interface CompaniesTableProps {
+export interface Nomenclature {
+  id: string;
+  name: string;
+  codeCount: number;
+}
+
+interface NomenclatureTableProps {
   nomenclatures: Nomenclature[];
 }
 
 export default function NomenclatureTable({
   nomenclatures,
-}: CompaniesTableProps) {
-  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+}: NomenclatureTableProps) {
   const router = useRouter();
   return (
     <div className="table-layout">
@@ -28,12 +31,7 @@ export default function NomenclatureTable({
       </div>
       <div className="table-rows-layout">
         {nomenclatures.map((nomenclature) => (
-          <NomenclatureRow
-            key={nomenclature.id}
-            nomenclature={nomenclature}
-            onSelect={setSelectedCompany}
-            selectedCompanyId={selectedCompany}
-          />
+          <NomenclatureRow key={nomenclature.id} nomenclature={nomenclature} />
         ))}
       </div>
     </div>

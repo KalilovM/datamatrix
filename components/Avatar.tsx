@@ -16,7 +16,7 @@ export default function Avatar({ user }: { user: User }) {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/auth/logout", { method: "POST" });
+      const res = await fetch(`${process.env.NEXT_API_URL}/api/auth/logout`);
       if (!res.ok) throw new Error("Logout failed");
       setIsOpen(false);
       router.push("/login");

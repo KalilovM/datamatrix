@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: Request) {
-  const response = NextResponse.json({ message: "Successfully logged out" });
-
-  response.cookies.delete("session");
-
-  return response;
+export async function GET(request: NextRequest) {
+  const res = NextResponse.json({ message: "Вы успешно вышли" });
+  res.cookies.delete("session");
+  res.cookies.set("foo", "bar");
+  return res;
 }

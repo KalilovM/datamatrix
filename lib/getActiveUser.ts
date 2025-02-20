@@ -2,12 +2,12 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { decrypt } from "./session";
-import prisma from "./prisma";
-//
-// write a function that returns the active user using cookies stored and decode
+import { decrypt } from "./auth";
+import { prisma } from "./prisma";
+
 export async function getActiveUser() {
-  const session = await cookies.get("session");
+  const cookieStore = await cookies();
+  const session = cookieStore.get("session")?.value;
   if (!session) {
     redirect("/login");
   }
@@ -22,6 +22,7 @@ export async function getActiveUser() {
     },
   });
   if (!user) {
+    cookieStore.delete("session");
     redirect("/login");
   }
   return user;

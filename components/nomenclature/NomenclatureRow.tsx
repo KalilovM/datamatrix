@@ -1,31 +1,23 @@
 "use client";
 import { useState } from "react";
-import { Nomenclature } from "@prisma/client";
+import { Nomenclature } from "./NomenclatureTable";
 import { useRouter } from "next/navigation";
 import { BinIcon, EditIcon } from "../Icons";
 import { toast } from "react-toastify";
 
-interface CompanyRowProps {
+interface NomenclatureRowProps {
   nomenclature: Nomenclature;
-  onSelect: (id: string) => void;
-  selectedCompanyId: string | null;
 }
 
 export default function NomenclatureRow({
   nomenclature,
-  onSelect,
-  selectedCompanyId,
-}: CompanyRowProps) {
+}: NomenclatureRowProps) {
   const router = useRouter();
   const [isModalOpen, setModalOpen] = useState(false);
 
-  const handleClick = () => {
-    onSelect(nomenclature.id);
-  };
-
   const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    router.push(`/companies/${nomenclature.id}/edit`);
+    router.push(`nomenclature/${nomenclature.id}/edit`);
   };
 
   const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -35,18 +27,18 @@ export default function NomenclatureRow({
 
   const handleConfirmDelete = async () => {
     try {
-      const res = await fetch(`/api/companies/${nomenclature.id}`, {
+      const res = await fetch(`/api/nomenclature/${nomenclature.id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
         const error = await res.json();
-        toast.error(error.message || "Ошибка при удалении компании");
+        toast.error(error.message || "Ошибка при удалении номенклатуры");
       } else {
-        toast.success("Компания успешно удалена");
+        toast.success("Номенклатура успешно удалена");
         router.refresh(); // refresh the list
       }
     } catch (err) {
-      toast.error("Ошибка при удалении компании");
+      toast.error("Ошибка при удалении номенклатуры");
     } finally {
       setModalOpen(false);
     }
@@ -59,19 +51,10 @@ export default function NomenclatureRow({
   return (
     <>
       <div
-        className={`flex cursor-pointer items-center justify-between px-8 py-4 ${
-          selectedCompanyId === nomenclature.id
-            ? "bg-blue-100 text-blue-900"
-            : "hover:bg-gray-100"
-        }`}
-        onClick={handleClick}
+        className={`flex cursor-pointer items-center justify-between px-8 py-4 hover:bg-gray-100`}
       >
         <div className="flex-1">{nomenclature.name}</div>
-        <div className="flex-1 text-gray-600">
-          {new Date(nomenclature.subscriptionEnd).toLocaleDateString("ru-RU", {
-            timeZone: "Europe/Moscow",
-          })}
-        </div>
+        <div className="flex-1 text-gray-600">{nomenclature.codeCount}</div>
         <div className="flex flex-shrink-0 flex-row items-center">
           <button
             onClick={handleEdit}

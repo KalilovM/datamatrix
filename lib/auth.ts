@@ -1,3 +1,6 @@
+"use server";
+
+import "server-only";
 import { User } from "@prisma/client";
 import { prisma } from "./prisma";
 import { cookies } from "next/headers";
