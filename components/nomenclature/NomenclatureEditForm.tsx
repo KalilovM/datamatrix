@@ -6,9 +6,16 @@ import CodesUploadModal from "./CodesUploadModal";
 import ConfigurationRow, { OptionType } from "./ConfigurationRow";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import CodeRowEdit from "./CodeRowEdit";
+import CodeRow from "./CodeRow";
+import ExistingCodeRow from "./ExistingCodeRow";
+import Link from "next/link";
 
-interface FileData {
+export interface FileData {
+  fileName: string;
+  content: string;
+}
+
+export interface ExistingFileData {
   id: string;
   name: string;
 }
@@ -20,7 +27,7 @@ interface NomenclatureData {
   color: string;
   size: string;
   configurations: OptionType[];
-  codes: FileData[];
+  codes: ExistingFileData[];
 }
 
 const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
@@ -36,7 +43,12 @@ const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
   );
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
 
-  const [codes, setCodes] = useState<FileData[]>(initialData.codes);
+  const [codes, setCodes] = useState<FileData[]>([]);
+  const [existingCodes, setExistingCodes] = useState<ExistingFileData[]>(
+    initialData.codes,
+  );
+
+  const [codesToDelete, setCodesToDelete] = useState<FileData[]>([]);
   const [isCodesModalOpen, setIsCodesModalOpen] = useState<boolean>(false);
 
   const router = useRouter();
@@ -72,21 +84,25 @@ const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
     );
   };
 
-  const handleAddCode = (file: FileData) => {
+  const handleAddCode = async (file: FileData) => {
     setCodes((prev) => [...prev, file]);
     setIsCodesModalOpen(false);
   };
 
   const handleDeleteCode = async (fileToDelete: FileData) => {
-    setCodes((prev) => prev.filter((file) => file !== fileToDelete));
-    const res = await fetch(`/api/nomenclature/codepack/${fileToDelete.id}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) {
-      toast.error("Произошла ошибка при удалении файла.");
-    } else {
-      toast.success("Файл успешно удален.");
-    }
+    setCodes((prev) =>
+      prev.filter((file) => file.fileName !== fileToDelete.fileName),
+    );
+  };
+
+  const handleExistingCodeDelete = async (fileToDelete: ExistingFileData) => {
+    setExistingCodes((prev) =>
+      prev.filter((file) => file.name !== fileToDelete.name),
+    );
+    setCodesToDelete((prev) => [
+      ...prev,
+      { fileName: fileToDelete.name, content: "" },
+    ]);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -106,10 +122,14 @@ const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
       JSON.stringify(configurations.map((option) => option.value)),
     );
     formData.append("codes", JSON.stringify(codes));
+    formData.append("codesToDelete", JSON.stringify(codesToDelete));
 
     try {
-      const res = await fetch("/api/nomenclature/edit", {
-        method: "POST",
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+      const res = await fetch(`/api/nomenclature/${initialData.id}`, {
+        method: "PUT",
         body: formData,
       });
       if (res.ok) {
@@ -133,12 +153,12 @@ const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
             Редактирование номенклатуры
           </h1>
           <div className="flex flex-row gap-4">
-            <button
-              type="button"
+            <Link
+              href="/nomenclature"
               className="bg-neutral-500 px-2.5 py-1.5 text-white rounded-md"
             >
               Отмена
-            </button>
+            </Link>
             <button
               type="submit"
               className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md"
@@ -252,19 +272,26 @@ const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
               </button>
             </div>
             <div className="table-rows-layout">
-              {codes.length === 0 ? (
+              {existingCodes.map((file, index) => (
+                <ExistingCodeRow
+                  file={file}
+                  key={index}
+                  onDelete={() => handleExistingCodeDelete(file)}
+                />
+              ))}
+
+              {codes.length === 0 && existingCodes.length === 0 ? (
                 <p className="px-8 py-4">Нет кодов</p>
               ) : (
-                <ul>
+                <>
                   {codes.map((file, index) => (
-                    <li key={index} className="mb-2">
-                      <CodeRowEdit
-                        file={file}
-                        onDelete={() => handleDeleteCode(file)}
-                      />
-                    </li>
+                    <CodeRow
+                      file={file}
+                      key={index}
+                      onDelete={() => handleDeleteCode(file)}
+                    />
                   ))}
-                </ul>
+                </>
               )}
             </div>
           </div>

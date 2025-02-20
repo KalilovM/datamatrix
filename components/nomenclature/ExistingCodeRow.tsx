@@ -3,18 +3,14 @@
 import React, { useState } from "react";
 import { BinIcon } from "../Icons";
 import { toast } from "react-toastify";
-
-export interface FileData {
-  id: string;
-  name: string;
-}
+import { ExistingFileData } from "./NomenclatureEditForm";
 
 interface CodeRowProps {
-  file: FileData;
-  onDelete?: (file: FileData) => void;
+  file: ExistingFileData;
+  onDelete?: (file: ExistingFileData) => void;
 }
 
-const CodeRowEdit: React.FC<CodeRowProps> = ({ file, onDelete }) => {
+const ExistingCodeRow: React.FC<CodeRowProps> = ({ file, onDelete }) => {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -36,7 +32,7 @@ const CodeRowEdit: React.FC<CodeRowProps> = ({ file, onDelete }) => {
   };
 
   return (
-    <>
+    <div className="mb-2">
       <div className="flex cursor-pointer items-center justify-between px-8 py-4">
         <div className="flex-1">{file.name}</div>
         <div className="flex flex-shrink-0 flex-row items-center">
@@ -73,8 +69,8 @@ const CodeRowEdit: React.FC<CodeRowProps> = ({ file, onDelete }) => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
-export default CodeRowEdit;
+export default ExistingCodeRow;

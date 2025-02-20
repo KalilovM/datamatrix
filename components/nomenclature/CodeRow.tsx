@@ -4,10 +4,7 @@ import React, { useState } from "react";
 import { BinIcon } from "../Icons";
 import { toast } from "react-toastify";
 
-export interface FileData {
-  fileName: string;
-  content: string;
-}
+import { FileData } from "./NomenclatureEditForm";
 
 interface CodeRowProps {
   file: FileData;
@@ -36,7 +33,7 @@ const CodeRow: React.FC<CodeRowProps> = ({ file, onDelete }) => {
   };
 
   return (
-    <>
+    <div className="mb-2">
       <div className="flex cursor-pointer items-center justify-between px-8 py-4">
         <div className="flex-1">{file.fileName}</div>
         <div className="flex flex-shrink-0 flex-row items-center">
@@ -73,7 +70,7 @@ const CodeRow: React.FC<CodeRowProps> = ({ file, onDelete }) => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

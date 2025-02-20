@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { parse } from "csv-parse/sync";
+import { processCodeFile } from "./helpers";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -58,64 +58,15 @@ export async function POST(request: Request) {
     );
   }
 
-  // For each uploaded file, parse its CSV content and create a code pack.
+  // Process each code file using the helper functions.
   let codePackCreateData: any[] = [];
   for (const fileObj of codes) {
-    const csvText = fileObj.content;
-    const rows: string[][] = parse(csvText, {
-      delimiter: ",",
-      columns: false,
-      skip_empty_lines: true,
-    });
-    // Flatten, trim, and filter each row.
-    const trimmed = rows
-      .flat()
-      .map((code: string) => code.trim())
-      .filter((code: string) => code.length > 0);
-
-    // Check for duplicates within this file.
-    const duplicatesInFile = trimmed.filter(
-      (code: string, index: number) => trimmed.indexOf(code) !== index,
-    );
-    if (duplicatesInFile.length > 0) {
-      return NextResponse.json(
-        { error: `В файле ${fileObj.fileName} найдены дубликаты кодов` },
-        { status: 400 },
-      );
+    try {
+      const codePackData = await processCodeFile(fileObj);
+      codePackCreateData.push(codePackData);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
     }
-
-    // Check for duplicates in the database for codes from this file.
-    const existingCodes = await prisma.code.findMany({
-      where: { value: { in: trimmed } },
-      select: { value: true },
-    });
-    // Check for unique codePack names for this file name.
-    const existingCodePacks = await prisma.codePack.findMany({
-      where: { name: fileObj.fileName },
-      select: { name: true },
-    });
-    if (existingCodes.length > 0) {
-      return NextResponse.json(
-        { error: `Коды в файле ${fileObj.fileName} уже существуют в БД` },
-        { status: 400 },
-      );
-    }
-
-    if (existingCodePacks.length > 0) {
-      return NextResponse.json(
-        { error: `Файл ${fileObj.fileName} уже загружен` },
-        { status: 400 },
-      );
-    }
-
-    // Create code records from this file's rows.
-    const codeRecords = trimmed.map((codeValue: string) => ({
-      value: codeValue,
-    }));
-    codePackCreateData.push({
-      name: fileObj.fileName, // set codepack name as the file name
-      codes: { create: codeRecords },
-    });
   }
 
   // Map configurations to the shape expected by Prisma.

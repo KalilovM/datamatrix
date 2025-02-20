@@ -91,7 +91,6 @@ const NomenclatureForm: React.FC = () => {
       for (let pair of formData.entries()) {
         console.log(pair[0] + ": " + pair[1]);
       }
-      console.log(process.env.NEXT_API_URL);
       const res = await fetch(`/api/nomenclature`, {
         method: "POST",
         body: formData,
