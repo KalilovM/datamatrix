@@ -7,6 +7,7 @@ import ConfigurationRow, { OptionType } from "./ConfigurationRow";
 import CodeRow from "./CodeRow";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // For codes, we still use file data.
 interface FileData {
@@ -114,12 +115,12 @@ const NomenclatureForm: React.FC = () => {
         <div className="flex items-center justify-between">
           <h1 className="leading-6 text-xl font-bold">Новая номенклатура</h1>
           <div className="flex flex-row gap-4">
-            <button
-              type="button"
+            <Link
+              href="/nomenclature"
               className="bg-neutral-500 px-2.5 py-1.5 text-white rounded-md"
             >
               Отмена
-            </button>
+            </Link>
             <button
               type="submit"
               className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md"
