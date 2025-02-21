@@ -13,6 +13,8 @@ export interface NomenclatureOption {
   name: string | null;
   id: string;
   configurations: {
+    id: string;
+    nomenclatureId: string;
     pieceInPack: number;
     packInPallet: number;
   }[];
@@ -20,25 +22,59 @@ export interface NomenclatureOption {
 
 export default function AggregationForm({ options }: AggregationFormProps) {
   const [selectedConfiguration, setSelectedConfiguration] = useState<{
+    id: string;
+    nomenclatureId: string;
     pieceInPack: number;
     packInPallet: number;
   } | null>(null);
 
   const [packValues, setPackValues] = useState<string[]>([]);
   const [lastUpdatedIndex, setLastUpdatedIndex] = useState<number | null>(null);
+  const [uniqueCode, setUniqueCode] = useState<string | null>(null);
 
-  // Refs for each PackInput for focus management.
   const packRefs = useRef<Array<HTMLInputElement | null>>([]);
 
-  // Reset pack values when configuration changes.
   useEffect(() => {
     if (selectedConfiguration) {
       setPackValues(Array(selectedConfiguration.pieceInPack).fill(""));
       packRefs.current = [];
+      setUniqueCode(null);
     }
   }, [selectedConfiguration]);
 
-  // Find and focus the next empty input
+  // ✅ Memoized function to submit data when all fields are filled
+  const submitPackData = useCallback(async () => {
+    try {
+      const res = await fetch("/api/aggregations/generate-pack-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packCodes: packValues,
+          configurationId: selectedConfiguration?.id,
+          nomenclatureId: selectedConfiguration?.nomenclatureId,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Ошибка при генерации кода");
+
+      const data = await res.json();
+      setUniqueCode(data.uniqueCode);
+      toast.success("Уникальный код успешно создан!");
+    } catch (error) {
+      toast.error("Ошибка при отправке данных на сервер");
+      console.error("Ошибка при отправке данных на сервер", error);
+    }
+  }, [packValues]);
+
+  // ✅ Effect to detect when all inputs are filled and trigger submission
+  useEffect(() => {
+    if (packValues.length > 0 && packValues.every((val) => val !== "")) {
+      toast.success("Все поля заполнены, отправляем данные...");
+      submitPackData();
+    }
+  }, [packValues, submitPackData]); // Runs when `packValues` changes
+
+  // ✅ Now `focusNextInput` only handles focusing
   const focusNextInput = useCallback(
     (currentIndex: number) => {
       const nextIndex = packValues.findIndex(
@@ -50,21 +86,17 @@ export default function AggregationForm({ options }: AggregationFormProps) {
 
       if (nextIndex !== -1 && packRefs.current[nextIndex]) {
         packRefs.current[nextIndex]?.focus();
-      } else if (nextIndex === -1) {
-        toast.success("Все поля заполнены, переходим на следующую страницу");
       }
     },
-    [packValues], // Ensures it updates when `packValues` changes
+    [packValues],
   );
 
-  // Effect to focus the next input after a state update
   useEffect(() => {
     if (lastUpdatedIndex !== null) {
       focusNextInput(lastUpdatedIndex);
     }
   }, [lastUpdatedIndex, focusNextInput]);
 
-  // Validate a code by sending a request to the backend.
   const validateCode = async (
     index: number,
     value: string,
@@ -94,8 +126,7 @@ export default function AggregationForm({ options }: AggregationFormProps) {
         return newValues;
       });
 
-      setLastUpdatedIndex(index); // Update index to trigger focus
-
+      setLastUpdatedIndex(index);
       return true;
     } catch (error) {
       toast.error("Ошибка проверки кода");
@@ -104,7 +135,6 @@ export default function AggregationForm({ options }: AggregationFormProps) {
     }
   };
 
-  // Clear a specific pack input.
   const handlePackInputClear = (index: number) => {
     setPackValues((prev) => {
       const newValues = [...prev];
@@ -114,7 +144,6 @@ export default function AggregationForm({ options }: AggregationFormProps) {
     packRefs.current[index]?.focus();
   };
 
-  // Render the list of PackInput components.
   const renderPackInputs = () => {
     if (!selectedConfiguration) {
       return (
@@ -132,7 +161,6 @@ export default function AggregationForm({ options }: AggregationFormProps) {
       />
     ));
   };
-
   return (
     <div className="flex flex-col w-full h-full gap-4">
       <AggregationSelectors
@@ -140,16 +168,21 @@ export default function AggregationForm({ options }: AggregationFormProps) {
         onConfigurationSelect={setSelectedConfiguration}
       />
       <div className="flex flex-row w-full gap-4 h-full">
-        {/* Пачки Section */}
         <div className="w-1/2">
           <div className="table-layout">
             <div className="table-header flex justify-between items-center">
               <p className="table-header-title">Пачки</p>
             </div>
             <div className="table-rows-layout">{renderPackInputs()}</div>
+            {/* Display unique code if available */}
+            {uniqueCode && (
+              <div className="p-4 mt-4 border rounded bg-gray-100 text-center">
+                <p className="text-lg font-semibold">Уникальный код:</p>
+                <p className="text-2xl text-blue-600 font-bold">{uniqueCode}</p>
+              </div>
+            )}
           </div>
         </div>
-        {/* Паллеты Section */}
         <div className="w-1/2">
           <div className="table-layout">
             <div className="table-header flex justify-between items-center">

@@ -8,7 +8,12 @@ const Select = dynamic(() => import("react-select"), { ssr: false });
 interface AggregationSelectorsProps {
   options: NomenclatureOption[] | null;
   onConfigurationSelect: (
-    selectedConfig: { pieceInPack: number; packInPallet: number } | null,
+    selectedConfig: {
+      pieceInPack: number;
+      packInPallet: number;
+      id: string;
+      nomenclatureId: string;
+    } | null,
   ) => void;
 }
 
@@ -34,7 +39,7 @@ export default function AggregationSelectors({
           config: { pieceInPack: number; packInPallet: number },
           index: number,
         ) => ({
-          label: `Пачек: ${config.pieceInPack}, Паллет: ${config.packInPallet}`,
+          label: `1-${config.pieceInPack}-${config.packInPallet}`,
           value: config,
         }),
       )

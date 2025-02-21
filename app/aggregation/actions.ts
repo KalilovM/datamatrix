@@ -30,6 +30,8 @@ export default async function getNomenclatureOptions() {
       name: true,
       configurations: {
         select: {
+          id: true,
+          nomenclatureId: true,
           pieceInPack: true,
           packInPallet: true,
         },
