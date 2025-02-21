@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import Select from "react-select";
 import { NomenclatureOption } from "./AggregationForm";
+import dynamic from "next/dynamic";
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface AggregationSelectorsProps {
   options: NomenclatureOption[] | null;
