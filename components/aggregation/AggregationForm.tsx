@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import AggregationSelectors from "./AggregationSelectors";
 import PackInput from "./PackInput";
 import { toast } from "react-toastify";
@@ -19,19 +19,18 @@ export interface NomenclatureOption {
 }
 
 export default function AggregationForm({ options }: AggregationFormProps) {
-  // Store the selected configuration from AggregationSelectors.
   const [selectedConfiguration, setSelectedConfiguration] = useState<{
     pieceInPack: number;
     packInPallet: number;
   } | null>(null);
 
-  // Array to hold the current values for each pack input.
   const [packValues, setPackValues] = useState<string[]>([]);
+  const [lastUpdatedIndex, setLastUpdatedIndex] = useState<number | null>(null);
 
   // Refs for each PackInput for focus management.
   const packRefs = useRef<Array<HTMLInputElement | null>>([]);
 
-  // When configuration changes, reset the pack values and refs.
+  // Reset pack values when configuration changes.
   useEffect(() => {
     if (selectedConfiguration) {
       setPackValues(Array(selectedConfiguration.pieceInPack).fill(""));
@@ -39,35 +38,64 @@ export default function AggregationForm({ options }: AggregationFormProps) {
     }
   }, [selectedConfiguration]);
 
+  // Find and focus the next empty input
+  const focusNextInput = useCallback(
+    (currentIndex: number) => {
+      const nextIndex = packValues.findIndex(
+        (val, i) => val === "" && i > currentIndex,
+      );
+
+      console.log("Updated packValues:", packValues);
+      console.log("Next index to focus:", nextIndex);
+
+      if (nextIndex !== -1 && packRefs.current[nextIndex]) {
+        packRefs.current[nextIndex]?.focus();
+      } else if (nextIndex === -1) {
+        toast.success("Все поля заполнены, переходим на следующую страницу");
+      }
+    },
+    [packValues], // Ensures it updates when `packValues` changes
+  );
+
+  // Effect to focus the next input after a state update
+  useEffect(() => {
+    if (lastUpdatedIndex !== null) {
+      focusNextInput(lastUpdatedIndex);
+    }
+  }, [lastUpdatedIndex, focusNextInput]);
+
   // Validate a code by sending a request to the backend.
   const validateCode = async (
     index: number,
     value: string,
   ): Promise<boolean> => {
     try {
-      // Check via API if the code exists in the database.
       const res = await fetch("/api/codes/validate-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: value }),
       });
+
       const data = await res.json();
+
       if (!data.exists) {
         toast.error("Код не найден в БД");
         return false;
       }
-      // Prevent duplicate codes in the current list.
+
       if (packValues.includes(value)) {
         toast.error("Код уже в списке");
         return false;
       }
-      // Code is valid—update the pack values.
+
       setPackValues((prev) => {
         const newValues = [...prev];
         newValues[index] = value;
         return newValues;
       });
-      focusNextInput(index);
+
+      setLastUpdatedIndex(index); // Update index to trigger focus
+
       return true;
     } catch (error) {
       toast.error("Ошибка проверки кода");
@@ -84,20 +112,6 @@ export default function AggregationForm({ options }: AggregationFormProps) {
       return newValues;
     });
     packRefs.current[index]?.focus();
-  };
-
-  // Find and focus the next empty input. If all are filled, trigger pagination.
-  const focusNextInput = (currentIndex: number) => {
-    const nextIndex = packValues.findIndex(
-      (val, i) => val === "" && i > currentIndex,
-    );
-    console.log("indexes", packValues);
-    console.log("nextIndex", nextIndex);
-    if (nextIndex !== -1 && packRefs.current[nextIndex]) {
-      packRefs.current[nextIndex]?.focus();
-    } else if (nextIndex === -1) {
-      toast.success("Все поля заполнены, переходим на следующую страницу");
-    }
   };
 
   // Render the list of PackInput components.
@@ -133,20 +147,6 @@ export default function AggregationForm({ options }: AggregationFormProps) {
               <p className="table-header-title">Пачки</p>
             </div>
             <div className="table-rows-layout">{renderPackInputs()}</div>
-            <div className="flex justify-center mt-4">
-              <button
-                type="button"
-                className="bg-red-500 text-white px-4 py-2 rounded"
-                onClick={() => {
-                  if (selectedConfiguration)
-                    setPackValues(
-                      Array(selectedConfiguration.pieceInPack).fill(""),
-                    );
-                }}
-              >
-                Очистить все
-              </button>
-            </div>
           </div>
         </div>
         {/* Паллеты Section */}
