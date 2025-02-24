@@ -148,18 +148,35 @@ const PackInputsSection: React.FC<PackInputsSectionProps> = ({
     ));
   };
 
+  // Copy the unique code to the clipboard on click
+  const handleCopyUniqueCode = useCallback(() => {
+    if (uniqueCode) {
+      navigator.clipboard
+        .writeText(uniqueCode)
+        .then(() => {
+          toast.success("Datamatrix код скопирован в буфер обмена!");
+        })
+        .catch(() => {
+          toast.error("Не удалось скопировать Datamatrix код.");
+        });
+    }
+  }, [uniqueCode]);
+
   return (
     <div className="table-layout flex flex-col h-full">
       <div className="table-header flex justify-between items-center">
         <p className="table-header-title">Пачки</p>
       </div>
+      <div className="table-rows-layout flex-1">{renderPackInputs()}</div>
       {uniqueCode && (
-        <div className="p-4 border rounded bg-gray-100 flex flex-col justify-start text-start items-center">
+        <div
+          onClick={handleCopyUniqueCode}
+          className="p-4 border rounded bg-gray-100 flex flex-col justify-start text-start items-start cursor-pointer select-none"
+        >
           <p className="text-lg font-semibold">Уникальный код:</p>
           <p className="text-xl text-green-600 font-bold">{uniqueCode}</p>
         </div>
       )}
-      <div className="table-rows-layout flex-1">{renderPackInputs()}</div>
       <PaginationControls
         currentPage={currentPage}
         totalPages={totalPages}
