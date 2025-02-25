@@ -27,7 +27,7 @@ export const sidebarItems: Array<{
   },
   {
     name: "Контрагенты",
-    href: "/counteragent",
+    href: "/counteragents",
     icon: <AggregationIcon />,
   },
   {

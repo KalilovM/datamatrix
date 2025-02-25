@@ -1,9 +1,14 @@
 "use client";
 import { useState } from "react";
-import { Nomenclature } from "./NomenclatureTable";
 import { useRouter } from "next/navigation";
 import { BinIcon, EditIcon } from "../Icons";
 import { toast } from "react-toastify";
+
+export interface Nomenclature {
+  id: number;
+  name: string;
+  codeCount: number;
+}
 
 interface NomenclatureRowProps {
   nomenclature: Nomenclature;

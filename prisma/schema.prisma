@@ -80,7 +80,7 @@ model Company {
 
 model Nomenclature {
   id                   String                @id @default(uuid())
-  name                 String?
+  name                 String
   modelArticle         String? // модель/артикул
   color                String? // Цвет
   size                 String? // размер

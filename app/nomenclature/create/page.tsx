@@ -1,4 +1,3 @@
-// app/new-nomenclature/page.tsx
 import MainLayout from "@/components/MainLayout";
 import NomenclatureForm from "@/components/nomenclature/NomenclatureForm";
 
