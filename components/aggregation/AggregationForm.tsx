@@ -15,9 +15,19 @@ const AggregationForm: React.FC<AggregationFormProps> = ({ options }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 5;
 
-  const handleConfigurationSelect = useCallback((config: Configuration) => {
-    setSelectedConfiguration(config);
-  }, []);
+  const handleConfigurationSelect = useCallback(
+    (
+      config: {
+        pieceInPack: number;
+        packInPallet: number;
+        id: string;
+        nomenclatureId: string;
+      } | null,
+    ) => {
+      setSelectedConfiguration(config);
+    },
+    [],
+  );
 
   return (
     <div className="flex flex-col w-full h-full gap-4">
