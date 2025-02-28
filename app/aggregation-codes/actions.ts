@@ -44,7 +44,7 @@ export async function getAggregatedCodes() {
     configuration: `1-${pack.configuration.pieceInPack}-${
       pack.configuration.packInPallet
     }`,
-    type: "Pack",
+    type: "Пачка",
     createdAt: pack.createdAt,
   }));
 
@@ -55,7 +55,7 @@ export async function getAggregatedCodes() {
     configuration: `1-${pallet.configuration.pieceInPack}-${
       pallet.configuration.packInPallet
     }`,
-    type: "Pallet",
+    type: "Паллет",
     createdAt: pallet.createdAt,
   }));
 

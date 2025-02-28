@@ -82,7 +82,7 @@ const ConfigurationRow: React.FC<ConfigurationRowProps> = ({
     <>
       <div className="flex cursor-pointer items-center justify-between px-8 py-4">
         <div className="flex-1">{option.label}</div>
-        <div className="flex flex-shrink-0 flex-row items-center">
+        <div className="flex shrink-0 flex-row items-center">
           <button
             onClick={handleEdit}
             className="mr-4 bg-blue-500 px-2.5 py-2.5 text-white rounded-md"
@@ -114,7 +114,7 @@ const ConfigurationRow: React.FC<ConfigurationRowProps> = ({
                   type="number"
                   value={editPeace}
                   onChange={(e) => setEditPeace(Number(e.target.value))}
-                  className="w-full border rounded px-2 py-1"
+                  className="w-full border rounded-sm px-2 py-1"
                   required
                 />
               </div>
@@ -126,7 +126,7 @@ const ConfigurationRow: React.FC<ConfigurationRowProps> = ({
                   type="number"
                   value={editPallet}
                   onChange={(e) => setEditPallet(Number(e.target.value))}
-                  className="w-full border rounded px-2 py-1"
+                  className="w-full border rounded-sm px-2 py-1"
                   required
                 />
               </div>

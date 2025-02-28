@@ -138,7 +138,7 @@ const CustomOptionModal: React.FC<CustomOptionModalProps> = ({
               type="number"
               value={peaceInPack}
               onChange={(e) => setPeaceInPack(Number(e.target.value))}
-              className="w-full border rounded px-2 py-1"
+              className="w-full border rounded-sm px-2 py-1"
               required
             />
           </div>
@@ -148,7 +148,7 @@ const CustomOptionModal: React.FC<CustomOptionModalProps> = ({
               type="number"
               value={packInPallet}
               onChange={(e) => setPackInPallet(Number(e.target.value))}
-              className="w-full border rounded px-2 py-1"
+              className="w-full border rounded-sm px-2 py-1"
               required
             />
           </div>

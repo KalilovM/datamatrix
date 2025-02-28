@@ -35,7 +35,7 @@ const ExistingCodeRow: React.FC<CodeRowProps> = ({ file, onDelete }) => {
     <div className="mb-2">
       <div className="flex cursor-pointer items-center justify-between px-8 py-4">
         <div className="flex-1">{file.name}</div>
-        <div className="flex flex-shrink-0 flex-row items-center">
+        <div className="flex shrink-0 flex-row items-center">
           <button
             onClick={handleDeleteClick}
             className="bg-red-500 px-2.5 py-2.5 text-white rounded-md"

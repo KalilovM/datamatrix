@@ -76,7 +76,7 @@ export default function CompanyRow({
             timeZone: "Europe/Moscow",
           })}
         </div>
-        <div className="flex flex-shrink-0 flex-row items-center">
+        <div className="flex shrink-0 flex-row items-center">
           <Link
             className="mr-4 bg-blue-500 px-2.5 py-2.5 text-white rounded-md"
             href={`/companies/${company.id}/edit`}

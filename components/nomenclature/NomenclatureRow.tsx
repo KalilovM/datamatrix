@@ -60,7 +60,7 @@ export default function NomenclatureRow({
       >
         <div className="flex-1">{nomenclature.name}</div>
         <div className="flex-1 text-gray-600">{nomenclature.codeCount}</div>
-        <div className="flex flex-shrink-0 flex-row items-center">
+        <div className="flex shrink-0 flex-row items-center">
           <button
             onClick={handleEdit}
             className="mr-4 bg-blue-500 px-2.5 py-2.5 text-white rounded-md"

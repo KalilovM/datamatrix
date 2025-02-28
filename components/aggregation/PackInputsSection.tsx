@@ -228,7 +228,7 @@ const PackInputsSection: React.FC<PackInputsSectionProps> = ({
       {pages[currentPage]?.uniqueCode && (
         <div
           onClick={handleCopyUniqueCode}
-          className="p-4 border rounded bg-gray-100 flex flex-col justify-start text-start items-start cursor-pointer select-none"
+          className="p-4 border rounded-sm bg-gray-100 flex flex-col justify-start text-start items-start cursor-pointer select-none"
         >
           <p className="text-lg font-semibold">Уникальный код:</p>
           <p className="text-xl text-green-600 font-bold">

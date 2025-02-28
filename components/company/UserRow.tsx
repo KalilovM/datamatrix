@@ -67,7 +67,7 @@ export default function UserRow({
       >
         <div className="flex-1">{user.username}</div>
         <div className="flex-1 text-gray-600">{user.email}</div>
-        <div className="flex flex-shrink-0 flex-row items-center">
+        <div className="flex shrink-0 flex-row items-center">
           <Link
             className="mr-4 bg-blue-500 px-2.5 py-2.5 text-white rounded-md"
             href={`/users/${user.id}/edit`}

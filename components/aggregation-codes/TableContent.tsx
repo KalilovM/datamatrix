@@ -3,7 +3,7 @@
 import { IAggregatedCode } from "@/app/aggregation-codes/defenitions";
 import { useState } from "react";
 import AggregationCodesRow from "./AggregationCodesRow";
-import { FilterIcon } from "../Icons";
+import { FilterIcon, SearchIcon } from "../Icons";
 
 interface ITableContentProps {
   aggregatedCodes: IAggregatedCode[];
@@ -14,18 +14,26 @@ export default function TableContent({ aggregatedCodes }: ITableContentProps) {
     <div className="table-layout">
       {/* Table Header */}
       <div className="table-header">
-        <p className="table-header-title">Сгенерированные коды</p>
+        <p className="table-header-title">Агрегированные коды</p>
         <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="🔍 Поиск..."
-            className="border rounded-md px-3 py-1.5"
-          />
-          <button className="bg-white text-white p-2 rounded-md inset">
+          <button className="bg-neutral-100 text-white p-2 rounded-md shadow-sm">
             <span>
               <FilterIcon className="size-5" strokeWidth="2" stroke="black" />
             </span>
           </button>
+
+          <div className="relative">
+            <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
+              <SearchIcon className="w-5 h-5 text-gray-400" />
+            </div>
+            <input
+              type="search"
+              id="default-search"
+              className="block w-full min-w-64 p-2 pe-10 text-sm text-gray-900 border border-neutral-100 rounded-lg bg-neutral-50 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Поиск"
+              required
+            />
+          </div>
         </div>
       </div>
 

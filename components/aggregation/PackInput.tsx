@@ -95,12 +95,12 @@ export default function PackInput({
         onChange={handleChange}
         readOnly={isScanned}
         placeholder="Отсканируйте код"
-        className="border rounded px-1 py-2 w-full"
+        className="border rounded-sm px-1 py-2 w-full"
         ref={inputRef}
       />
       <button
         onClick={handleClearClick}
-        className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
+        className="ml-2 bg-red-500 text-white px-2 py-1 rounded-sm"
       >
         Очистить
       </button>

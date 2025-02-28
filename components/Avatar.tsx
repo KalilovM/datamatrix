@@ -65,7 +65,7 @@ export default function Avatar({ user }: { user: User }) {
       <div
         ref={dropdownRef}
         className={
-          "absolute right-0 top-3/4 z-50 my-4 list-none divide-y divide-gray-100 rounded-lg bg-white text-base shadow " +
+          "absolute right-0 top-3/4 z-50 my-4 list-none divide-y divide-gray-100 rounded-lg bg-white text-base shadow-sm " +
           (isOpen ? "block" : "hidden")
         }
       >
