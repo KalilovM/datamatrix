@@ -147,10 +147,10 @@ model GeneratedCodePallet {
   id                 String              @id @default(uuid())
   value              String              @unique
   generatedCodePacks GeneratedCodePack[]
-  nomenclature       Nomenclature?       @relation(fields: [nomenclatureId], references: [id], onDelete: SetNull)
-  nomenclatureId     String?
-  configuration      Configuration?      @relation(fields: [configurationId], references: [id], onDelete: SetNull)
-  configurationId    String?
+  nomenclature       Nomenclature        @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
+  nomenclatureId     String
+  configuration      Configuration       @relation(fields: [configurationId], references: [id], onDelete: Cascade)
+  configurationId    String
   createdAt          DateTime            @default(now())
   order              Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
   orderId            String?

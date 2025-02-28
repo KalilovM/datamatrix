@@ -32,7 +32,7 @@ export const sidebarItems: Array<{
   },
   {
     name: "Заказы",
-    href: "/order",
+    href: "/orders",
     icon: <AggregationIcon />,
   },
   {
