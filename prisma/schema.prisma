@@ -175,12 +175,12 @@ model BankDetails {
 model Counteragent {
   id        String   @id @default(uuid())
   name      String
-  inn       String // Renamed from "INN"
+  inn       String
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  orders    Order[] // Renamed from "Orders"
+  orders    Order[]
 }
 
 model Order {
