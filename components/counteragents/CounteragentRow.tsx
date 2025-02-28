@@ -34,7 +34,7 @@ export default function CounteragentRow({
         const error = await res.json();
         toast.error(error.message || "Ошибка при удалении контрагента");
       } else {
-        toast.success("Контрагент успешно удалена");
+        toast.success("Контрагент успешно удален");
         router.refresh(); // refresh the list
       }
     } catch (err) {
