@@ -1,11 +1,32 @@
+"use client";
+
 import { IAggregatedCode } from "@/app/aggregation-codes/defenitions";
 import { PrintIcon } from "../Icons";
+import { useState } from "react";
+import PrintCodes from "./PrintCodes";
+import { PrintingTemplate } from "@prisma/client";
+import { toast } from "react-toastify";
 
 export default function AggregationCodesRow({
   aggregatedCodes,
+  defaultTemplate,
 }: {
   aggregatedCodes: IAggregatedCode[];
+  defaultTemplate: PrintingTemplate | null | never[];
 }) {
+  const [codeToPrint, setCodeToPrint] = useState<IAggregatedCode | null>(null);
+  const handlePrint = (code: IAggregatedCode) => {
+    console.log(defaultTemplate);
+    if (
+      !defaultTemplate ||
+      (Array.isArray(defaultTemplate) && defaultTemplate.length === 0)
+    ) {
+      toast.error("Не выбрат шаблон печати по умолчанию");
+      return;
+    }
+    setCodeToPrint(code);
+  };
+
   return (
     <div className="relative overflow-x-auto sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
@@ -53,7 +74,10 @@ export default function AggregationCodesRow({
                 {new Date(code.createdAt).toLocaleDateString()}
               </td>
               <td className="px-6 py-4 text-right">
-                <button className="p-4 rounded-md shadow-md">
+                <button
+                  className="p-4 rounded-md shadow-md cursor-pointer"
+                  onClick={() => handlePrint(code)}
+                >
                   <PrintIcon className="size-5 stroke-blue-600 fill-none stroke-2" />
                 </button>
               </td>
@@ -61,6 +85,13 @@ export default function AggregationCodesRow({
           ))}
         </tbody>
       </table>
+      {codeToPrint && (
+        <PrintCodes
+          aggregatedCodes={[codeToPrint]}
+          printingTemplate={defaultTemplate}
+          onPrintComplete={() => setCodeToPrint(null)}
+        />
+      )}
     </div>
   );
 }

@@ -58,7 +58,7 @@ const ConfigurationsUploadModal: React.FC<ConfigurationsUploadModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
         <div className="bg-white p-8 rounded-lg w-1/2">
           <h2 className="text-xl font-bold mb-4">Загрузка конфигурации</h2>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -128,7 +128,7 @@ const CustomOptionModal: React.FC<CustomOptionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="bg-white p-6 rounded-lg w-1/3">
         <h3 className="text-lg font-bold mb-4">Новая конфигурация</h3>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

@@ -100,7 +100,7 @@ const ConfigurationRow: React.FC<ConfigurationRowProps> = ({
 
       {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-96 rounded-md bg-white p-6">
             <h2 className="mb-4 text-xl font-bold">
               Редактирование конфигурации
@@ -151,7 +151,7 @@ const ConfigurationRow: React.FC<ConfigurationRowProps> = ({
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-96 rounded-md bg-white p-6">
             <h2 className="mb-4 text-xl font-bold">Подтверждение удаления</h2>
             <p className="mb-6">

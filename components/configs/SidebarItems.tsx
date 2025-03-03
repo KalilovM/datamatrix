@@ -45,4 +45,9 @@ export const sidebarItems: Array<{
     href: "/disaggregation",
     icon: <AggregationIcon />,
   },
+  {
+    name: "Шаблоны печати",
+    href: "/print-templates",
+    icon: <AggregationIcon />,
+  },
 ];

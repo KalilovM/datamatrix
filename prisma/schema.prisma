@@ -65,17 +65,18 @@ model Permission {
 }
 
 model Company {
-  id              String         @id @default(uuid())
-  name            String
-  token           String         @unique @default(uuid())
-  subscriptionEnd DateTime
-  isActive        Boolean        @default(true)
-  users           User[]
-  nomenclatures   Nomenclature[]
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  counteragents   Counteragent[] // Renamed from "Counteragent"
-  orders          Order[] // Renamed from "Orders"
+  id               String             @id @default(uuid())
+  name             String
+  token            String             @unique @default(uuid())
+  subscriptionEnd  DateTime
+  isActive         Boolean            @default(true)
+  users            User[]
+  nomenclatures    Nomenclature[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  counteragents    Counteragent[] // Renamed from "Counteragent"
+  orders           Order[] // Renamed from "Orders"
+  printingTemplate PrintingTemplate[]
 }
 
 model Nomenclature {
@@ -193,4 +194,38 @@ model Order {
   generatedCodePacks   GeneratedCodePack[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
+}
+
+enum QrPosition {
+  LEFT
+  RIGHT
+}
+
+enum TemplateFieldType {
+  NAME // "Имя"
+  MODEL_ARTICLE // "Модель"
+  COLOR // "Цвет"
+  SIZE // "Размер"
+}
+
+model PrintingTemplate {
+  id         String                  @id @default(uuid())
+  name       String
+  qrPosition QrPosition
+  fields     PrintingTemplateField[]
+  company    Company?                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId  String?
+  isDefault  Boolean                 @default(false)
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
+}
+
+model PrintingTemplateField {
+  id         String            @id @default(uuid())
+  order      Int // порядок отображения поля
+  fieldType  TemplateFieldType // одно из: NAME, MODEL_ARTICLE, COLOR, SIZE
+  template   PrintingTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  templateId String
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
 }
