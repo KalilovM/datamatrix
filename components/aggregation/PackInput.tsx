@@ -37,7 +37,6 @@ export default function PackInput({
       startTimeRef.current = Date.now();
     }
 
-    // Otherwise, update the input state.
     setInputValue(newValue);
 
     // Once the input reaches the minimum scanned length, validate the speed.
@@ -54,11 +53,6 @@ export default function PackInput({
         setIsScanned(false);
       }
     } else {
-      startTimeRef.current = Date.now();
-      if (Date.now() - lastToastTimeRef.current > 2000) {
-        toast.error("Используйте сканнер для ввода кода");
-        lastToastTimeRef.current = Date.now();
-      }
       setInputValue("");
       setIsScanned(false);
     }
