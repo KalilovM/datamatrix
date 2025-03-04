@@ -98,6 +98,7 @@ model Nomenclature {
 model Code {
   id                  String             @id @default(uuid())
   value               String             @unique
+  formattedValue      String
   codePack            CodePack           @relation(fields: [codePackId], references: [id], onDelete: Cascade)
   codePackId          String
   used                Boolean            @default(false)
