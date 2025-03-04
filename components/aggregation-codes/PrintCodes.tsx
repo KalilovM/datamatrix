@@ -97,8 +97,8 @@ const PrintCodes: React.FC<PrintCodesProps> = ({
             key={index}
             className="print-page"
             style={{
-              width: "305px",
-              height: "228px",
+              width: "58mm",
+              height: "40mm",
               display: "flex",
               flexDirection: "row",
               boxSizing: "border-box",
