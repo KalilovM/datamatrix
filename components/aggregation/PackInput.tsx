@@ -37,22 +37,6 @@ export default function PackInput({
       startTimeRef.current = Date.now();
     }
 
-    const elapsed = startTimeRef.current
-      ? Date.now() - startTimeRef.current
-      : 0;
-
-    // If the user is typing slowly (elapsed > 80ms) and the value is not yet 80 chars, ignore further input.
-    if (elapsed > 500 && newValue.length < 60) {
-      if (Date.now() - lastToastTimeRef.current > 2000) {
-        toast.error("Используйте сканнер для ввода кода");
-        lastToastTimeRef.current = Date.now();
-      }
-      startTimeRef.current = Date.now();
-      setInputValue("");
-      setIsScanned(false);
-      return;
-    }
-
     // Otherwise, update the input state.
     setInputValue(newValue);
 
