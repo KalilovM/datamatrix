@@ -21,8 +21,6 @@ export default function PackInput({
   // Local state for the input value and a flag to mark scanned input.
   const [inputValue, setInputValue] = useState(value);
   const [isScanned, setIsScanned] = useState(false);
-  const lastToastTimeRef = useRef<number>(0);
-  const startTimeRef = useRef<number | null>(null);
 
   // Update local state if the value prop changes.
   useEffect(() => {
@@ -32,26 +30,11 @@ export default function PackInput({
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
 
-    // On the very first character, record the start time.
-    if (!startTimeRef.current) {
-      startTimeRef.current = Date.now();
-    }
-
     setInputValue(newValue);
 
-    // Once the input reaches the minimum scanned length, validate the speed.
-    console.log(newValue.length >= 80, startTimeRef.current);
-    if (newValue.length >= 80 && startTimeRef.current) {
-      // Scanned input detected.
-      console.log("Scanned input detected");
-
-      const isValid = await onValidScan(index, newValue);
-      if (isValid) {
-        setIsScanned(true);
-      } else {
-        setInputValue("");
-        setIsScanned(false);
-      }
+    const isValid = await onValidScan(index, newValue);
+    if (isValid) {
+      setIsScanned(true);
     } else {
       setInputValue("");
       setIsScanned(false);
@@ -61,7 +44,6 @@ export default function PackInput({
   const handleClearClick = () => {
     setInputValue("");
     setIsScanned(false);
-    startTimeRef.current = null;
     onClear();
   };
 
