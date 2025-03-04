@@ -41,7 +41,7 @@
 
 @media print {
     @page {
-        /* size: 54mm 40mm; */
+        size: auto;
         margin: 0;
     }
     /* Hide everything on the page */
@@ -56,11 +56,9 @@
         z-index: 999;
         visibility: visible;
         position: relative;
-        width: 100%;
     }
     /* Make sure each print-page takes up a separate page */
     .print-page {
-        display: block;
         page-break-after: always;
         page-break-inside: avoid;
     }
