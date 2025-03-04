@@ -16,7 +16,6 @@ export default function AggregationCodesRow({
 }) {
   const [codeToPrint, setCodeToPrint] = useState<IAggregatedCode | null>(null);
   const handlePrint = (code: IAggregatedCode) => {
-    console.log(defaultTemplate);
     if (
       !defaultTemplate ||
       (Array.isArray(defaultTemplate) && defaultTemplate.length === 0)
@@ -24,12 +23,13 @@ export default function AggregationCodesRow({
       toast.error("Не выбрат шаблон печати по умолчанию");
       return;
     }
+    console.log("code", code);
     setCodeToPrint(code);
   };
 
   return (
     <div className="relative overflow-x-auto sm:rounded-lg">
-      <table className="w-full text-sm text-left text-gray-500">
+      <table className="w-full text-sm text-left text-gray-500 print:hidden">
         {/* Table Header */}
         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
@@ -87,7 +87,7 @@ export default function AggregationCodesRow({
       </table>
       {codeToPrint && (
         <PrintCodes
-          aggregatedCodes={[codeToPrint]}
+          aggregatedCodes={codeToPrint}
           printingTemplate={defaultTemplate}
           onPrintComplete={() => setCodeToPrint(null)}
         />

@@ -15,9 +15,9 @@ export default async function TableContent({
   defaultTemplate,
 }: ITableContentProps) {
   return (
-    <div className="table-layout">
+    <div className="table-layout print:border-none print:rounded-none">
       {/* Table Header */}
-      <div className="table-header">
+      <div className="table-header print:hidden">
         <p className="table-header-title">Агрегированные коды</p>
         <div className="flex gap-2">
           <button className="bg-neutral-100 text-white p-2 rounded-md shadow-sm">

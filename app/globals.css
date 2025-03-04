@@ -43,16 +43,16 @@
     @page {
         size: 58mm 40mm;
         margin: 0;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
     /* Hide everything on the page */
-    * {
-        visibility: hidden;
-    }
     /* Only display the print container */
+    body *::-webkit-scrollbar {
+        display: none;
+    }
     body .print-container * {
         display: block;
-        left: 0;
-        top: 0;
         z-index: 999;
         visibility: visible;
         position: relative;

@@ -9,6 +9,8 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+// TODO: React hook form (must have)
+
 // For codes, we still use file data.
 interface FileData {
   fileName: string;

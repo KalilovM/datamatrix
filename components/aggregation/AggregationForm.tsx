@@ -5,6 +5,8 @@ import AggregationSelectors from "./AggregationSelectors";
 import PackInputsSection from "./PackInputsSection";
 import { NomenclatureOption, Configuration } from "./defenitions";
 
+// TODO: Fetch config after nomenclature selected from backend
+
 interface AggregationFormProps {
   options: NomenclatureOption[] | null;
 }

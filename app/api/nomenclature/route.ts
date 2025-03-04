@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   if (!user?.companyId) {
     return NextResponse.json(
       { error: "Требуется наличие компании" },
-      { status: 401 },
+      { status: 404 },
     );
   }
 

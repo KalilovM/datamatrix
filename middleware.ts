@@ -22,6 +22,7 @@ export default async function middleware(req: NextRequest) {
     response.cookies.delete("session");
     return response;
   }
+  // put matcher logic to get session from db and check if session exists
 
   // Redirect logic:
   // If the route is protected and there is no valid session, redirect to login.

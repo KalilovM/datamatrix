@@ -4,6 +4,8 @@ import PaginationControls from "./PaginationControls";
 import { toast } from "react-toastify";
 import { Configuration } from "./defenitions";
 
+//TODO: use state manager to reduce the code complexity
+
 interface PageData {
   packValues: string[];
   uniqueCode: string | null;
