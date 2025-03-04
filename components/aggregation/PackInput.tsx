@@ -42,7 +42,7 @@ export default function PackInput({
       : 0;
 
     // If the user is typing slowly (elapsed > 80ms) and the value is not yet 80 chars, ignore further input.
-    if (elapsed > 80 && newValue.length < 80) {
+    if (elapsed > 500 && newValue.length < 60) {
       if (Date.now() - lastToastTimeRef.current > 2000) {
         toast.error("Используйте сканнер для ввода кода");
         lastToastTimeRef.current = Date.now();
