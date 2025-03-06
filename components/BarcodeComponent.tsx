@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import bwipjs from "bwip-js";
+import { parseBarcode } from "gs1-barcode-parser-mod";
 
 interface BarcodeComponentProps {
   text: string;
@@ -15,6 +16,7 @@ const BarcodeComponent: React.FC<BarcodeComponentProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
+  console.log(text);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -31,14 +33,16 @@ const BarcodeComponent: React.FC<BarcodeComponentProps> = ({
       try {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext("2d");
+        const formattedText = text.replace("�", "");
 
         if (ctx) {
           // Generate GS1 DataMatrix using bwip-js
+          console.log(parseBarcode(text.replace("�", "")));
           bwipjs.toCanvas(canvas, {
             bcid: "datamatrix", // DataMatrix barcode type
-            text: text, // The text to encode
+            text: formattedText, // The text to encode
             scale: 1, // Scale the barcode
-            includetext: false, // Do not include text below barcode
+            includetext: true, // Do not include text below barcode
             parse: true, // Enable GS1 parsing for FNC1 separators
           });
         }
