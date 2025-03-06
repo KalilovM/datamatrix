@@ -16,7 +16,7 @@ const PrintCodes: React.FC<PrintCodesProps> = ({
   aggregatedCodes,
   printingTemplate,
   onPrintComplete,
-  type = "qr",
+  type = "datamatrix",
 }) => {
   useEffect(() => {
     window.print();
