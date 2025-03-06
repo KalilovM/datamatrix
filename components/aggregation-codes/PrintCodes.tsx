@@ -16,7 +16,7 @@ const PrintCodes: React.FC<PrintCodesProps> = ({
   aggregatedCodes,
   printingTemplate,
   onPrintComplete,
-  type = "datamatrix",
+  type = "qr",
 }) => {
   useEffect(() => {
     window.print();
@@ -47,7 +47,7 @@ const PrintCodes: React.FC<PrintCodesProps> = ({
     return null;
 
   return (
-    <div className="print-container printable print:block">
+    <div className="print-container printable hidden print:block">
       {aggregatedCodes &&
         aggregatedCodes.codes.map((code, index) => {
           // Sort template fields based on the 'order' property
