@@ -90,6 +90,7 @@ export default function AggregationCodesRow({
           aggregatedCodes={codeToPrint}
           printingTemplate={defaultTemplate}
           onPrintComplete={() => setCodeToPrint(null)}
+          type="datamatrix"
         />
       )}
     </div>

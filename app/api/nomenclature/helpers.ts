@@ -55,7 +55,7 @@ export async function processCodeFile(fileObj: {
   const codeRecords = codes.map((codeValue: string) => {
     return {
       value: codeValue,
-      formattedValue: codeValue,
+      formattedValue: codeValue.replace(/[^a-zA-Z0-9+=_]/g, ""),
     };
   });
 

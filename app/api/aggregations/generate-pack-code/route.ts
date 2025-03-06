@@ -3,9 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   const { packCodes, nomenclatureId, configurationId } = await req.json();
+  const formattedValue = packCodes.map((code) =>
+    code.replace(/[^a-zA-Z0-9+=_]/g, ""),
+  );
   const codes = await prisma.code.findMany({
     where: {
-      formattedValue: { in: packCodes.map((code) => code) },
+      formattedValue: { in: formattedValue },
       used: false,
     },
   });
