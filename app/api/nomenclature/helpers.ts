@@ -50,14 +50,15 @@ export async function processCodeFile(fileObj: {
   content: string;
 }): Promise<any> {
   const codes = parseAndValidateCsvCodes(fileObj.content, fileObj.fileName);
-  await checkExistingCodes(codes, fileObj.fileName);
-  const removeSpecialCharacters = (str: string) => {
-    return str.replace(/[^a-zA-Z0-9]/g, "");
-  };
-  const codeRecords = codes.map((codeValue: string) => ({
-    value: codeValue,
-    formattedValue: removeSpecialCharacters(codeValue),
-  }));
+
+  // Decode codes using parseBarcode function
+  const codeRecords = codes.map((codeValue: string) => {
+    return {
+      value: codeValue,
+      formattedValue: codeValue,
+    };
+  });
+
   return {
     name: fileObj.fileName,
     codes: { create: codeRecords },

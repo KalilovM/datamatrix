@@ -3,11 +3,11 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   const { packCodes, nomenclatureId, configurationId } = await req.json();
-  const formattedCodes = packCodes.map((code: string) =>
-    code.replace(/[^a-zA-Z0-9]/g, ""),
-  );
   const codes = await prisma.code.findMany({
-    where: { formattedValue: { in: formattedCodes }, used: false },
+    where: {
+      formattedValue: { in: packCodes.map((code) => code) },
+      used: false,
+    },
   });
   if (codes.length !== packCodes.length) {
     return new Response(JSON.stringify({ error: "Коды уже использованы" }), {

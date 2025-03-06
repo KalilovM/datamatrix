@@ -82,7 +82,7 @@ export async function PUT(
   }
 
   // Parse codesToDelete: a JSON string with an array of IDs.
-  let codesToDeleteArray: string[] = [];
+  let codesToDeleteArray: { fileName: string; content: string }[] = [];
   const codesToDeleteRaw = formData.get("codesToDelete") as string;
   if (codesToDeleteRaw) {
     try {
@@ -122,7 +122,9 @@ export async function PUT(
       if (codesToDeleteArray.length > 0) {
         await tx.codePack.deleteMany({
           where: {
-            id: { in: codesToDeleteArray },
+            name: {
+              in: codesToDeleteArray.map((code) => code.fileName),
+            },
             nomenclatureId,
           },
         });

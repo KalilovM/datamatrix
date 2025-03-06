@@ -1,6 +1,6 @@
 "use client";
 
-import QRCodeComponent from "../QRCodeComponent";
+import BarcodeComponent from "../BarcodeComponent";
 import { PrintingTemplate } from "@prisma/client";
 import IAggregatedCode from "@/app/aggregation-codes/defenitions";
 import { useEffect } from "react";
@@ -9,12 +9,14 @@ interface PrintCodesProps {
   aggregatedCodes: IAggregatedCode;
   printingTemplate: PrintingTemplate | null | never[];
   onPrintComplete: () => void;
+  type: "qr" | "datamatrix";
 }
 
 const PrintCodes: React.FC<PrintCodesProps> = ({
   aggregatedCodes,
   printingTemplate,
   onPrintComplete,
+  type = "qr",
 }) => {
   useEffect(() => {
     window.print();
@@ -45,7 +47,7 @@ const PrintCodes: React.FC<PrintCodesProps> = ({
     return null;
 
   return (
-    <div className="print-container printable hidden print:block">
+    <div className="print-container printable print:block">
       {aggregatedCodes &&
         aggregatedCodes.codes.map((code, index) => {
           // Sort template fields based on the 'order' property
@@ -64,7 +66,7 @@ const PrintCodes: React.FC<PrintCodesProps> = ({
                 justifyContent: "center",
               }}
             >
-              <QRCodeComponent text={code} size={100} />
+              <BarcodeComponent text={code} size={100} type={type} />
             </div>
           );
 
