@@ -1,41 +1,53 @@
-import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
+import Cookies from "js-cookie";
 
-export default async function getNomenclatureOptions() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  const user = await prisma.session.findUnique({
-    where: { token },
-    include: {
-      user: {
-        include: {
-          company: {
-            select: {
-              id: true,
-            },
-          },
-        },
-      },
+export const getNomenclatureOptions = async () => {
+  const sessionCookie = Cookies.get("session");
+  console.log(sessionCookie);
+  const res = await fetch(`${process.env.NEXT_API_URL}/api/nomenclature`, {
+    cache: "no-store",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: `session=${sessionCookie}`,
     },
   });
-  if (!user) return null;
-  if (!user.user.company) return null;
 
-  return await prisma.nomenclature.findMany({
-    where: {
-      companyId: user.user.company.id,
+  if (!res.ok) {
+    console.log(await res.json());
+    throw new Error("Ошибка загрузки номенклатуры");
+  }
+
+  return res.json();
+};
+
+export const generatePackCode = async (data: {
+  packCodes: string[];
+  configurationId: string;
+  nomenclatureId: string;
+}) => {
+  const res = await fetch(
+    `${process.env.NEXT_API_URL}/api/aggregations/generate-pack-code`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     },
-    select: {
-      id: true,
-      name: true,
-      configurations: {
-        select: {
-          id: true,
-          nomenclatureId: true,
-          pieceInPack: true,
-          packInPallet: true,
-        },
-      },
+  );
+
+  if (!res.ok) throw new Error("Ошибка генерации кода");
+
+  return res.json();
+};
+
+export const validateCode = async (code: string) => {
+  const res = await fetch(
+    `${process.env.NEXT_API_URL}/api/codes/validate-code`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
     },
-  });
-}
+  );
+
+  return res.json();
+};

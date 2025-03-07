@@ -5,6 +5,7 @@ import { BinIcon, EditIcon } from "../Icons";
 import { toast } from "react-toastify";
 
 export interface OptionValue {
+  id: string;
   peaceInPack: number;
   packInPallet: number;
 }

@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import AggregationSelectors from "./AggregationSelectors";
+import AggregationSelectors from "../../app/aggregation/components/AggregationSelectors";
 import PackInputsSection from "./PackInputsSection";
 import { NomenclatureOption, Configuration } from "./defenitions";
-
-// TODO: Fetch config after nomenclature selected from backend
 
 interface AggregationFormProps {
   options: NomenclatureOption[] | null;

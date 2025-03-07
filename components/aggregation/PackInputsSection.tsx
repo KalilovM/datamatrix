@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import PackInput from "./PackInput";
-import PaginationControls from "./PaginationControls";
+import PackInput from "../../app/aggregation/components/PackInput";
+import PaginationControls from "../../app/aggregation/components/PaginationControls";
 import { toast } from "react-toastify";
 import { Configuration } from "./defenitions";
 

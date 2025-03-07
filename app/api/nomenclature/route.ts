@@ -3,6 +3,42 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { processCodeFile } from "./helpers";
 
+export async function GET(request: Request) {
+  try {
+    const user = await getCurrentUser();
+    if (!user?.companyId) {
+      return NextResponse.json(
+        { error: "Требуется наличие компании", user: user },
+        { status: 404 },
+      );
+    }
+
+    const nomenclatureOptions = await prisma.nomenclature.findMany({
+      where: { companyId: user.companyId },
+      select: {
+        id: true,
+        name: true,
+        configurations: {
+          select: {
+            id: true,
+            nomenclatureId: true,
+            pieceInPack: true,
+            packInPallet: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(nomenclatureOptions);
+  } catch (error) {
+    console.error("Ошибка загрузки номенклатуры:", error);
+    return NextResponse.json(
+      { error: "Ошибка загрузки данных" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function POST(request: Request) {
   const formData = await request.formData();
   const user = await getCurrentUser();

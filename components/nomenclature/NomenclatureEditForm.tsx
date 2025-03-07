@@ -33,14 +33,16 @@ interface NomenclatureData {
 const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
   initialData,
 }) => {
+  console.log(initialData);
   const [name, setName] = useState(initialData.name);
   const [modelArticle, setModelArticle] = useState(initialData.modelArticle);
   const [color, setColor] = useState(initialData.color);
   const [size, setSize] = useState(initialData.size);
 
-  const [configurations, setConfigurations] = useState<OptionType[]>(
-    initialData.configurations,
-  );
+  const [existingConfigurations, setExistingConfigurations] = useState<
+    OptionType[]
+  >(initialData.configurations);
+  const [configurations, setConfigurations] = useState<OptionType[]>([]);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
 
   const [codes, setCodes] = useState<FileData[]>([]);
@@ -59,7 +61,7 @@ const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
   };
 
   const handleDeleteConfiguration = (optionToDelete: OptionType) => {
-    setConfigurations((prev) =>
+    setExistingConfigurations((prev) =>
       prev.filter(
         (option) =>
           !(
@@ -242,10 +244,10 @@ const NomenclatureEditForm: React.FC<{ initialData: NomenclatureData }> = ({
               </button>
             </div>
             <div className="table-rows-layout">
-              {configurations.length === 0 ? (
+              {existingConfigurations.length === 0 ? (
                 <p className="px-8 py-4">Нет конфигураций</p>
               ) : (
-                configurations.map((option) => (
+                existingConfigurations.map((option) => (
                   <ConfigurationRow
                     key={`${option.value.peaceInPack}-${option.value.packInPallet}`}
                     option={option}
