@@ -1,12 +1,12 @@
-import MainLayout from "@/components/MainLayout";
-import UserCreateForm from "@/components/user/create/UserCreateForm";
-import { getCompanies } from "./actions";
+import Layout from "@/shared/ui/Layout";
+import { fetchCompanies } from "./actions";
+import UserCreateForm from "./form";
 
 export default async function Page() {
-  const companies = await getCompanies();
-  return (
-    <MainLayout>
-      <UserCreateForm companies={companies} />
-    </MainLayout>
-  );
+	const companies = await fetchCompanies();
+	return (
+		<Layout>
+			<UserCreateForm companies={companies} />
+		</Layout>
+	);
 }

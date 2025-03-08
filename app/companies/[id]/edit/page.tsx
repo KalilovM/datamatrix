@@ -1,27 +1,19 @@
-import CompanyEditForm from "@/components/company/edit/CompanyEditForm";
-import MainLayout from "@/components/MainLayout";
-import { getUsers, getCompany } from "../edit/actions";
+import Layout from "@/shared/ui/Layout";
+import { fetchCompanyById, fetchUsers } from "./actions";
+import CompanyEditForm from "./form";
 
 export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const users = await getUsers();
-  const company = await getCompany((await params).id);
+	params,
+}: { params: Promise<{ id: string }> }) {
+	const { id } = await params;
+	const [users, company] = await Promise.all([
+		fetchUsers(),
+		fetchCompanyById(id),
+	]);
 
-  if (!company) {
-    // Handle case where company is not found.
-    return (
-      <MainLayout>
-        <p>Компания не найдена.</p>
-      </MainLayout>
-    );
-  }
-
-  return (
-    <MainLayout>
-      <CompanyEditForm users={users} company={company} />
-    </MainLayout>
-  );
+	return (
+		<Layout>
+			<CompanyEditForm users={users} company={company} />
+		</Layout>
+	);
 }

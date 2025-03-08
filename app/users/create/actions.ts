@@ -1,54 +1,30 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import { FormState, NewUserSchema } from "./defenitions";
-import { Role } from "@prisma/client";
+import { prisma } from "@/shared/lib/prisma";
+import { NewUserSchema } from "./schema";
+import type { FormData } from "./types";
 
-export async function getCompanies() {
-  return await prisma.company.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-  });
+export async function fetchCompanies() {
+	return await prisma.company.findMany({
+		select: { id: true, name: true },
+	});
 }
 
-export async function createUser(state: FormState, formData: FormData) {
-  const data = {
-    email: formData.get("email") as string,
-    username: formData.get("username") as string,
-    password: formData.get("password") as string,
-    role: formData.get("role") as string,
-    companyId: formData.get("companyId") as string,
-  };
+export async function createUser(data: FormData) {
+	const parsedData = NewUserSchema.safeParse(data);
+	if (!parsedData.success) {
+		throw new Error("Неверные данные");
+	}
 
-  const result = NewUserSchema.safeParse(data);
-
-  if (!result.success) {
-    const errors = result.error.errors.reduce(
-      (acc: Record<string, string>, curr) => {
-        if (curr.path.length > 0) {
-          const field = curr.path[0];
-          acc[field] = curr.message;
-        }
-        return acc;
-      },
-      {},
-    );
-
-    return { errors };
-  }
-
-  await prisma.user.create({
-    data: {
-      email: data.email,
-      username: data.username,
-      password: data.password,
-      role: data.role as Role,
-      companyId: data.companyId,
-    },
-  });
-
-  return redirect("/companies");
+	await prisma.user.create({
+		data: {
+			email: parsedData.data.email,
+			username: parsedData.data.username,
+			password: parsedData.data.password,
+			role: parsedData.data.role,
+			company: parsedData.data.companyId
+				? { connect: { id: parsedData.data.companyId } }
+				: undefined,
+		},
+	});
 }

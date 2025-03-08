@@ -1,10 +1,10 @@
-import MainLayout from "@/components/MainLayout";
-import NomenclatureForm from "@/components/nomenclature/NomenclatureForm";
+import Layout from "@/shared/ui/Layout";
+import NomenclatureForm from "../ui/create/NomenclatureForm";
 
-export default function Page() {
-  return (
-    <MainLayout>
-      <NomenclatureForm />
-    </MainLayout>
-  );
+export default async function Page() {
+	return (
+		<Layout>
+			<NomenclatureForm />
+		</Layout>
+	);
 }

@@ -1,46 +1,22 @@
-import MainLayout from "@/components/MainLayout";
-import NomenclatureEditForm from "@/components/nomenclature/NomenclatureEditForm";
-import { getNomenclatureById } from "./action";
+import Layout from "@/shared/ui/Layout";
+import { fetchNomenclatureById } from "../../model/actions";
+import NomenclatureEditForm from "../../ui/edit/NomenclatureEditForm";
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const nomenclatureId = (await params).id;
-  const nomenclature = await getNomenclatureById(nomenclatureId);
+interface Props {
+	params: Promise<{ id: string }>;
+}
 
-  if (!nomenclature) {
-    return (
-      <MainLayout>
-        <p>Номенклатура не найдена</p>
-      </MainLayout>
-    );
-  }
+export default async function Page(props: Props) {
+	const params = await props.params;
+	const nomenclature = await fetchNomenclatureById(params.id);
+	console.log(nomenclature);
+	if (!nomenclature) {
+		return <Layout>Номенклатура не найдена</Layout>;
+	}
 
-  const initialData = {
-    id: nomenclature.id,
-    name: nomenclature.name || "",
-    modelArticle: nomenclature.modelArticle || "",
-    color: nomenclature.color || "",
-    size: nomenclature.size || "",
-    configurations: nomenclature.configurations.map((cfg) => ({
-      label: `1-${cfg.pieceInPack}-${cfg.packInPallet}`,
-      value: {
-        peaceInPack: cfg.pieceInPack,
-        packInPallet: cfg.packInPallet,
-        id: cfg.id,
-      },
-    })),
-    codes: nomenclature.codePacks.map((pack) => ({
-      id: pack.id,
-      name: pack.name,
-    })),
-  };
-
-  return (
-    <MainLayout>
-      <NomenclatureEditForm initialData={initialData} />
-    </MainLayout>
-  );
+	return (
+		<Layout>
+			<NomenclatureEditForm nomenclature={nomenclature} />
+		</Layout>
+	);
 }

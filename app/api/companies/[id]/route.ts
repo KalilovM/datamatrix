@@ -1,17 +1,18 @@
-import { prisma } from "@/lib/prisma";
-import { NextRequest } from "next/server";
+import { prisma } from "@/shared/lib/prisma";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+	req: NextRequest,
+	{ params }: { params: Promise<{ id: string }> },
 ) {
-  const companyId = (await params).id;
-  await prisma.company.delete({
-    where: {
-      id: companyId,
-    },
-  });
-  return new Response("Success!", {
-    status: 200,
-  });
+	const { id } = await params;
+	await prisma.company.delete({
+		where: { id },
+	});
+	return NextResponse.json(
+		{ message: "success" },
+		{
+			status: 200,
+		},
+	);
 }

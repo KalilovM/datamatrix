@@ -13,7 +13,7 @@ model User {
   email       String       @unique
   username    String       @unique
   password    String
-  role        Role
+  role        Role?
   company     Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
   companyId   String?
   createdAt   DateTime     @default(now())
@@ -71,13 +71,13 @@ model Company {
 model Nomenclature {
   id                   String                @id @default(uuid())
   name                 String
-  modelArticle         String? // модель/артикул
-  color                String? // Цвет
-  size                 String? // размер
+  modelArticle         String?
+  color                String?
+  size                 String?
   configurations       Configuration[]
   codePacks            CodePack[]
-  company              Company?              @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  companyId            String?
+  company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId            String
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   generatedCodePacks   GeneratedCodePack[]
@@ -99,6 +99,7 @@ model Code {
 model CodePack {
   id             String       @id @default(uuid())
   name           String       @unique
+  content        String
   nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
   nomenclatureId String
   codes          Code[]
@@ -123,12 +124,12 @@ model GeneratedCodePack {
   id                    String               @id @default(uuid())
   value                 String               @unique
   codes                 Code[]
-  nomenclature          Nomenclature         @relation(fields: [nomenclatureId], references: [id])
+  nomenclature          Nomenclature         @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
   nomenclatureId        String
-  configuration         Configuration        @relation(fields: [configurationId], references: [id])
+  configuration         Configuration        @relation(fields: [configurationId], references: [id], onDelete: Cascade)
   configurationId       String
   createdAt             DateTime             @default(now())
-  generatedCodePallet   GeneratedCodePallet? @relation(fields: [generatedCodePalletId], references: [id], onDelete: SetNull)
+  generatedCodePallet   GeneratedCodePallet? @relation(fields: [generatedCodePalletId], references: [id], onDelete: Cascade)
   generatedCodePalletId String?
   order                 Order?               @relation(fields: [orderId], references: [id], onDelete: SetNull)
   orderId               String?

@@ -1,17 +1,17 @@
-import { prisma } from "@/lib/prisma";
-import { NextRequest } from "next/server";
+import { prisma } from "@/shared/lib/prisma";
+import type { NextRequest } from "next/server";
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+	req: NextRequest,
+	{ params }: { params: Promise<{ id: string }> },
 ) {
-  const codePackId = (await params).id;
-  await prisma.codePack.delete({
-    where: {
-      id: codePackId,
-    },
-  });
-  return new Response("Success!", {
-    status: 200,
-  });
+	const codePackId = (await params).id;
+	await prisma.codePack.delete({
+		where: {
+			id: codePackId,
+		},
+	});
+	return new Response("Success!", {
+		status: 200,
+	});
 }

@@ -1,8 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+export { default } from "next-auth/middleware"
 
-const protectedRoutes = ["/", "/companies", "/nomenclature"];
-const publicRoutes = ["/login"];
-
-export default async function middleware(req: NextRequest) {
-  return NextResponse.next();
-}
+export const config = {
+  matcher: ["/((?!api/auth|auth|_next/static|_next/image|favicon.ico).*)"],
+};

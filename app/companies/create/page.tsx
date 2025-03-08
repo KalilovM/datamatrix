@@ -1,14 +1,12 @@
-import CompanyCreateForm from "@/components/company/create/CompanyCreateForm";
-import MainLayout from "@/components/MainLayout";
-import { getUsers } from "./actions";
-import { v4 as uuid } from "uuid";
+import Layout from "@/shared/ui/Layout";
+import { fetchUsers } from "./actions";
+import CompanyCreateForm from "./form";
 
 export default async function Page() {
-  const users = await getUsers();
-  const companyToken = uuid();
-  return (
-    <MainLayout>
-      <CompanyCreateForm users={users} companyToken={companyToken} />
-    </MainLayout>
-  );
+	const users = await fetchUsers();
+	return (
+		<Layout>
+			<CompanyCreateForm users={users} />
+		</Layout>
+	);
 }

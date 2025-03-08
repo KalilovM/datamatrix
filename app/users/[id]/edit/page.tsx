@@ -1,22 +1,18 @@
-import UserEditForm from "@/components/user/UserEditForm";
-import MainLayout from "@/components/MainLayout";
-import { getUser, getCompanies } from "./actions";
+import Layout from "@/shared/ui/Layout";
+import { fetchCompanies, fetchUser } from "./actions";
+import UserEditForm from "./form";
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const companies = await getCompanies();
-  const user = await getUser(params.id);
+interface PageProps {
+	params: { id: string };
+}
 
-  if (!user) {
-    return (
-      <MainLayout>
-        <p>Пользователь не найден.</p>
-      </MainLayout>
-    );
-  }
+export default async function Page({ params }: PageProps) {
+	const user = await fetchUser(params.id);
+	const companies = await fetchCompanies();
 
-  return (
-    <MainLayout>
-      <UserEditForm user={user} companies={companies} />
-    </MainLayout>
-  );
+	return (
+		<Layout>
+			<UserEditForm user={user} companies={companies} />
+		</Layout>
+	);
 }
