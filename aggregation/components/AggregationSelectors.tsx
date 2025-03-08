@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState } from "react";
-import { NomenclatureOption } from "./defenitions";
+import { NomenclatureOption } from "../types";
 import dynamic from "next/dynamic";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 

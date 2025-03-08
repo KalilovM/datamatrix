@@ -1,14 +1,12 @@
 "use server";
 
-import MainLayout from "@/components/MainLayout";
-import AggregationForm from "./components/AggregationForm";
-import { getNomenclatureOptions } from "./actions";
+import Layout from "@/shared/ui/Layout";
+import AggregationForm from "./ui/AggregationForm";
 
 export default async function Page() {
-  const options = await getNomenclatureOptions();
-  return (
-    <MainLayout>
-      <AggregationForm options={options} />
-    </MainLayout>
-  );
+	return (
+		<Layout>
+			<AggregationForm />
+		</Layout>
+	);
 }

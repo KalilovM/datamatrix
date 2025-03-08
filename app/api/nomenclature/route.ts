@@ -17,20 +17,22 @@ export async function GET(request: Request) {
 				{ status: 404 },
 			);
 		}
+		if (user.role === "ADMIN") {
+			const nomenclatureOptions = await prisma.nomenclature.findMany({
+				select: {
+					id: true,
+					name: true,
+				},
+			});
+
+			return NextResponse.json(nomenclatureOptions);
+		}
 
 		const nomenclatureOptions = await prisma.nomenclature.findMany({
 			where: { companyId: user.companyId },
 			select: {
 				id: true,
 				name: true,
-				configurations: {
-					select: {
-						id: true,
-						nomenclatureId: true,
-						pieceInPack: true,
-						packInPallet: true,
-					},
-				},
 			},
 		});
 
