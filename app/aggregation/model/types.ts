@@ -10,3 +10,8 @@ export interface NomenclatureOption {
 	name: string;
 	configurations: AggregationConfig[];
 }
+
+export interface PackPage {
+	packValues: string[];
+	uniqueCode: string | null;
+}

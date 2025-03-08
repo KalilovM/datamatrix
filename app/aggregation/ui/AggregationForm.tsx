@@ -2,6 +2,7 @@
 
 import { useNomenclatureOptions } from "../api/aggregationApi";
 import AggregationSelectors from "./AggregationSelectors";
+import PackInputsSection from "./PackInputsSection";
 
 export default function AggregationForm() {
 	const { data: options, isLoading, error } = useNomenclatureOptions();
@@ -13,7 +14,7 @@ export default function AggregationForm() {
 		<div className="flex flex-col w-full h-full gap-4">
 			<AggregationSelectors options={options || []} />
 			<div className="flex flex-row w-full gap-4 h-full">
-				{/* Placeholder for additional sections */}
+				<PackInputsSection />
 			</div>
 		</div>
 	);

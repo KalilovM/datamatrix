@@ -1,46 +1,48 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useEffect } from "react";
+import { useConfigurations } from "../api/configurationApi";
 import type { AggregationConfig, NomenclatureOption } from "../model/types";
 import { useAggregationSelector } from "../store/aggregationStore";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface AggregationSelectorsProps {
-	options?: NomenclatureOption[];
+	options: NomenclatureOption[];
 }
 
 export default function AggregationSelectors({
-	options = [],
+	options,
 }: AggregationSelectorsProps) {
 	const {
-		selectedConfiguration,
 		setSelectedConfiguration,
 		selectedNomenclature,
 		setSelectedNomenclature,
-		resetAggregation,
+		configurations,
+		setConfigurations,
 	} = useAggregationSelector();
 
-	const nomenclatureOptions = useMemo(
-		() =>
-			options.map((nom) => ({
-				label: nom.name || "Без имени",
-				value: nom,
-			})),
-		[options],
+	const { data: fetchedConfigurations } = useConfigurations(
+		selectedNomenclature?.id || null,
 	);
 
-	const configurationOptions = useMemo(
-		() =>
-			selectedNomenclature?.configurations
-				? selectedNomenclature.configurations.map((config) => ({
-						label: `1-${config.pieceInPack}-${config.packInPallet}`,
-						value: config,
-					}))
-				: [],
-		[selectedNomenclature],
-	);
+	// ✅ Store configurations in Zustand when fetched
+	useEffect(() => {
+		if (fetchedConfigurations) {
+			setConfigurations(fetchedConfigurations);
+		}
+	}, [fetchedConfigurations, setConfigurations]);
+
+	const nomenclatureOptions = options.map((nom) => ({
+		label: nom.name || "Без имени",
+		value: nom,
+	}));
+
+	const configurationOptions = configurations.map((config) => ({
+		label: `1-${config.pieceInPack}-${config.packInPallet}`,
+		value: config,
+	}));
 
 	const handleNomenclatureChange = (
 		option: { label: string; value: NomenclatureOption } | null,
@@ -58,50 +60,26 @@ export default function AggregationSelectors({
 		<div className="gap-4 flex flex-col">
 			<div className="flex items-center justify-between">
 				<h1 className="leading-6 text-xl font-bold">Агрегация</h1>
-				<button
-					className="text-red-500 hover:text-red-700"
-					onClick={resetAggregation}
-				>
-					Сбросить
-				</button>
 			</div>
-			<div className="flex flex-col w-full rounded-lg border border-blue-300 bg-white px-8 py-3 gap-4">
-				<div className="flex flex-row w-full gap-4">
-					{/* Номенклатура Select */}
-					<div className="w-1/2 flex flex-col">
-						<label htmlFor="nomenclature">Номенклатура</label>
-						<Select
-							options={nomenclatureOptions}
-							value={
-								selectedNomenclature
-									? {
-											label: selectedNomenclature.name,
-											value: selectedNomenclature,
-										}
-									: null
-							}
-							onChange={handleNomenclatureChange}
-							placeholder="Выберите номенклатуру"
-						/>
-					</div>
-					{/* Конфигурация Select */}
-					<div className="w-1/2 flex flex-col">
-						<label htmlFor="configuration">Конфигурация</label>
-						<Select
-							options={configurationOptions}
-							value={
-								selectedConfiguration
-									? {
-											label: `1-${selectedConfiguration.pieceInPack}-${selectedConfiguration.packInPallet}`,
-											value: selectedConfiguration,
-										}
-									: null
-							}
-							onChange={handleConfigurationChange}
-							placeholder="Выберите конфигурацию"
-							isDisabled={!selectedNomenclature}
-						/>
-					</div>
+			<div className="flex flex-row w-full rounded-lg border border-blue-300 bg-white px-8 py-3 gap-4">
+				<div className="w-1/2 flex flex-col">
+					<label htmlFor="nomenclatures">Номенклатура</label>
+					<Select
+						name="nomenclatures"
+						options={nomenclatureOptions}
+						onChange={handleNomenclatureChange}
+						placeholder="Выберите номенклатуру"
+					/>
+				</div>
+				<div className="w-1/2 flex flex-col">
+					<label htmlFor="configurations">Конфигурация</label>
+					<Select
+						name="configurations"
+						options={configurationOptions}
+						onChange={handleConfigurationChange}
+						placeholder="Выберите конфигурацию"
+						isDisabled={!selectedNomenclature}
+					/>
 				</div>
 			</div>
 		</div>

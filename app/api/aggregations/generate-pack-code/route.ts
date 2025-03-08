@@ -28,6 +28,7 @@ export async function POST(req: Request) {
 			},
 		},
 	});
+	console.log("codePack", codepack);
 	await prisma.code.updateMany({
 		where: { value: { in: packCodes } },
 		data: { used: true },
