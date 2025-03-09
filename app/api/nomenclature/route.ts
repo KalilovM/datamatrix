@@ -2,7 +2,6 @@ import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { processCodeFile } from "./helpers";
 
 export async function GET(request: Request) {
 	try {
@@ -22,6 +21,9 @@ export async function GET(request: Request) {
 				select: {
 					id: true,
 					name: true,
+					modelArticle: true,
+					size: true,
+					color: true,
 				},
 			});
 
@@ -33,6 +35,9 @@ export async function GET(request: Request) {
 			select: {
 				id: true,
 				name: true,
+				modelArticle: true,
+				size: true,
+				color: true,
 			},
 		});
 

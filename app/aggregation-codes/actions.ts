@@ -1,23 +1,16 @@
+import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
 
 export async function getAggregatedCodes() {
-	const cookieStore = await cookies();
-	const token = cookieStore.get("session")?.value;
-	const user = await prisma.session.findUnique({
-		where: { token },
-		include: {
-			user: {
-				include: {
-					company: { select: { id: true } },
-				},
-			},
-		},
-	});
+	const session = await getServerSession(authOptions);
+	if (!session?.user) {
+		return [];
+	}
 
-	if (!user || !user.user.company) return [];
+	const { companyId, role } = session.user;
 
-	const companyId = user.user.company.id;
+	if (!companyId) return [];
 
 	// Fetch packs
 	const packs = await prisma.generatedCodePack.findMany({
@@ -79,22 +72,14 @@ export async function getAggregatedCodes() {
 }
 
 export async function getDefaultPrintTemplate() {
-	const cookieStore = await cookies();
-	const token = cookieStore.get("session")?.value;
-	const user = await prisma.session.findUnique({
-		where: { token },
-		include: {
-			user: {
-				include: {
-					company: { select: { id: true } },
-				},
-			},
-		},
-	});
+	const session = await getServerSession(authOptions);
+	if (!session?.user) {
+		return [];
+	}
 
-	if (!user || !user.user.company) return [];
+	const { companyId } = session.user;
 
-	const companyId = user.user.company.id;
+	if (!companyId) return [];
 
 	return await prisma.printingTemplate.findFirst({
 		where: { companyId, isDefault: true },

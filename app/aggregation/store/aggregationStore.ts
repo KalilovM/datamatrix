@@ -12,6 +12,7 @@ interface AggregationState {
 	selectedNomenclature: NomenclatureOption | null;
 	selectedConfiguration: AggregationConfig | null;
 	configurations: AggregationConfig[];
+	codes: string[];
 	pages: PackPage[];
 	currentPage: number;
 
@@ -19,6 +20,7 @@ interface AggregationState {
 	setSelectedConfiguration: (config: AggregationConfig | null) => void;
 	setConfigurations: (configs: AggregationConfig[]) => void;
 	setPages: (pages: PackPage[]) => void;
+	setCodes: (codes: string[]) => void;
 	setCurrentPage: (page: number) => void;
 	updatePackValue: (index: number, value: string) => void;
 	setUniqueCode: (pageIndex: number, code: string) => void;
@@ -29,6 +31,7 @@ export const useAggregationStore = create<AggregationState>((set) => ({
 	selectedNomenclature: null,
 	selectedConfiguration: null,
 	configurations: [],
+	codes: [],
 	pages: [],
 	currentPage: 0,
 
@@ -38,6 +41,7 @@ export const useAggregationStore = create<AggregationState>((set) => ({
 			selectedConfiguration: null, // Reset config on nomenclature change
 			configurations: [],
 		}),
+	setCodes: (codes) => set({ codes }),
 	setPages: (pages) => set({ pages }),
 	setCurrentPage: (page) => set({ currentPage: page }),
 	updatePackValue: (index, value) =>
@@ -78,6 +82,8 @@ export const useAggregationSelector = () => {
 			setCurrentPage: store.setCurrentPage,
 			updatePackValue: store.updatePackValue,
 			setUniqueCode: store.setUniqueCode,
+			codes: store.codes,
+			setCodes: store.setCodes,
 		}),
 		[
 			store.selectedNomenclature,
@@ -93,6 +99,8 @@ export const useAggregationSelector = () => {
 			store.setCurrentPage,
 			store.updatePackValue,
 			store.setUniqueCode,
+			store.codes,
+			store.setCodes,
 		],
 	);
 };

@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 	try {
 		// Parse the JSON payload
 		const data = await request.json();
-		const { qrPosition, textFields, canvasSize, name, type } = data;
+		const { qrPosition, textFields, qrType, canvasSize, name, type } = data;
 		const { width, height } = canvasSize;
 
 		// Convert canvasSize dimensions from strings (e.g., "58mm") to numbers
@@ -110,6 +110,7 @@ export async function POST(request: Request) {
 				qrPosition: qrPos,
 				width: widthInt,
 				height: heightInt,
+				qrType: qrType.toUpperCase(),
 				company: {
 					connect: { id: companyId },
 				},

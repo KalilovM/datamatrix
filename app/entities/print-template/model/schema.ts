@@ -8,6 +8,7 @@ export const canvasSizeSchema = z.object({
 export const printTemplateSchema = z.object({
 	name: z.string().min(1, "Название шаблона обязательно"),
 	type: z.enum(["aggregation", "nomenclature"]),
+	qrType: z.enum(["qr", "datamatrix"]),
 	qrPosition: z.enum(["left", "right", "center"]),
 	canvasSize: canvasSizeSchema,
 	textFields: z

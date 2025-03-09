@@ -27,7 +27,6 @@ export default function AggregationSelectors({
 		selectedNomenclature?.id || null,
 	);
 
-	// ✅ Store configurations in Zustand when fetched
 	useEffect(() => {
 		if (fetchedConfigurations) {
 			setConfigurations(fetchedConfigurations);
@@ -57,7 +56,7 @@ export default function AggregationSelectors({
 	};
 
 	return (
-		<div className="gap-4 flex flex-col">
+		<div className="gap-4 flex flex-col print:hidden">
 			<div className="flex items-center justify-between">
 				<h1 className="leading-6 text-xl font-bold">Агрегация</h1>
 			</div>

@@ -155,7 +155,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 			);
 
 			// Check for duplicates in both codes and code packs.
-			await checkExistingCodes(codesArray, fileObj.fileName);
+			await checkExistingCodes(prisma, codesArray, fileObj.fileName);
 
 			try {
 				// Process the file (which includes re-parsing the CSV).

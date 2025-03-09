@@ -43,6 +43,7 @@
     @page {
         size: 58mm 40mm;
         margin: 0;
+        paggin: 0;
         scrollbar-width: none;
         -ms-overflow-style: none;
     }

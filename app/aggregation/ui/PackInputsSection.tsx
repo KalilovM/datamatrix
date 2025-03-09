@@ -1,22 +1,30 @@
 "use client";
 
+import PrintCodes from "@/components/aggregation-codes/PrintCodes";
 import { PrintIcon } from "@/shared/ui/icons";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useGeneratePackCode } from "../api/generatePackApi";
-import type { PackPage } from "../model/types";
+import type { PackPage, PrintTemplate } from "../model/types";
 import { useAggregationStore } from "../store/aggregationStore";
 import PackInputsList from "./PackInputsList";
 import PaginationControls from "./PaginationControls";
 
-export default function PackInputsSection() {
+interface Props {
+	printTemplate: PrintTemplate | undefined;
+}
+
+export default function PackInputsSection({ printTemplate }: Props) {
 	const {
+		selectedNomenclature,
 		selectedConfiguration,
 		pages,
 		currentPage,
 		setPages,
 		setCurrentPage,
 		setUniqueCode,
+		codes,
+		setCodes,
 	} = useAggregationStore();
 
 	const mutation = useGeneratePackCode();
@@ -35,10 +43,6 @@ export default function PackInputsSection() {
 			mutationTriggered.current = false;
 		}
 	}, [selectedConfiguration, setPages, setCurrentPage]);
-	useEffect(() => {
-		console.log("Current Page State:", currentPage);
-	}, [currentPage]);
-
 	useEffect(() => {
 		const currentData = pages[currentPage];
 
@@ -60,6 +64,8 @@ export default function PackInputsSection() {
 					onSuccess: (data) => {
 						setUniqueCode(currentPage, data.value);
 						toast.success("Уникальный код создан");
+						window.print();
+						setCodes(currentData.packValues);
 
 						const newPage: PackPage = {
 							packValues: Array(selectedConfiguration?.pieceInPack || 0).fill(
@@ -93,12 +99,12 @@ export default function PackInputsSection() {
 	]);
 
 	return (
-		<div className="flex flex-col gap-4 w-1/2 h-full justify-between bg-white rounded-md border border-blue-300 p-4">
+		<div className="flex flex-col gap-4 w-1/2 h-full justify-between bg-white rounded-md border border-blue-300 p-4 print:border-none print:h-auto">
 			<div className="flex flex-col gap-4">
-				<h2 className="text-xl font-semibold">Пачки</h2>
+				<h2 className="text-xl font-semibold print:hidden">Пачки</h2>
 
 				{lastGeneratedCode && (
-					<div className="bg-green-100 text-green-800 p-3 rounded-md text-left font-semibold flex justify-between items-center">
+					<div className="bg-green-100 text-green-800 p-3 rounded-md text-left font-semibold flex justify-between items-center print:hidden">
 						{/* Left side: Unique Code */}
 						<div>
 							<span>Уникальный код:</span>
@@ -119,6 +125,11 @@ export default function PackInputsSection() {
 				)}
 
 				<PackInputsList />
+				<PrintCodes
+					printTemplate={printTemplate}
+					selectedNomenclature={selectedNomenclature}
+					codes={codes}
+				/>
 			</div>
 			<PaginationControls />
 		</div>

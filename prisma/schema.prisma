@@ -205,6 +205,11 @@ enum PrintingTemplateType {
   AGGREGATION
 }
 
+enum QrType {
+  QR
+  DATAMATRIX
+}
+
 model PrintingTemplate {
   id         String                  @id @default(uuid())
   type       PrintingTemplateType
@@ -212,6 +217,7 @@ model PrintingTemplate {
   width      Int
   height     Int
   qrPosition QrPosition
+  qrType     QrType
   fields     PrintingTemplateField[]
   company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId  String

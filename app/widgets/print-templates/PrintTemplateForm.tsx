@@ -126,6 +126,11 @@ const PrintTemplateForm = () => {
 					<option value="nomenclature">Номенклатура</option>
 				</select>
 
+				<label className="font-bold">Тип QR-кода:</label>
+				<select {...register("qrType")} className="border rounded p-2 w-full">
+					<option value="qr">QR</option>
+					<option value="datamatrix">Data Matrix</option>
+				</select>
 				<label className="font-bold">Позиция QR-кода:</label>
 				<select
 					{...register("qrPosition")}

@@ -6,7 +6,7 @@ export default function PaginationControls() {
 	const { currentPage, pages, setCurrentPage } = useAggregationStore();
 
 	return (
-		<div className="flex justify-center gap-2 p-4">
+		<div className="flex justify-center gap-2 p-4 print:hidden">
 			<button
 				type="button"
 				disabled={currentPage === 0}
