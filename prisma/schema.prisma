@@ -213,8 +213,8 @@ model PrintingTemplate {
   height     Int
   qrPosition QrPosition
   fields     PrintingTemplateField[]
-  company    Company?                @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  companyId  String?
+  company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId  String
   isDefault  Boolean                 @default(false)
   createdAt  DateTime                @default(now())
   updatedAt  DateTime                @updatedAt

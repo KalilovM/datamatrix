@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-export const canvasSizeSchema = z.string().transform((value) => {
-	const [width, height] = value.split(" x ");
-	return { width, height };
+export const canvasSizeSchema = z.object({
+	width: z.string(),
+	height: z.string(),
 });
 
 export const printTemplateSchema = z.object({
@@ -12,13 +12,11 @@ export const printTemplateSchema = z.object({
 	canvasSize: canvasSizeSchema,
 	textFields: z
 		.array(
-			z
-				.object({
-					field: z.string().optional(),
-					bold: z.boolean(),
-					size: z.number().int().min(8).max(32),
-				})
-				.optional(),
+			z.object({
+				field: z.string().optional(),
+				bold: z.boolean(),
+				size: z.number().int().min(8).max(32),
+			}),
 		)
 		.optional(),
 });

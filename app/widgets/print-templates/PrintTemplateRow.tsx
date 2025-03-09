@@ -8,17 +8,22 @@ interface PrintTemplateRowProps {
 	template: PrintTemplate;
 }
 
+const PRINT_TEMPLATE_TYPES = {
+	AGGREGATION: "Агрегация",
+	NOMENCLATURE: "Номенклатура",
+};
+
 const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation({
 		mutationFn: async (id: string) => {
-			const response = await fetch("/printing-templates/default", {
+			const response = await fetch("api/printing-templates/default", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ id }),
+				body: JSON.stringify({ id: id, templateType: template.type }),
 			});
 			if (!response.ok) {
 				throw new Error((await response.json()).error);
@@ -41,13 +46,14 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 
 	return (
 		<tr className="bg-white border-b border-gray-200 hover:bg-gray-50">
-			<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+			<td className="px-8 py-4 font-medium text-gray-900 whitespace-nowrap">
 				{template.name}
 			</td>
-			<td className="px-6 py-4">
+			<td className="px-8 py-4">
 				{new Date(template.createdAt).toLocaleDateString("ru-RU")}
 			</td>
-			<td className="px-6 py-4 text-right">
+			<td className="px-8 py-4">{PRINT_TEMPLATE_TYPES[template.type]}</td>
+			<td className="px-8 py-4 text-right">
 				{template.isDefault ? (
 					<span className="text-green-600 font-bold">По умолчанию</span>
 				) : (

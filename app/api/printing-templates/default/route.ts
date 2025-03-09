@@ -1,11 +1,12 @@
-import { getCurrentUser } from "@/lib/auth";
+import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
 	try {
 		const data = await request.json();
-		const { id } = data;
+		const { id, templateType } = data;
 
 		if (!id) {
 			return NextResponse.json(
@@ -14,13 +15,11 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const user = await getCurrentUser();
-		if (!user?.companyId) {
-			return NextResponse.json(
-				{ error: "Требуется наличие компании" },
-				{ status: 401 },
-			);
+		const session = await getServerSession(authOptions);
+		if (!session?.user) {
+			return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
 		}
+		const user = session.user;
 
 		// Verify the template exists and belongs to the user's company
 		const template = await prisma.printingTemplate.findFirst({
@@ -38,6 +37,7 @@ export async function POST(request: Request) {
 		await prisma.printingTemplate.updateMany({
 			where: {
 				companyId: user.companyId,
+				type: templateType,
 			},
 			data: {
 				isDefault: false,
@@ -46,7 +46,10 @@ export async function POST(request: Request) {
 
 		// Set the selected template as default
 		const updatedTemplate = await prisma.printingTemplate.update({
-			where: { id },
+			where: {
+				id: id,
+				type: templateType,
+			},
 			data: { isDefault: true },
 		});
 

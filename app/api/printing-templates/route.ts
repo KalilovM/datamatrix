@@ -37,7 +37,12 @@ export async function POST(request: Request) {
 	try {
 		// Parse the JSON payload
 		const data = await request.json();
-		const { qrPosition, textFields } = data;
+		const { qrPosition, textFields, canvasSize, name, type } = data;
+		const { width, height } = canvasSize;
+
+		// Convert canvasSize dimensions from strings (e.g., "58mm") to numbers
+		const widthInt = Number.parseInt(width.replace("mm", "").trim(), 10);
+		const heightInt = Number.parseInt(height.replace("mm", "").trim(), 10);
 
 		// Ensure the user is authenticated and has an associated company
 		const session = await getServerSession(authOptions);
@@ -45,7 +50,7 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
 		}
 
-		const { companyId, role } = session.user;
+		const { companyId } = session.user;
 		if (!companyId) {
 			return NextResponse.json(
 				{ error: "Требуется наличие компании" },
@@ -54,7 +59,7 @@ export async function POST(request: Request) {
 		}
 
 		// Validate payload
-		if (!qrPosition || (qrPosition !== "left" && qrPosition !== "right")) {
+		if (!qrPosition || !["left", "right", "center"].includes(qrPosition)) {
 			return NextResponse.json(
 				{ error: "Некорректная позиция QR кода" },
 				{ status: 400 },
@@ -68,8 +73,20 @@ export async function POST(request: Request) {
 		}
 
 		// Map the frontend values to your Prisma enums.
-		// Prisma enums for QR position and template fields are assumed to be uppercase.
-		const qrPos = qrPosition.toUpperCase(); // "left" => "LEFT", "right" => "RIGHT"
+		const qrPos = qrPosition.toUpperCase(); // "left" => "LEFT", "right" => "RIGHT", "center" => "CENTER"
+
+		// Mapping for the printing template type
+		const typeMapping: { [key: string]: "AGGREGATION" | "NOMENCLATURE" } = {
+			aggregation: "AGGREGATION",
+			nomenclature: "NOMENCLATURE",
+		};
+		const templateType = typeMapping[type];
+		if (!templateType) {
+			return NextResponse.json(
+				{ error: "Некорректный тип шаблона" },
+				{ status: 400 },
+			);
+		}
 
 		// Mapping for text fields from frontend keys to Prisma enum values.
 		const fieldTypeMapping: {
@@ -81,18 +98,27 @@ export async function POST(request: Request) {
 			size: "SIZE",
 		};
 
+		// Filter out text fields where the field id is empty.
+		const filteredFields = textFields.filter(
+			(field: any) => field.field && field.field.trim() !== "",
+		);
 		// Create the printing template with nested field creation.
 		const template = await prisma.printingTemplate.create({
 			data: {
-				name: "Новый шаблон", // You could extend this to accept a custom name.
+				name: name || "Новый шаблон",
+				type: templateType,
 				qrPosition: qrPos,
+				width: widthInt,
+				height: heightInt,
 				company: {
 					connect: { id: companyId },
 				},
 				fields: {
-					create: textFields.map((field: string, index: number) => ({
+					create: filteredFields.map((field: any, index: number) => ({
 						order: index + 1,
-						fieldType: fieldTypeMapping[field],
+						fieldType: fieldTypeMapping[field.field],
+						isBold: field.bold,
+						fontSize: field.size,
 					})),
 				},
 			},

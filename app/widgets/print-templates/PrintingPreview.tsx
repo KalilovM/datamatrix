@@ -56,7 +56,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 							fontSize: `${tf.size}px`,
 							fontWeight: tf.bold ? "bold" : "normal",
 						}}
-						className="w-full h-full"
+						className="w-full h-full flex items-center"
 					>
 						{TEXT_FIELD_LABEL[tf.field]}
 					</div>
@@ -69,18 +69,18 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 		return (
 			<div
 				style={containerStyle}
-				className="border p-4 flex flex-col items-center"
+				className="border p-1 flex flex-col items-center bg-white mx-auto gap-2"
 			>
 				{/* QR code centered and taking 50% of the width */}
-				<div className="w-1/2 mb-4">{renderQRCode()}</div>
-				{renderTextFields()}
+				<div className="w-1/2 h-full">{renderQRCode()}</div>
+				<div>{renderTextFields()}</div>
 			</div>
 		);
 	}
 
 	if (qrPosition === "left") {
 		return (
-			<div style={containerStyle} className="border p-4 flex">
+			<div style={containerStyle} className="border p-1 flex bg-white mx-auto">
 				{/* Left side: QR code (50% width) */}
 				<div className="w-1/2">{renderQRCode()}</div>
 				{/* Right side: Text fields */}
@@ -91,7 +91,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 
 	// Default to "right" if not center or left.
 	return (
-		<div style={containerStyle} className="border p-1 flex bg-white">
+		<div style={containerStyle} className="border p-1 flex bg-white mx-auto">
 			{/* Left side: Text fields */}
 			<div className="w-1/2">{renderTextFields()}</div>
 			{/* Right side: QR code (50% width) */}

@@ -25,6 +25,7 @@ const fieldOptions = [
 
 const PrintTemplateForm = () => {
 	const [availableFields, setAvailableFields] = useState(fieldOptions);
+	const router = useRouter();
 
 	const {
 		register,
@@ -41,7 +42,7 @@ const PrintTemplateForm = () => {
 			qrPosition: "right",
 			type: "aggregation",
 			textFields: Array(4).fill({ field: "", bold: false, size: 12 }),
-			canvasSize: "58mm x 40mm",
+			canvasSize: { width: "58mm", height: "40mm" },
 		},
 	});
 
@@ -84,7 +85,25 @@ const PrintTemplateForm = () => {
 
 	const onSubmit = async (data: PrintTemplateFormValues) => {
 		console.log(data);
-		// Submission logic...
+		try {
+			const res = await fetch("/api/printing-templates", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
+			if (res.ok) {
+				toast.success("Шаблон печати успешно создан");
+				router.push("/print-templates");
+			} else {
+				const { error } = await res.json();
+				toast.error(error);
+			}
+		} catch (error) {
+			console.error("Ошибка при создании шаблона печати:", error);
+			toast.error("Ошибка при создании шаблона печати");
+		}
 	};
 
 	return (
@@ -118,13 +137,22 @@ const PrintTemplateForm = () => {
 				</select>
 
 				<label className="font-bold">Размер этикетки:</label>
-				<select
-					{...register("canvasSize")}
-					disabled
-					className="border rounded p-2 w-full"
-				>
-					<option value="58mm x 40mm">58mm x 40mm</option>
-				</select>
+				<Controller
+					control={control}
+					name="canvasSize"
+					render={({ field: { value, onChange } }) => (
+						<select
+							disabled
+							className="border rounded p-2 w-full"
+							value={JSON.stringify(value)}
+							onChange={(e) => onChange(JSON.parse(e.target.value))}
+						>
+							<option value={JSON.stringify({ width: "58mm", height: "40mm" })}>
+								58mm x 40mm
+							</option>
+						</select>
+					)}
+				/>
 			</div>
 
 			<div className="p-4 border rounded-lg bg-white border-blue-600">
@@ -180,12 +208,13 @@ const PrintTemplateForm = () => {
 					</div>
 				))}
 			</div>
-
-			<PrintingPreview
-				textFields={textFields}
-				qrPosition={qrPosition}
-				canvasSize={canvasSize}
-			/>
+			<div className="w-full">
+				<PrintingPreview
+					textFields={textFields}
+					qrPosition={qrPosition}
+					canvasSize={canvasSize}
+				/>
+			</div>
 
 			<button
 				type="submit"
