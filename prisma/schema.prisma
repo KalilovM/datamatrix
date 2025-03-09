@@ -167,7 +167,7 @@ model BankDetails {
 model Counteragent {
   id        String   @id @default(uuid())
   name      String
-  inn       String
+  inn       String?
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId String
   createdAt DateTime @default(now())
@@ -190,6 +190,7 @@ model Order {
 enum QrPosition {
   LEFT
   RIGHT
+  CENTER
 }
 
 enum TemplateFieldType {
@@ -199,9 +200,17 @@ enum TemplateFieldType {
   SIZE // "Размер"
 }
 
+enum PrintingTemplateType {
+  NOMENCLATURE
+  AGGREGATION
+}
+
 model PrintingTemplate {
   id         String                  @id @default(uuid())
+  type       PrintingTemplateType
   name       String
+  width      Int
+  height     Int
   qrPosition QrPosition
   fields     PrintingTemplateField[]
   company    Company?                @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -215,6 +224,8 @@ model PrintingTemplateField {
   id         String            @id @default(uuid())
   order      Int // порядок отображения поля
   fieldType  TemplateFieldType // одно из: NAME, MODEL_ARTICLE, COLOR, SIZE
+  isBold     Boolean           @default(false)
+  fontSize   Int               @default(12)
   template   PrintingTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
   templateId String
   createdAt  DateTime          @default(now())

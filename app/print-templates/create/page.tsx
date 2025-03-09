@@ -1,12 +1,10 @@
-"use server";
+import Layout from "@/shared/ui/Layout";
+import PrintTemplateForm from "@/widgets/print-templates/PrintTemplateForm";
 
-import MainLayout from "@/components/MainLayout";
-import LabelEditor from "@/components/print-templates/LabelTemplateEditor";
+const PrintTemplateCreatePage = () => (
+	<Layout>
+		<PrintTemplateForm />
+	</Layout>
+);
 
-export default async function Page() {
-  return (
-    <MainLayout>
-      <LabelEditor />
-    </MainLayout>
-  );
-}
+export default PrintTemplateCreatePage;

@@ -1,32 +1,18 @@
-"use server";
-import { getCounteragents } from "./actions";
-import MainLayout from "@/components/MainLayout";
-import CounteragentRow from "@/components/counteragents/CounteragentRow";
-import Link from "next/link";
+"use client";
 
-export default async function Page() {
-  const counteragents = await getCounteragents();
-  return (
-    <MainLayout>
-      <div className="table-layout">
-        <div className="table-header">
-          <p className="table-header-title">Контрагенты</p>
-          <Link
-            className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md"
-            href="/counteragents/create"
-          >
-            Создать
-          </Link>
-        </div>
-        <div className="table-rows-layout">
-          {counteragents.map((counteragent) => (
-            <CounteragentRow
-              key={counteragent.id}
-              counteragent={counteragent}
-            />
-          ))}
-        </div>
-      </div>
-    </MainLayout>
-  );
+import { useCounteragents } from "@/features/counteragents/hooks/useCounteragents";
+import Layout from "@/shared/ui/Layout";
+import CounteragentsTable from "@/widgets/counteragents/CounteragentsTable";
+
+export default function CounteragentsPage() {
+	const { data: counteragents, error, isLoading } = useCounteragents();
+
+	if (isLoading) return <p>Загрузка данных...</p>;
+	if (error) return <p>Ошибка: {error.message}</p>;
+
+	return (
+		<Layout>
+			<CounteragentsTable counteragents={counteragents || []} />
+		</Layout>
+	);
 }

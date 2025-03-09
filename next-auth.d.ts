@@ -5,7 +5,7 @@ declare module "next-auth" {
     id: string;
     name: string;
     email: string;
-    companyId?: string | undefined;
+    companyId: string;
     role: "ADMIN" | "COMPANY_ADMIN" | "COMPANY_USER";
   }
 
@@ -15,7 +15,7 @@ declare module "next-auth" {
 
   interface JWT {
     role: "ADMIN" | "COMPANY_ADMIN" | "COMPANY_USER";
-    companyId?: string | undefined;
+    companyId: string;
     email?: string;
   }
 }

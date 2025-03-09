@@ -1,15 +1,12 @@
-"use server";
+import Layout from '@/shared/ui/Layout';
+import TableContent from '@/widgets/print-templates/TableContent';
 
-import MainLayout from "@/components/MainLayout";
-import { getPrintTemplates } from "./actions";
-import TableContent from "@/components/print-templates/TableContent";
-
-export default async function Page() {
-  const printTemplates = await getPrintTemplates();
-
+const PrintTemplatesPage: React.FC = () => {
   return (
-    <MainLayout>
-      <TableContent templates={printTemplates} />
-    </MainLayout>
+    <Layout>
+      <TableContent />
+    </Layout>
   );
-}
+};
+
+export default PrintTemplatesPage;

@@ -11,14 +11,22 @@ const prettyPrint = (object) =>
   console.log(JSON.stringify(object, undefined, 2));
 
 async function seed() {
-  const user = await prisma.user.create({
-    data: {
-      email: "admin@gmail.com",
-      password: "admin",
-      username: "admin",
-      role: "ADMIN",
-    },
-  });
+  const company = await prisma.company.create({
+     data: {
+       name: "ОсОО 'Тестовая компания'",
+       subscriptionEnd: new Date("2025-12-31"),
+     },
+   });
+
+   const user = await prisma.user.create({
+     data: {
+       email: "admin@example.com",
+       password: "admin",
+       username: "admin",
+       role: "ADMIN",
+       companyId: company.id,
+     },
+   });
 
   console.log("========= 🌱 result of seed: =========");
   prettyPrint({ user });

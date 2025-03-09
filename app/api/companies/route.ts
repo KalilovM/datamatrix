@@ -11,7 +11,7 @@ export async function GET() {
 			return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
 		}
 
-		const { role, companyId } = session.user;
+		const { companyId, role } = session.user;
 
 		let companies;
 		if (role === "ADMIN") {
@@ -32,6 +32,13 @@ export async function GET() {
 				},
 			});
 		} else {
+			if (!companyId) {
+				return NextResponse.json(
+					{ error: "Не найдена компания" },
+					{ status: 404 },
+				);
+			}
+
 			// Non-admins can only see their own company
 			companies = await prisma.company.findMany({
 				where: { id: companyId || "" }, // Avoid returning null values
