@@ -1,26 +1,19 @@
+import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
 
 export async function getOrders() {
-	const cookieStore = await cookies();
-	const token = cookieStore.get("session")?.value;
-	const user = await prisma.session.findUnique({
-		where: { token },
-		include: {
-			user: {
-				include: {
-					company: { select: { id: true } },
-				},
-			},
-		},
-	});
-
-	if (!user || !user.user.company) return [];
-
-	const companyId = user.user.company.id;
+	const session = await getServerSession(authOptions);
+	if (!session?.user) {
+		return [];
+	}
+	const user = session.user;
+	if (!user?.companyId) {
+		return [];
+	}
 
 	return await prisma.order.findMany({
-		where: { companyId },
+		where: { companyId: user.companyId },
 		select: {
 			id: true,
 			createdAt: true,

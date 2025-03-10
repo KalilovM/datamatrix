@@ -3,6 +3,7 @@
 import type { Counteragent } from "@/entities/counteragent/types";
 import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { BinIcon, EditIcon } from "@/shared/ui/icons";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,7 +16,7 @@ interface CounteragentRowProps {
 export default function CounteragentRow({
 	counteragent,
 }: CounteragentRowProps) {
-	const router = useRouter();
+	const queryClient = useQueryClient();
 	const [isModalOpen, setModalOpen] = useState(false);
 
 	const handleDelete = async () => {
@@ -24,10 +25,12 @@ export default function CounteragentRow({
 				method: "DELETE",
 			});
 			if (!response.ok) {
-				throw new Error("Failed to delete counteragent");
+				throw new Error("Не удалось удалить контрагента");
 			}
-			toast.success("Counteragent deleted successfully");
-			router.refresh();
+			toast.success("Контрагент успешно удален");
+			queryClient.invalidateQueries({
+				queryKey: ["counteragents"],
+			});
 		} catch (error: any) {
 			toast.error(error.message);
 		} finally {
@@ -41,8 +44,10 @@ export default function CounteragentRow({
 				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
 					{counteragent.name}
 				</td>
-				<td className="px-6 py-4 text-gray-600">{counteragent.inn}</td>
-				<td className="px-6 py-4 text-right">
+				<td className="px-6 py-4 text-gray-600">
+					{counteragent.inn || "Пусто"}
+				</td>
+				<td className="px-6 py-4 text-right flex items-center justify-end">
 					<Link
 						href={`/counteragents/${counteragent.id}/edit`}
 						className="mr-4 bg-blue-500 px-2.5 py-2.5 text-white rounded-md"
