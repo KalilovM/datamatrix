@@ -30,7 +30,7 @@ export default async function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
 				<Providers>{children}</Providers>
-				<ToastContainer className="print:hidden" />
+				<ToastContainer className="print:hidden" position="bottom-right" />
 			</body>
 		</html>
 	);

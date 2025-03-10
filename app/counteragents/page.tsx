@@ -7,8 +7,8 @@ import CounteragentsTable from "@/widgets/counteragents/CounteragentsTable";
 export default function CounteragentsPage() {
 	const { data: counteragents, error, isLoading } = useCounteragents();
 
-	if (isLoading) return <p>Загрузка данных...</p>;
-	if (error) return <p>Ошибка: {error.message}</p>;
+	if (isLoading) return <Layout> Загрузка данных... </Layout>;
+	if (error) return <Layout> Ошибка загрузки данных </Layout>;
 
 	return (
 		<Layout>

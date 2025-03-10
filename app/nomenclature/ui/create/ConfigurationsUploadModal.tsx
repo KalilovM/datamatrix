@@ -28,7 +28,7 @@ export default function ConfigurationsUploadModal({
 	);
 
 	const handleSubmit = () => {
-		if (pieceInPack <= 0 || packInPallet <= 0) {
+		if (pieceInPack < 0 || packInPallet < 0) {
 			toast.error("Значения должны быть положительными числами.");
 			return;
 		}

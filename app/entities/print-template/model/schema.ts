@@ -16,7 +16,7 @@ export const printTemplateSchema = z.object({
 			z.object({
 				field: z.string().optional(),
 				bold: z.boolean(),
-				size: z.number().int().min(8).max(32),
+				size: z.coerce.number().min(8).max(32),
 			}),
 		)
 		.optional(),

@@ -206,6 +206,7 @@ const PrintTemplateForm = () => {
 									type="number"
 									min="8"
 									max="32"
+									onChange={(e) => field.onChange(Number(e.target.value))}
 									className="border rounded p-1 w-16 text-center"
 								/>
 							)}
