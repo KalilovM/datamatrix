@@ -31,7 +31,7 @@ export default function OrderTableRow({ order }: { order: IOrder }) {
 				toast.error(error.message || "Ошибка при удалении заказа");
 			} else {
 				toast.success("Заказ успешно удален");
-				router.refresh(); // refresh the list
+				router.refresh();
 			}
 		} catch (err) {
 			toast.error("Ошибка при удалении заказа");
