@@ -5,10 +5,10 @@ export const ConfigurationSchema = z.object({
 	value: z.object({
 		pieceInPack: z
 			.number()
-			.min(1, "Количество в упаковке должно быть не менее 1"),
+			.min(0, "Количество в упаковке должно быть не менее 0"),
 		packInPallet: z
 			.number()
-			.min(1, "Количество в поддоне должно быть не менее 1"),
+			.min(0, "Количество в поддоне должно быть не менее 0"),
 	}),
 });
 
@@ -36,10 +36,10 @@ export const ConfigurationEditSchema = z.object({
 	value: z.object({
 		pieceInPack: z
 			.number()
-			.min(1, "Количество в упаковке должно быть не менее 1"),
+			.min(0, "Количество в упаковке должно быть не менее 0"),
 		packInPallet: z
 			.number()
-			.min(1, "Количество в поддоне должно быть не менее 1"),
+			.min(0, "Количество в поддоне должно быть не менее 0"),
 	}),
 });
 

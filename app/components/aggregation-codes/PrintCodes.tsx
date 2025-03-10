@@ -34,7 +34,6 @@ const PrintCodes: React.FC<Props> = ({
 				return "";
 		}
 	};
-	console.log("PROPS", printTemplate, selectedNomenclature, codes);
 
 	const fieldLabels = {
 		NAME: "Наименование",
@@ -44,7 +43,7 @@ const PrintCodes: React.FC<Props> = ({
 	};
 
 	return (
-		<div className="print-container printable print:block hidden text:black">
+		<div className="print-container printable print:block text:black">
 			{codes &&
 				codes.map((code, index) => {
 					// Sort template fields based on the 'order' property
@@ -56,7 +55,7 @@ const PrintCodes: React.FC<Props> = ({
 					const qrColumn = (
 						<div
 							style={{
-								width: "40%",
+								width: "50%",
 								display: "flex",
 								flexDirection: "column",
 								alignItems: "center",
@@ -65,30 +64,41 @@ const PrintCodes: React.FC<Props> = ({
 						>
 							<BarcodeComponent
 								text={code}
-								size={100}
+								size={80}
 								type={printTemplate.qrType}
 							/>
 						</div>
 					);
 
-					// Build the fields column (60% width) from nomenclature data
 					const fieldsColumn = (
 						<div
 							style={{
-								width: "60%",
+								width: "50%",
 								display: "flex",
 								flexDirection: "column",
 								justifyContent: "center",
-								padding: "0 4mm",
+								alignItems: "center",
+								padding: "0",
 								fontSize: "10px",
 							}}
 						>
 							{sortedFields.map((field) => (
-								<div key={field.order} style={{ marginBottom: "1mm" }}>
+								<div
+									key={field.order}
+									className="w-full h-full flex items-center text-start centered"
+									style={{ marginBottom: "1mm" }}
+								>
 									<strong>
 										{fieldLabels[field.fieldType] || field.fieldType}:
-									</strong>{" "}
-									{getFieldValue(selectedNomenclature, field.fieldType)}
+									</strong>
+									<span
+										style={{
+											fontSize: `${field.fontSize}`,
+											fontWeight: `${field.isBold ? "bold" : "normal"}`,
+										}}
+									>
+										{getFieldValue(selectedNomenclature, field.fieldType)}
+									</span>
 								</div>
 							))}
 						</div>

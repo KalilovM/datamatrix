@@ -27,10 +27,10 @@ export default function NomenclatureForm() {
 	});
 	const mutation = useMutation({
 		mutationFn: createNomenclature,
-		onSuccess: () => {
+		onSuccess: (nom) => {
 			toast.success("Номенклатура сохранена!");
 			reset();
-			router.push("/nomenclature");
+			router.push(`/nomenclature/${nom.id}/edit`);
 		},
 		onError: (error) => {
 			console.error(error.message);

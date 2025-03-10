@@ -61,6 +61,7 @@ export default function ConfigurationTable({
 						}}
 						className="bg-blue-500 px-4 py-2 text-white rounded-md cursor-pointer"
 					>
+						Создать
 						<PlusIcon className="size-5" />
 					</button>
 				</div>

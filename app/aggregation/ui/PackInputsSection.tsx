@@ -64,7 +64,6 @@ export default function PackInputsSection({ printTemplate }: Props) {
 					onSuccess: (data) => {
 						setUniqueCode(currentPage, data.value);
 						toast.success("Уникальный код создан");
-						window.print();
 						setCodes(currentData.packValues);
 
 						const newPage: PackPage = {
@@ -97,6 +96,13 @@ export default function PackInputsSection({ printTemplate }: Props) {
 		setCurrentPage,
 		mutation,
 	]);
+
+	useEffect(() => {
+		console.log(codes);
+		if (codes && codes.length === selectedConfiguration?.pieceInPack) {
+			window.print();
+		}
+	}, [codes]);
 
 	return (
 		<div className="flex flex-col gap-4 w-1/2 h-full justify-between bg-white rounded-md border border-blue-300 p-4 print:border-none print:h-auto">

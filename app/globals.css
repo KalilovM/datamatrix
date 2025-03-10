@@ -42,8 +42,8 @@
 @media print {
     @page {
         size: 58mm 40mm;
-        margin: 0;
-        paggin: 0;
+        /* margin: 0;
+        paggin: 0; */
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
@@ -62,5 +62,16 @@
     .print-page {
         page-break-after: always;
         page-break-inside: avoid;
+        text-align: center;
+    }
+    .Toastify {
+        display: none;
+    }
+    .print-container .centered {
+      text-align: start; /* Remove !important */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: start;
     }
 }
