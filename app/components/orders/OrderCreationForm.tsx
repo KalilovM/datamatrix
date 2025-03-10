@@ -1,11 +1,11 @@
 "use client";
 
-import OrderCodesList from "./OrderCodesList";
-import OrderCreationSelectors from "./OrderCreationSelectors";
 import type { ICounteragentOption } from "@/orders/create/defenitions";
-import { useState } from "react";
 import { saveAs } from "file-saver";
 import Papa from "papaparse";
+import { useState } from "react";
+import OrderCodesList from "./OrderCodesList";
+import OrderCreationSelectors from "./OrderCreationSelectors";
 
 export default function OrderCreationForm({
 	counteragentOptions,
@@ -37,11 +37,11 @@ export default function OrderCreationForm({
 				counteragentOptionsProps={counteragentOptions}
 				onCodesFetched={setCodes}
 				handleDownloadCSV={handleDownloadCSV}
+				codes={codes}
 			/>
 			<div className="flex flex-row w-full gap-4 h-full">
 				<OrderCodesList codes={codes} />
 			</div>
-			{/* Download CSV Button */}
 		</div>
 	);
 }
