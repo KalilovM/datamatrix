@@ -1,14 +1,14 @@
 "use server";
 
-import MainLayout from "@/components/MainLayout";
-import { getCounteragentOptions } from "./actions";
 import OrderCreationForm from "@/components/orders/OrderCreationForm";
+import Layout from "@/shared/ui/Layout";
+import { getCounteragentOptions } from "./actions";
 
 export default async function Page() {
-  const counteragentOptions = await getCounteragentOptions();
-  return (
-    <MainLayout>
-      <OrderCreationForm counteragentOptions={counteragentOptions} />
-    </MainLayout>
-  );
+	const counteragentOptions = await getCounteragentOptions();
+	return (
+		<Layout>
+			<OrderCreationForm counteragentOptions={counteragentOptions} />
+		</Layout>
+	);
 }
