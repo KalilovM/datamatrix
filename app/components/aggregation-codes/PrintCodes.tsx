@@ -43,7 +43,7 @@ const PrintCodes: React.FC<Props> = ({
 	};
 
 	return (
-		<div className="print-container printable print:block text:black">
+		<div className="print-container printable hidden print:block text:black">
 			{codes &&
 				codes.map((code, index) => {
 					// Sort template fields based on the 'order' property

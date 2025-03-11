@@ -1,16 +1,28 @@
 "use client";
 
-import { useAggregationStore } from "../store/aggregationStore";
+import { useAggregationPackStore } from "../store/aggregationPackStore";
 
 export default function PaginationControls() {
-	const { currentPage, pages, setCurrentPage } = useAggregationStore();
+	const { currentPage, pages, setCurrentPage } = useAggregationPackStore();
+
+	const handlePrev = () => {
+		if (currentPage > 0) {
+			setCurrentPage(currentPage - 1);
+		}
+	};
+
+	const handleNext = () => {
+		if (currentPage < pages.length - 1) {
+			setCurrentPage(currentPage + 1);
+		}
+	};
 
 	return (
 		<div className="flex justify-center gap-2 p-4 print:hidden">
 			<button
 				type="button"
 				disabled={currentPage === 0}
-				onClick={() => setCurrentPage(currentPage - 1)}
+				onClick={handlePrev}
 				className="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
 			>
 				Назад
@@ -19,7 +31,7 @@ export default function PaginationControls() {
 			<button
 				type="button"
 				disabled={currentPage >= pages.length - 1}
-				onClick={() => setCurrentPage(currentPage + 1)}
+				onClick={handleNext}
 				className="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
 			>
 				Вперед

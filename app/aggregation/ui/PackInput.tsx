@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useCheckCode } from "../api/checkCodeApi";
-import { useAggregationStore } from "../store/aggregationStore";
+import { useAggregationPackStore } from "../store/aggregationPackStore";
 
 interface PackInputProps {
 	index: number;
@@ -11,12 +11,11 @@ interface PackInputProps {
 }
 
 export default function PackInput({ index, value }: PackInputProps) {
-	const { updatePackValue, pages, currentPage } = useAggregationStore();
+	const { updatePackValue, pages, currentPage } = useAggregationPackStore();
 	const [inputValue, setInputValue] = useState(value);
 	const [isScanned, setIsScanned] = useState(false);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const checkCodeMutation = useCheckCode();
-	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	useEffect(() => {
 		setInputValue(value);
