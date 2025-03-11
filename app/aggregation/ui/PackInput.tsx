@@ -26,20 +26,11 @@ export default function PackInput({ index, value }: PackInputProps) {
 		const newValue = e.target.value;
 		setInputValue(newValue);
 		updatePackValue(index, newValue);
-		setIsScanned(true);
-
-		if (timeoutRef.current) {
-			clearTimeout(timeoutRef.current);
-		}
-
-		timeoutRef.current = setTimeout(() => {
-			validateCode(newValue);
-		}, 500);
+		validateCode(newValue);
 	};
 
 	const validateCode = (code: string) => {
-		// ✅ Stop checking if unique code is already generated
-		if (pages[currentPage].uniqueCode) return;
+		if (pages[currentPage]?.uniqueCode) return;
 
 		checkCodeMutation.mutate(code, {
 			onSuccess: (exists) => {

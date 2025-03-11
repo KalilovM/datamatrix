@@ -1,10 +1,10 @@
 "use client";
 
-import { useAggregationStore } from "../store/aggregationStore";
+import { useAggregationPackStore } from "../store/aggregationPackStore";
 import PackInput from "./PackInput";
 
 export default function PackInputsList() {
-	const { pages, currentPage } = useAggregationStore();
+	const { pages, currentPage } = useAggregationPackStore();
 
 	if (!pages[currentPage]) return null;
 

@@ -27,10 +27,11 @@ export const authOptions: NextAuthOptions = {
 					},
 				});
 
-				if (!user || !user.password) throw new Error("Пользователь не найден");
+				if (!user || !user.password || !user.companyId)
+					throw new Error("Неверный логин или пароль");
 
 				const isValid = credentials.password === user.password;
-				if (!isValid) throw new Error("Неверный пароль");
+				if (!isValid) throw new Error("Неверный логин или пароль");
 
 				return {
 					id: user.id,

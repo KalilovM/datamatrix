@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { useConfigurations } from "../api/configurationApi";
 import type { AggregationConfig, NomenclatureOption } from "../model/types";
-import { useAggregationSelector } from "../store/aggregationStore";
+import { useAggregationSelectionStore } from "../store/aggregationSelectionStore";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -16,12 +16,12 @@ export default function AggregationSelectors({
 	options,
 }: AggregationSelectorsProps) {
 	const {
-		setSelectedConfiguration,
 		selectedNomenclature,
 		setSelectedNomenclature,
+		setSelectedConfiguration,
 		configurations,
 		setConfigurations,
-	} = useAggregationSelector();
+	} = useAggregationSelectionStore();
 
 	const { data: fetchedConfigurations } = useConfigurations(
 		selectedNomenclature?.id || null,
