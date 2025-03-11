@@ -46,7 +46,6 @@ export default function CompanyCreateForm({ users }: Props) {
 	});
 
 	const onSubmit = (data: FormData) => {
-		console.log("Submitting Data:", data);
 		mutation.mutate(data);
 	};
 

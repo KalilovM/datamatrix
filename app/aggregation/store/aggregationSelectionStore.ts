@@ -8,10 +8,9 @@ interface AggregationSelectionState {
 	selectedConfiguration: AggregationConfig | null;
 	configurations: AggregationConfig[];
 
-	setSelectedNomenclature: (nomenclature: NomenclatureOption | null) => void;
-	setSelectedConfiguration: (config: AggregationConfig | null) => void;
+	setSelectedNomenclature: (nomenclature: NomenclatureOption) => void;
+	setSelectedConfiguration: (config: AggregationConfig) => void;
 	setConfigurations: (configs: AggregationConfig[]) => void;
-	resetSelection: () => void;
 }
 
 export const useAggregationSelectionStore = create<AggregationSelectionState>(
@@ -22,18 +21,11 @@ export const useAggregationSelectionStore = create<AggregationSelectionState>(
 		setSelectedNomenclature: (nomenclature) =>
 			set({
 				selectedNomenclature: nomenclature,
-				// Reset configuration on nomenclature change
 				selectedConfiguration: null,
 				configurations: [],
 			}),
 		setSelectedConfiguration: (config) =>
 			set({ selectedConfiguration: config }),
 		setConfigurations: (configs) => set({ configurations: configs }),
-		resetSelection: () =>
-			set({
-				selectedNomenclature: null,
-				selectedConfiguration: null,
-				configurations: [],
-			}),
 	}),
 );

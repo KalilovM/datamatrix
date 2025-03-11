@@ -6,7 +6,6 @@ export async function DELETE(
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const { id } = await params;
-	console.log(id);
 	await prisma.user.delete({
 		where: {
 			id,

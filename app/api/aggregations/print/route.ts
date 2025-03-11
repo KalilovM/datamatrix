@@ -39,6 +39,5 @@ export async function GET(req: Request) {
 			{ status: 404 },
 		);
 	}
-	console.log(template);
 	return NextResponse.json(template);
 }

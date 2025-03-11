@@ -1,8 +1,8 @@
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import QRCode from "qrcode";
 import bwipjs from "bwip-js";
 import { parseBarcode } from "gs1-barcode-parser-mod";
+import QRCode from "qrcode";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface BarcodeComponentProps {
 	text: string;
@@ -17,7 +17,6 @@ const BarcodeComponent: React.FC<BarcodeComponentProps> = ({
 }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [error, setError] = useState<string | null>(null);
-	console.log(text);
 
 	useEffect(() => {
 		if (!canvasRef.current) return;

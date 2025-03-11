@@ -68,11 +68,6 @@ const PrintTemplateForm = () => {
 		}
 	}, [qrPosition, setValue, textFields.length]);
 
-	// Log errors
-	useEffect(() => {
-		console.log(errors);
-	}, [errors]);
-
 	// Update available fields only in left/right modes.
 	useEffect(() => {
 		if (qrPosition !== "center") {
@@ -84,7 +79,6 @@ const PrintTemplateForm = () => {
 	}, [textFields, getValues, qrPosition]);
 
 	const onSubmit = async (data: PrintTemplateFormValues) => {
-		console.log(data);
 		try {
 			const res = await fetch("/api/printing-templates", {
 				method: "POST",

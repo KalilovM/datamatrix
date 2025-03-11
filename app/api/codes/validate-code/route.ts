@@ -4,7 +4,6 @@ export async function POST(req: Request) {
 	const { code } = await req.json();
 
 	const formattedCode = code.replace(/[^a-zA-Z0-9+=_]/g, "");
-	console.log(formattedCode, "FormattedCode");
 
 	const exists = await prisma.code.findFirst({
 		where: { formattedValue: formattedCode, used: false },

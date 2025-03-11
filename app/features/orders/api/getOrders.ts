@@ -4,6 +4,5 @@ export async function getOrders() {
 		throw new Error("Произошла ошибка при загрузке контрагентов");
 	}
 	const data = response.json();
-	console.log(data);
 	return data;
 }

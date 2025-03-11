@@ -74,7 +74,6 @@ export async function POST(req: Request) {
 			{ status: 400 },
 		);
 	}
-	console.log(generatedCodePacks);
 	const orderId = await getUniqueOrderId();
 
 	const order = await prisma.order.create({

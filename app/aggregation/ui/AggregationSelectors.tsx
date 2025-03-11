@@ -18,6 +18,7 @@ export default function AggregationSelectors({
 	const {
 		selectedNomenclature,
 		setSelectedNomenclature,
+		selectedConfiguration,
 		setSelectedConfiguration,
 		configurations,
 		setConfigurations,
@@ -46,13 +47,13 @@ export default function AggregationSelectors({
 	const handleNomenclatureChange = (
 		option: { label: string; value: NomenclatureOption } | null,
 	) => {
-		setSelectedNomenclature(option?.value || null);
+		setSelectedNomenclature(option ? option.value : null);
 	};
 
 	const handleConfigurationChange = (
 		option: { label: string; value: AggregationConfig } | null,
 	) => {
-		setSelectedConfiguration(option?.value || null);
+		setSelectedConfiguration(option ? option.value : null);
 	};
 
 	return (
@@ -67,6 +68,14 @@ export default function AggregationSelectors({
 						name="nomenclatures"
 						options={nomenclatureOptions}
 						onChange={handleNomenclatureChange}
+						value={
+							selectedNomenclature
+								? {
+										label: selectedNomenclature.name,
+										value: selectedNomenclature,
+									}
+								: null
+						}
 						placeholder="Выберите номенклатуру"
 					/>
 				</div>
@@ -76,6 +85,14 @@ export default function AggregationSelectors({
 						name="configurations"
 						options={configurationOptions}
 						onChange={handleConfigurationChange}
+						value={
+							selectedConfiguration
+								? {
+										label: `1-${selectedConfiguration.pieceInPack}-${selectedConfiguration.packInPallet}`,
+										value: selectedConfiguration,
+									}
+								: null
+						}
 						placeholder="Выберите конфигурацию"
 						isDisabled={!selectedNomenclature}
 					/>

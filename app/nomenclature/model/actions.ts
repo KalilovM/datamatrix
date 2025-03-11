@@ -130,7 +130,6 @@ export async function createNomenclature(data: NomenclatureFormData) {
 		throw new Error("Не авторизован");
 	}
 	const { companyId } = session.user;
-	console.log(session.user);
 	if (!companyId) {
 		throw new Error("Не установлен ID компании");
 	}

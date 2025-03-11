@@ -42,8 +42,6 @@ const PrintCodes: React.FC<Props> = ({
 		SIZE: "Размер",
 	};
 
-	console.log("CODES", codes);
-
 	return (
 		<div className="print-container printable hidden print:block text:black">
 			{codes &&

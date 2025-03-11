@@ -37,10 +37,6 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	});
 
 	useEffect(() => {
-		console.log(errors);
-	}, [errors]);
-
-	useEffect(() => {
 		if (nomenclature) {
 			setInitialData(nomenclature);
 			resetForm(nomenclature);

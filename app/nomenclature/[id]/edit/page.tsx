@@ -9,7 +9,6 @@ interface Props {
 export default async function Page(props: Props) {
 	const params = await props.params;
 	const nomenclature = await fetchNomenclatureById(params.id);
-	console.log(nomenclature);
 	if (!nomenclature) {
 		return <Layout>Номенклатура не найдена</Layout>;
 	}
