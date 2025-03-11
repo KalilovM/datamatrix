@@ -38,7 +38,6 @@ export function usePackGeneration() {
 	// Trigger pack code generation when all inputs are filled
 	useEffect(() => {
 		const currentData = pages[currentPage];
-		console.log(currentData);
 		if (!currentData || currentData.uniqueCode) return;
 
 		if (

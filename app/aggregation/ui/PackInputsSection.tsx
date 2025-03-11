@@ -1,28 +1,21 @@
 "use client";
 
-import PrintCodes from "@/components/aggregation-codes/PrintCodes";
 import { PrintIcon } from "@/shared/ui/icons";
 import { usePackGeneration } from "../hooks/usePackGeneration";
 import { useAggregationPackStore } from "../store/aggregationPackStore";
-import { useAggregationSelectionStore } from "../store/aggregationSelectionStore";
 import PackInputsList from "./PackInputsList";
 import PaginationControls from "./PaginationControls";
 
-interface Props {
-	printTemplate: any; // Replace 'any' with your PrintTemplate type if available
-}
-
-export default function PackInputsSection({ printTemplate }: Props) {
+export default function PackInputsSection() {
 	usePackGeneration();
 
-	const { selectedNomenclature } = useAggregationSelectionStore();
-	const { pages, currentPage, codes } = useAggregationPackStore();
+	const { pages, currentPage } = useAggregationPackStore();
 
 	const lastGeneratedCode = pages[currentPage]?.uniqueCode;
 
 	return (
-		<div className="flex flex-col gap-4 w-1/2 h-full justify-between bg-white rounded-md border border-blue-300 p-4 print:border-none print:h-auto">
-			<div className="flex flex-col gap-4">
+		<div className="flex flex-col gap-4 w-1/2 h-full justify-between bg-white rounded-md border border-blue-300 p-4 print:border-none print:gap-0 print:hidden">
+			<div className="flex flex-col gap-4 print:hidden">
 				<h2 className="text-xl font-semibold print:hidden">Пачки</h2>
 				{lastGeneratedCode && (
 					<div className="bg-green-100 text-green-800 p-3 rounded-md text-left font-semibold flex justify-between items-center print:hidden">
@@ -42,11 +35,6 @@ export default function PackInputsSection({ printTemplate }: Props) {
 					</div>
 				)}
 				<PackInputsList />
-				<PrintCodes
-					printTemplate={printTemplate}
-					selectedNomenclature={selectedNomenclature}
-					codes={codes}
-				/>
 			</div>
 			<PaginationControls />
 		</div>

@@ -9,7 +9,6 @@ export const fetchPrintTemplate = async (): Promise<PrintTemplate> => {
 		throw new Error("Ошибка загрузки данных");
 	}
 	const data = await res.json();
-	console.log(data);
 	return data;
 };
 
