@@ -1,30 +1,25 @@
 "use client";
 
+import { useAggregationCodesStore } from "@/aggregation-codes/store/aggregationCodesStore";
+import { useAggregationSelectionStore } from "@/aggregation/store/aggregationSelectionStore";
 import type { IAggregatedCode } from "@/app/aggregation-codes/defenitions";
+import { usePrintStore } from "@/shared/store/printStore";
 import type { PrintingTemplate } from "@prisma/client";
-import { useState } from "react";
-import { toast } from "react-toastify";
 import { PrintIcon } from "../Icons";
-import PrintCodes from "./PrintCodes";
 
 export default function AggregationCodesRow({
 	aggregatedCodes,
-	defaultTemplate,
 }: {
 	aggregatedCodes: IAggregatedCode[];
 	defaultTemplate: PrintingTemplate | null | never[];
 }) {
-	const [codeToPrint, setCodeToPrint] = useState<IAggregatedCode | null>(null);
-	const handlePrint = (code: IAggregatedCode) => {
-		if (
-			!defaultTemplate ||
-			(Array.isArray(defaultTemplate) && defaultTemplate.length === 0)
-		) {
-			toast.error("Не выбрат шаблон печати по умолчанию");
-			return;
-		}
-		setCodeToPrint(code);
-		window.print();
+	const { triggerPrint, setPrintCodes } = usePrintStore();
+	const { setNomenclature } = useAggregationCodesStore();
+
+	const handlePrint = (nomenclature: IAggregatedCode) => {
+		setNomenclature(nomenclature);
+		setPrintCodes(nomenclature.codes);
+		triggerPrint();
 	};
 
 	return (
@@ -85,13 +80,6 @@ export default function AggregationCodesRow({
 					))}
 				</tbody>
 			</table>
-			{codeToPrint && (
-				<PrintCodes
-					printTemplate={defaultTemplate}
-					selectedNomenclature={codeToPrint}
-					codes={codeToPrint.codes}
-				/>
-			)}
 		</div>
 	);
 }

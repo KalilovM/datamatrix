@@ -1,19 +1,12 @@
-"use server";
-
 import type { IAggregatedCode } from "@/app/aggregation-codes/defenitions";
-import AggregationCodesRow from "./AggregationCodesRow";
 import { FilterIcon, SearchIcon } from "../Icons";
-import type { PrintingTemplate } from "@prisma/client";
+import AggregationCodesRow from "./AggregationCodesRow";
 
 interface ITableContentProps {
 	aggregatedCodes: IAggregatedCode[];
-	defaultTemplate: PrintingTemplate | null | never[];
 }
 
-export default async function TableContent({
-	aggregatedCodes,
-	defaultTemplate,
-}: ITableContentProps) {
+export default function TableContent({ aggregatedCodes }: ITableContentProps) {
 	return (
 		<div className="table-layout print:border-none print:rounded-none">
 			{/* Table Header */}
@@ -57,10 +50,7 @@ export default async function TableContent({
 			</div>
 
 			{/* Table Columns */}
-			<AggregationCodesRow
-				aggregatedCodes={aggregatedCodes}
-				defaultTemplate={defaultTemplate}
-			/>
+			<AggregationCodesRow aggregatedCodes={aggregatedCodes} />
 		</div>
 	);
 }

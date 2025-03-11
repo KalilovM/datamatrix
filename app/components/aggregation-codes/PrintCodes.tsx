@@ -4,19 +4,29 @@ import type {
 	NomenclatureOption,
 	PrintTemplate,
 } from "@/aggregation/model/types";
+import { usePrintStore } from "@/shared/store/printStore";
+import { useEffect } from "react";
 import BarcodeComponent from "../BarcodeComponent";
 
 interface Props {
 	printTemplate: PrintTemplate;
-	selectedNomenclature: NomenclatureOption;
-	codes: string[];
+	selectedNomenclature: NomenclatureOption | null;
 }
 
 const PrintCodes: React.FC<Props> = ({
 	printTemplate,
 	selectedNomenclature,
-	codes,
 }: Props) => {
+	const { printCodes: codes, shouldPrint, resetPrint } = usePrintStore();
+
+	// Trigger printing when the print flag is set
+	useEffect(() => {
+		if (shouldPrint) {
+			window.print();
+			resetPrint();
+		}
+	}, [shouldPrint, resetPrint]);
+
 	const getFieldValue = (
 		nomenclature: NomenclatureOption,
 		fieldType: string,
@@ -47,11 +57,11 @@ const PrintCodes: React.FC<Props> = ({
 			{codes &&
 				codes.map((code, index) => {
 					// Sort template fields based on the 'order' property
-					const sortedFields = [...printTemplate!.fields].sort(
+					const sortedFields = [...printTemplate.fields].sort(
 						(a, b) => a.order - b.order,
 					);
 
-					// Build the QR/Generated Code column (40% width)
+					// Build the QR/Generated Code column (50% width)
 					const qrColumn = (
 						<div
 							style={{
@@ -94,7 +104,7 @@ const PrintCodes: React.FC<Props> = ({
 									<span
 										style={{
 											fontSize: `${field.fontSize}`,
-											fontWeight: `${field.isBold ? "bold" : "normal"}`,
+											fontWeight: field.isBold ? "bold" : "normal",
 										}}
 									>
 										{getFieldValue(selectedNomenclature, field.fieldType)}

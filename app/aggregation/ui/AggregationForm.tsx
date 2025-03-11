@@ -27,7 +27,6 @@ export default function AggregationForm() {
 			<PrintCodes
 				printTemplate={printTemplate}
 				selectedNomenclature={selectedNomenclature}
-				codes={codes}
 			/>
 		</div>
 	);

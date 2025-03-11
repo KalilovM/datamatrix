@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrintStore } from "@/shared/store/printStore";
 import { useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { useGeneratePackCode } from "../api/generatePackApi";
@@ -17,9 +18,10 @@ export function usePackGeneration() {
 		setPages,
 		setCurrentPage,
 		setUniqueCode,
-		codes,
 		setCodes,
 	} = useAggregationPackStore();
+
+	const { setPrintCodes, triggerPrint } = usePrintStore();
 
 	// When configuration changes, initialize pages
 	useEffect(() => {
@@ -55,7 +57,9 @@ export function usePackGeneration() {
 					onSuccess: (data) => {
 						setUniqueCode(currentPage, data.value);
 						toast.success("Уникальный код создан");
-						setCodes(currentData.packValues);
+						// Update the print store with the generated codes
+						setPrintCodes(currentData.packValues);
+						triggerPrint();
 
 						const newPage = {
 							packValues: Array(selectedConfiguration!.pieceInPack).fill(""),
@@ -84,15 +88,6 @@ export function usePackGeneration() {
 		setCurrentPage,
 		mutation,
 		setCodes,
+		setPrintCodes,
 	]);
-
-	useEffect(() => {
-		if (
-			codes &&
-			selectedConfiguration &&
-			codes.length === selectedConfiguration.pieceInPack
-		) {
-			window.print();
-		}
-	}, [codes, selectedConfiguration]);
 }
