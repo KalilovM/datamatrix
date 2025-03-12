@@ -71,3 +71,48 @@ export async function PUT(request: Request) {
 		return NextResponse.json({ message: "Произошла ошибка" }, { status: 500 });
 	}
 }
+
+export async function POST(req: Request) {
+	try {
+		const { code } = await req.json();
+
+		// Find the generated code pack by its unique code value and include its associated codes
+		const generatedCodePack = await prisma.generatedCodePack.findUnique({
+			where: { value: code },
+			include: { codes: true },
+		});
+
+		if (!generatedCodePack) {
+			return NextResponse.json(
+				{ message: "Datamatrix код не найден" },
+				{ status: 404 },
+			);
+		}
+
+		// Collect the IDs of the associated codes
+		const codeIds = generatedCodePack.codes.map((c) => c.id);
+
+		// Update all codes: set 'used' to false
+		await prisma.code.updateMany({
+			where: {
+				id: { in: codeIds },
+			},
+			data: { used: false },
+		});
+
+		// Delete the generated code pack
+		await prisma.generatedCodePack.delete({
+			where: { id: generatedCodePack.id },
+		});
+
+		return NextResponse.json({
+			message: "Коды обновлены, пакет удалён",
+		});
+	} catch (error: any) {
+		console.error("Ошибка при обновлении кодов:", error);
+		return NextResponse.json(
+			{ message: "Ошибка сервера", error: error.message },
+			{ status: 500 },
+		);
+	}
+}

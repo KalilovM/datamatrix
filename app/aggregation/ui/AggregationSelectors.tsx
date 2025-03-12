@@ -29,6 +29,7 @@ export default function AggregationSelectors({
 	);
 
 	useEffect(() => {
+		console.log(fetchedConfigurations);
 		if (fetchedConfigurations) {
 			setConfigurations(fetchedConfigurations);
 		}
