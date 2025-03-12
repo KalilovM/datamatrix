@@ -3,50 +3,60 @@ import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-	try {
-		const session = await getServerSession(authOptions);
-		if (!session?.user) {
-			return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
-		}
-		const user = session.user;
-		if (!user?.companyId) {
-			return NextResponse.json(
-				{ error: "Требуется наличие компании", user: user },
-				{ status: 404 },
-			);
-		}
-		if (user.role === "ADMIN") {
-			const nomenclatureOptions = await prisma.nomenclature.findMany({
-				select: {
-					id: true,
-					name: true,
-					modelArticle: true,
-					size: true,
-					color: true,
-				},
-			});
-
-			return NextResponse.json(nomenclatureOptions);
-		}
-
-		const nomenclatureOptions = await prisma.nomenclature.findMany({
-			where: { companyId: user.companyId },
+export async function GET() {
+	const session = await getServerSession(authOptions);
+	if (!session?.user) {
+		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
+	}
+	const { role, companyId } = session.user;
+	let nomenclatures;
+	if (role === "ADMIN") {
+		nomenclatures = await prisma.nomenclature.findMany({
 			select: {
 				id: true,
 				name: true,
-				modelArticle: true,
-				size: true,
-				color: true,
+				codePacks: {
+					select: {
+						codes: {
+							where: { used: false },
+							select: { id: true },
+						},
+					},
+				},
 			},
 		});
-
-		return NextResponse.json(nomenclatureOptions);
-	} catch (error) {
-		console.error("Ошибка загрузки номенклатуры:", error);
-		return NextResponse.json(
-			{ error: "Ошибка загрузки данных" },
-			{ status: 500 },
-		);
+	} else {
+		if (!companyId) {
+			return NextResponse.json(
+				{ message: "Не установлен ID компании" },
+				{ status: 400 },
+			);
+		}
+		nomenclatures = await prisma.nomenclature.findMany({
+			where: { companyId },
+			select: {
+				id: true,
+				name: true,
+				codePacks: {
+					select: {
+						codes: {
+							where: { used: false },
+							select: { id: true },
+						},
+					},
+				},
+			},
+		});
 	}
+
+	const result = nomenclatures.map((nomenclature) => ({
+		id: nomenclature.id,
+		name: nomenclature.name,
+		codeCount: nomenclature.codePacks.reduce(
+			(total, codePack) => total + codePack.codes.length,
+			0,
+		),
+	}));
+
+	return NextResponse.json(result);
 }

@@ -58,7 +58,7 @@ export function usePackGeneration() {
 						setUniqueCode(currentPage, data.value);
 						toast.success("Уникальный код создан");
 						// Update the print store with the generated codes
-						setPrintCodes(currentData.packValues);
+						setPrintCodes(data.value);
 						triggerPrint();
 
 						const newPage = {

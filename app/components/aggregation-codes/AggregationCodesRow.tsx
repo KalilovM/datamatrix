@@ -18,7 +18,8 @@ export default function AggregationCodesRow({
 
 	const handlePrint = (nomenclature: IAggregatedCode) => {
 		setNomenclature(nomenclature);
-		setPrintCodes(nomenclature.codes);
+		console.log(nomenclature);
+		setPrintCodes([nomenclature.generatedCode]);
 		triggerPrint();
 	};
 

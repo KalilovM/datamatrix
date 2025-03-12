@@ -6,7 +6,7 @@ import type { NomenclatureOption } from "../model/types";
 export const fetchNomenclatureOptions = async (): Promise<
 	NomenclatureOption[]
 > => {
-	const res = await fetch("/api/nomenclature");
+	const res = await fetch("/api/aggregations/nomenclature");
 	if (!res.ok) {
 		throw new Error("Ошибка загрузки данных");
 	}

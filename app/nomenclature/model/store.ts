@@ -24,8 +24,11 @@ interface Nomenclature {
 
 interface NomenclatureStore {
 	nomenclature: Nomenclature;
+	printTemplate: any;
 	setNomenclature: (data: Partial<Nomenclature>) => void;
 	reset: () => void;
+
+	setPrintTemplate: (data: any) => void;
 
 	// Configurations
 	addConfiguration: (config: Configuration) => void;
@@ -49,6 +52,9 @@ export const useNomenclatureStore = create<NomenclatureStore>((set) => ({
 		configurations: [],
 		codes: [],
 	},
+	printTemplate: null,
+
+	setPrintTemplate: (data) => set({ printTemplate: data }),
 
 	setNomenclature: (data) =>
 		set((state) => ({

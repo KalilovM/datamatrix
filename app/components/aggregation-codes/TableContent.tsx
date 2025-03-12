@@ -8,7 +8,7 @@ interface ITableContentProps {
 
 export default function TableContent({ aggregatedCodes }: ITableContentProps) {
 	return (
-		<div className="table-layout print:border-none print:rounded-none">
+		<div className="table-layout print:border-none print:rounded-none print:hidden">
 			{/* Table Header */}
 			<div className="table-header print:hidden">
 				<p className="table-header-title">Агрегированные коды</p>

@@ -1,21 +1,48 @@
+"use client";
+
+import PrintCodes from "@/components/aggregation-codes/PrintCodes";
+import { useNomenclatureById } from "@/nomenclature/hooks/useNomenclatureById";
+import { usePrintTemplate } from "@/nomenclature/hooks/usePrintTemplate";
+import { useNomenclatureStore } from "@/nomenclature/model/store";
+import NomenclatureEditForm from "@/nomenclature/ui/edit/NomenclatureEditForm";
 import Layout from "@/shared/ui/Layout";
-import { fetchNomenclatureById } from "../../model/actions";
-import NomenclatureEditForm from "../../ui/edit/NomenclatureEditForm";
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
 
-interface Props {
-	params: Promise<{ id: string }>;
-}
+export default function Page() {
+	const params = useParams();
+	const { id } = params;
+	const { data: nomenclatureData, isLoading, error } = useNomenclatureById(id);
+	const {
+		data: printTemplateData,
+		isLoading: isPrintTemplateLoading,
+		error: printTemplateError,
+	} = usePrintTemplate();
+	const { nomenclature, setPrintTemplate } = useNomenclatureStore();
 
-export default async function Page(props: Props) {
-	const params = await props.params;
-	const nomenclature = await fetchNomenclatureById(params.id);
-	if (!nomenclature) {
-		return <Layout>Номенклатура не найдена</Layout>;
-	}
+	useEffect(() => {
+		if (!isPrintTemplateLoading && !printTemplateError && printTemplateData) {
+			setPrintTemplate(printTemplateData);
+		}
+	}, [
+		isPrintTemplateLoading,
+		printTemplateError,
+		printTemplateData,
+		setPrintTemplate,
+	]);
+
+	if (isLoading) return <Layout>Загрузка...</Layout>;
+	if (error || !nomenclature) return <Layout>Номенклатура не найдена</Layout>;
 
 	return (
 		<Layout>
-			<NomenclatureEditForm nomenclature={nomenclature} />
+			<NomenclatureEditForm nomenclature={nomenclatureData} />
+			{printTemplateData && (
+				<PrintCodes
+					printTemplate={printTemplateData}
+					selectedNomenclature={nomenclature}
+				/>
+			)}
 		</Layout>
 	);
 }

@@ -23,6 +23,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	const [initialData, setInitialData] = useState<NomenclatureEditData | null>(
 		null,
 	);
+	const { setNomenclature } = useNomenclatureStore();
 	const { reset } = useNomenclatureStore();
 	const router = useRouter();
 	const {
@@ -39,6 +40,8 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	useEffect(() => {
 		if (nomenclature) {
 			setInitialData(nomenclature);
+			setNomenclature(nomenclature);
+
 			resetForm(nomenclature);
 		}
 	}, [nomenclature, resetForm]);
@@ -61,7 +64,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 
 	return (
 		<form
-			className="flex flex-col w-full h-full gap-4"
+			className="flex flex-col w-full h-full gap-4 print:hidden"
 			onSubmit={handleSubmit(onSubmit)}
 		>
 			<div className="table-layout h-auto">

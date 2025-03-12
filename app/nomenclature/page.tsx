@@ -1,9 +1,14 @@
+"use client";
+
 import Layout from "@/shared/ui/Layout";
-import { fetchNomenclatures } from "./model/actions";
+import { useNomenclatures } from "./hooks/useNomenclatures";
 import NomenclatureTable from "./ui/NomenclatureTable";
 
-export default async function Page() {
-	const nomenclatures = await fetchNomenclatures();
+export default function Page() {
+	const { data: nomenclatures, isLoading, error } = useNomenclatures();
+
+	if (isLoading) return <Layout>Загрузка...</Layout>;
+	if (error || !nomenclatures) return <Layout>Ошибка загрузки данных</Layout>;
 
 	return (
 		<Layout>

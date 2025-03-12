@@ -15,5 +15,5 @@ export const usePrintStore = create<PrintState>((set) => ({
 	shouldPrint: false,
 	setPrintCodes: (codes) => set({ printCodes: codes }),
 	triggerPrint: () => set({ shouldPrint: true }),
-	resetPrint: () => set({ shouldPrint: false }),
+	resetPrint: () => set({ shouldPrint: false, printCodes: [] }),
 }));

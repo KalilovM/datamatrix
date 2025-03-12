@@ -56,18 +56,28 @@ const PrintCodes: React.FC<Props> = ({
 		<div className="print-container printable hidden print:block text:black">
 			{codes &&
 				codes.map((code, index) => {
-					// Sort template fields based on the 'order' property
+					// Sort fields based on the 'order' property from the template
 					const sortedFields = [...printTemplate.fields].sort(
 						(a, b) => a.order - b.order,
 					);
 
-					// Build the QR/Generated Code column (50% width)
+					// Use template values for the container dimensions
+					const containerStyle = {
+						width: `${printTemplate.width}mm`,
+						height: `${printTemplate.height}mm`,
+						display: "flex",
+						flexDirection: "row" as const,
+						boxSizing: "border-box" as const,
+						padding: "2mm",
+					};
+
+					// QR Column styling
 					const qrColumn = (
 						<div
 							style={{
 								width: "50%",
 								display: "flex",
-								flexDirection: "column",
+								flexDirection: "column" as const,
 								alignItems: "center",
 								justifyContent: "center",
 							}}
@@ -80,16 +90,16 @@ const PrintCodes: React.FC<Props> = ({
 						</div>
 					);
 
+					// Fields column: each field uses the fontSize and isBold properties from the template
 					const fieldsColumn = (
 						<div
 							style={{
 								width: "50%",
 								display: "flex",
-								flexDirection: "column",
+								flexDirection: "column" as const,
 								justifyContent: "center",
 								alignItems: "center",
 								padding: "0",
-								fontSize: "10px",
 							}}
 						>
 							{sortedFields.map((field) => (
@@ -98,36 +108,32 @@ const PrintCodes: React.FC<Props> = ({
 									className="w-full h-full flex items-center text-start centered"
 									style={{ marginBottom: "1mm" }}
 								>
-									<strong>
-										{fieldLabels[field.fieldType] || field.fieldType}:
-									</strong>
-									<span
+									<strong
 										style={{
-											fontSize: `${field.fontSize}`,
-											fontWeight: field.isBold ? "bold" : "normal",
+											fontSize: "10px",
 										}}
 									>
-										{getFieldValue(selectedNomenclature, field.fieldType)}
-									</span>
+										{fieldLabels[field.fieldType] || field.fieldType}:
+									</strong>
+									<p
+										style={{
+											fontSize: `${field.fontSize}px`,
+											fontWeight: field.isBold ? "bold" : "normal",
+											marginLeft: "0.5mm",
+										}}
+									>
+										{selectedNomenclature
+											? getFieldValue(selectedNomenclature, field.fieldType)
+											: ""}
+									</p>
 								</div>
 							))}
 						</div>
 					);
 
-					// Layout: QR column on left or right based on qrPosition setting
+					// Layout based on qrPosition setting
 					return (
-						<div
-							key={index}
-							className="print-page"
-							style={{
-								width: "58mm",
-								height: "40mm",
-								display: "flex",
-								flexDirection: "row",
-								boxSizing: "border-box",
-								padding: "2mm",
-							}}
-						>
+						<div key={index} className="print-page" style={containerStyle}>
 							{printTemplate.qrPosition === "LEFT" ? (
 								<>
 									{qrColumn}

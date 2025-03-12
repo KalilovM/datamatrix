@@ -35,7 +35,7 @@ export default function Page() {
 			</Layout>
 		);
 	return (
-		<Layout>
+		<Layout className="print:block print:h-auto print:w-auto printable">
 			<>
 				<TableContent aggregatedCodes={aggregatedCodes} />
 				<PrintCodes

@@ -42,6 +42,7 @@
 @media print {
     @page {
         size: 58mm 40mm;
+        /* size: auto; */
         margin: 0;
         paggin: 0;
         scrollbar-width: none;
@@ -52,11 +53,12 @@
     body *::-webkit-scrollbar {
         display: none;
     }
-    body .print-container * {
-        display: block;
-        z-index: 999;
-        visibility: visible;
-        position: relative;
+    * {
+        border: none;
+    }
+    body > *:not(div) {
+        display: none;
+        /* border: 1px solid red; */
     }
     /* Make sure each print-page takes up a separate page */
     .print-page {
@@ -72,6 +74,11 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      width: fit-content;
       align-items: start;
     }
 }
+
+/* * {
+    border: 1px solid red;
+} */

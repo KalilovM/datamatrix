@@ -1,17 +1,16 @@
 "use client";
 
-import React from "react";
-import ReactQueryProvider from "./ReactQueryProvider";
 import { SessionProvider } from "next-auth/react";
+import ReactQueryProvider from "./ReactQueryProvider";
 
 interface ProvidersProps {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }
 
 export default function Providers({ children }: ProvidersProps) {
-  return (
-    <ReactQueryProvider>
-      <SessionProvider>{children}</SessionProvider>
-    </ReactQueryProvider>
-  );
+	return (
+		<ReactQueryProvider>
+			<SessionProvider>{children}</SessionProvider>
+		</ReactQueryProvider>
+	);
 }
