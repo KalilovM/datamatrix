@@ -134,12 +134,42 @@ const PrintCodes: React.FC<Props> = ({
 					// Layout based on qrPosition setting
 					return (
 						<div key={index} className="print-page" style={containerStyle}>
-							{printTemplate.qrPosition === "LEFT" ? (
+							{printTemplate.qrPosition === "CENTER" ? (
+								<div
+									style={{
+										display: "flex",
+										flexDirection: "column",
+										alignItems: "center",
+										justifyContent: "center",
+										width: "100%",
+									}}
+								>
+									<BarcodeComponent
+										text={code}
+										size={100}
+										type={printTemplate.qrType}
+									/>
+									<span
+										style={{
+											fontSize: `${sortedFields[0].fontSize}px`,
+											fontWeight: sortedFields[0].isBold ? "bold" : "normal",
+										}}
+									>
+										{selectedNomenclature
+											? getFieldValue(
+													selectedNomenclature,
+													sortedFields[0].fieldType,
+												)
+											: ""}
+									</span>
+								</div>
+							) : printTemplate.qrPosition === "LEFT" ? (
 								<>
 									{qrColumn}
 									{fieldsColumn}
 								</>
 							) : (
+								// If not CENTER or LEFT, we assume RIGHT
 								<>
 									{fieldsColumn}
 									{qrColumn}

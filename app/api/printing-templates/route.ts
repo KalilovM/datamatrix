@@ -11,7 +11,9 @@ export async function GET(request: Request) {
 		}
 		const { companyId, role } = session.user;
 		if (role === "ADMIN") {
-			const printingTemplates = await prisma.printingTemplate.findMany();
+			const printingTemplates = await prisma.printingTemplate.findMany({
+				orderBy: [{ type: "asc" }, { createdAt: "desc" }],
+			});
 			return NextResponse.json(printingTemplates, { status: 200 });
 		}
 		if (!companyId) {
@@ -22,6 +24,7 @@ export async function GET(request: Request) {
 		}
 		const printingTemplates = await prisma.printingTemplate.findMany({
 			where: { companyId },
+			orderBy: { type: "asc" },
 		});
 		return NextResponse.json(printingTemplates, { status: 200 });
 	} catch (error: any) {

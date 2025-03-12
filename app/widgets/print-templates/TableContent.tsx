@@ -6,6 +6,7 @@ import PrintTemplateRow from "./PrintTemplateRow";
 
 const TableContent: React.FC = () => {
 	const { data: templates, isLoading, isError } = usePrintTemplates();
+	console.log(templates);
 
 	if (isLoading) return <p>Загрузка шаблонов...</p>;
 	if (isError) return <p>Ошибка при загрузке шаблонов</p>;
@@ -34,8 +35,11 @@ const TableContent: React.FC = () => {
 							<th scope="col" className="px-8 py-3">
 								Назначение
 							</th>
+							<th scope="col" className="px-8 py-3 text-center">
+								По умолчанию
+							</th>
 							<th scope="col" className="px-8 py-3">
-								<span className="sr-only">Назначение</span>
+								<span className="sr-only">Действия</span>
 							</th>
 						</tr>
 					</thead>

@@ -29,6 +29,7 @@ export default function PackInput({ index, value }: PackInputProps) {
 	};
 
 	const validateCode = (code: string) => {
+		// If the current pack already has a unique code, skip validation
 		if (pages[currentPage]?.uniqueCode) return;
 
 		checkCodeMutation.mutate(code, {
@@ -42,6 +43,21 @@ export default function PackInput({ index, value }: PackInputProps) {
 						inputRef.current.focus();
 					}
 				} else {
+					// Check if the same code already exists in pack values (excluding current index)
+					const currentPackValues = pages[currentPage]?.packValues || [];
+					const isDuplicate = currentPackValues.some(
+						(val, i) => i !== index && val === code,
+					);
+					if (isDuplicate) {
+						toast.error("Значение уже существует в пачке");
+						setInputValue("");
+						updatePackValue(index, "");
+						if (inputRef.current) {
+							inputRef.current.focus();
+						}
+						return;
+					}
+					// If no duplicate, focus the next input
 					const nextInput = document.querySelector<HTMLInputElement>(
 						`input[data-index="${index + 1}"]`,
 					);
