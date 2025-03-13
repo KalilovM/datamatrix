@@ -7,8 +7,19 @@ export async function getAggregatedCodes() {
 	if (!session?.user) {
 		return [];
 	}
+	const user = await prisma.user.findUnique({
+		where: {
+			id: session.user.id,
+		},
+		select: {
+			companyId: true,
+		},
+	});
+	if (!user) {
+		return [];
+	}
 
-	const { companyId, role } = session.user;
+	const { companyId } = user;
 
 	if (!companyId) return [];
 
@@ -76,8 +87,19 @@ export async function getDefaultPrintTemplate() {
 	if (!session?.user) {
 		return [];
 	}
+	const user = await prisma.user.findUnique({
+		where: {
+			id: session.user.id,
+		},
+		select: {
+			companyId: true,
+		},
+	});
+	if (!user) {
+		return [];
+	}
 
-	const { companyId } = session.user;
+	const { companyId } = user;
 
 	if (!companyId) return [];
 

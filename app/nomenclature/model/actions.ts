@@ -15,9 +15,24 @@ import type { NomenclatureEditData, NomenclatureFormData } from "./schema";
 export async function fetchNomenclatures() {
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
-		throw new Error("Не авторизован");
+		return [];
 	}
-	const { role, companyId } = session.user;
+	const user = await prisma.user.findUnique({
+		where: {
+			id: session.user.id,
+		},
+		select: {
+			role: true,
+			companyId: true,
+		},
+	});
+	if (!user) {
+		return [];
+	}
+	if (!user?.companyId) {
+		return [];
+	}
+	const { role, companyId } = user;
 	let nomenclatures;
 	if (role === "ADMIN") {
 		nomenclatures = await prisma.nomenclature.findMany({
@@ -127,12 +142,24 @@ export async function createNomenclature(data: NomenclatureFormData) {
 	// Get current user session.
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
-		throw new Error("Не авторизован");
+		return [];
 	}
-	const { companyId } = session.user;
-	if (!companyId) {
+	const user = await prisma.user.findUnique({
+		where: {
+			id: session.user.id,
+		},
+		select: {
+			role: true,
+			companyId: true,
+		},
+	});
+	if (!user) {
+		throw new Error("Пользователь не найден");
+	}
+	if (!user?.companyId) {
 		throw new Error("Не установлен ID компании");
 	}
+	const { companyId } = user;
 
 	// Map configurations to the shape expected by Prisma.
 	const configCreateData = configurations
@@ -201,12 +228,24 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
-		throw new Error("Не авторизован");
+		return [];
 	}
-	const { companyId } = session.user;
-	if (!companyId) {
+	const user = await prisma.user.findUnique({
+		where: {
+			id: session.user.id,
+		},
+		select: {
+			role: true,
+			companyId: true,
+		},
+	});
+	if (!user) {
+		throw new Error("Пользователь не найден");
+	}
+	if (!user?.companyId) {
 		throw new Error("Не установлен ID компании");
 	}
+	const { companyId } = user;
 
 	try {
 		const updatedNomenclature = await prisma.$transaction(async (tx) => {

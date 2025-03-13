@@ -8,10 +8,32 @@ const PRINT_TYPE = "NOMENCLATURE";
 export async function GET(req: Request) {
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
-		return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
+	}
+	const user = await prisma.user.findUnique({
+		where: {
+			id: session.user.id,
+		},
+		select: {
+			role: true,
+			companyId: true,
+		},
+	});
+	if (!user) {
+		return NextResponse.json(
+			{ message: "Пользователь не найден" },
+			{ status: 401 },
+		);
+	}
+	const { companyId } = user;
+
+	if (!companyId) {
+		return NextResponse.json(
+			{ message: "Не установлен ID компании" },
+			{ status: 404 },
+		);
 	}
 
-	const { companyId } = session.user;
 	const template = await prisma.printingTemplate.findFirst({
 		where: {
 			companyId: companyId,

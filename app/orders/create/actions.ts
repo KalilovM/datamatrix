@@ -7,7 +7,18 @@ export async function getCounteragentOptions() {
 	if (!session?.user) {
 		return [];
 	}
-	const user = session.user;
+	const user = await prisma.user.findUnique({
+		where: {
+			id: session.user.id,
+		},
+		select: {
+			role: true,
+			companyId: true,
+		},
+	});
+	if (!user) {
+		return [];
+	}
 	if (!user?.companyId) {
 		return [];
 	}

@@ -6,5 +6,11 @@ export const EditUserSchema = z.object({
 		.string()
 		.min(3, "Имя пользователя должно содержать не менее 3 символов"),
 	role: z.enum(["ADMIN", "COMPANY_ADMIN", "COMPANY_USER"]).nullable(),
-	companyId: z.string().uuid("Некорректный UUID").nullable(),
+	companyId: z
+		.object({
+			label: z.string(),
+			value: z.string(),
+		})
+		.nullable()
+		.optional(),
 });

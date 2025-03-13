@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "@/shared/lib/prisma";
-import { EditUserSchema } from "./schema";
 import type { FormData } from "./types";
 
 export async function fetchUser(id: string) {
@@ -24,18 +23,14 @@ export async function fetchCompanies() {
 }
 
 export async function updateUser(id: string, data: FormData) {
-	const parsedData = EditUserSchema.safeParse(data);
-	if (!parsedData.success) {
-		throw new Error("Неверные данные");
-	}
-
+	console.log(data);
 	await prisma.user.update({
 		where: { id },
 		data: {
-			email: parsedData.data.email,
-			username: parsedData.data.username,
-			role: parsedData.data.role,
-			companyId: parsedData.data.companyId || null,
+			email: data.email,
+			username: data.username,
+			role: data.role,
+			companyId: data.companyId.value || null,
 		},
 	});
 }

@@ -30,7 +30,12 @@ export default function UserEditForm({ user, companies }: Props) {
 			email: user.email,
 			username: user.username,
 			role: user.role,
-			companyId: user.companyId || null,
+			companyId: user.companyId
+				? {
+						value: user.companyId,
+						label: companies.find((c) => c.id === user.companyId)?.name || "",
+					}
+				: null,
 		},
 	});
 
@@ -131,6 +136,7 @@ export default function UserEditForm({ user, companies }: Props) {
 								<Select
 									{...field}
 									isClearable
+									value={field.value}
 									options={companies.map((company) => ({
 										value: company.id,
 										label: company.name,

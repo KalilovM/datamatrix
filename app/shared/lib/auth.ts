@@ -23,11 +23,10 @@ export const authOptions: NextAuthOptions = {
 						email: true,
 						password: true,
 						role: true,
-						companyId: true,
 					},
 				});
 
-				if (!user || !user.password || !user.companyId)
+				if (!user || !user.password)
 					throw new Error("Неверный логин или пароль");
 
 				const isValid = credentials.password === user.password;
@@ -38,7 +37,6 @@ export const authOptions: NextAuthOptions = {
 					name: user.username,
 					email: user.email,
 					role: user.role,
-					companyId: user.companyId,
 				};
 			},
 		}),
@@ -46,18 +44,18 @@ export const authOptions: NextAuthOptions = {
 	callbacks: {
 		async jwt({ token, user }) {
 			if (user) {
+				token.id = user.id;
 				token.role = user.role as "ADMIN" | "COMPANY_ADMIN" | "COMPANY_USER";
-				token.companyId = user.companyId;
 				token.email = user.email;
 			}
 			return token;
 		},
 		async session({ session, token }) {
+			session.user.id = token.id as string;
 			session.user.role = token.role as
 				| "ADMIN"
 				| "COMPANY_ADMIN"
 				| "COMPANY_USER";
-			session.user.companyId = token.companyId;
 			session.user.email = token.email as string;
 			return session;
 		},

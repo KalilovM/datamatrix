@@ -7,16 +7,32 @@ export async function GET(request: Request) {
 	try {
 		const session = await getServerSession(authOptions);
 		if (!session?.user) {
-			return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+			return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
 		}
-		const user = session.user;
-		if (!user?.companyId) {
+		const user = await prisma.user.findUnique({
+			where: {
+				id: session.user.id,
+			},
+			select: {
+				role: true,
+				companyId: true,
+			},
+		});
+		if (!user) {
 			return NextResponse.json(
-				{ error: "Требуется наличие компании", user: user },
+				{ message: "Пользователь не найден" },
+				{ status: 401 },
+			);
+		}
+		const { role, companyId } = user;
+		if (!companyId) {
+			return NextResponse.json(
+				{ message: "Не установлен ID компании" },
 				{ status: 404 },
 			);
 		}
-		if (user.role === "ADMIN") {
+
+		if (role === "ADMIN") {
 			const nomenclatureOptions = await prisma.nomenclature.findMany({
 				select: {
 					id: true,
@@ -31,7 +47,7 @@ export async function GET(request: Request) {
 		}
 
 		const nomenclatureOptions = await prisma.nomenclature.findMany({
-			where: { companyId: user.companyId },
+			where: { companyId },
 			select: {
 				id: true,
 				name: true,

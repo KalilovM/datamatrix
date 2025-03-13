@@ -8,7 +8,22 @@ export async function GET() {
 	if (!session?.user) {
 		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
 	}
-	const { role, companyId } = session.user;
+	const user = await prisma.user.findUnique({
+		where: {
+			id: session.user.id,
+		},
+		select: {
+			role: true,
+			companyId: true,
+		},
+	});
+	if (!user) {
+		return NextResponse.json(
+			{ message: "Пользователь не найден" },
+			{ status: 401 },
+		);
+	}
+	const { role, companyId } = user;
 	let nomenclatures;
 	if (role === "ADMIN") {
 		nomenclatures = await prisma.nomenclature.findMany({
@@ -29,7 +44,7 @@ export async function GET() {
 		if (!companyId) {
 			return NextResponse.json(
 				{ message: "Не установлен ID компании" },
-				{ status: 400 },
+				{ status: 404 },
 			);
 		}
 		nomenclatures = await prisma.nomenclature.findMany({

@@ -3,11 +3,11 @@ import { fetchCompanies, fetchUser } from "./actions";
 import UserEditForm from "./form";
 
 interface PageProps {
-	params: { id: string };
+	params: Promise<{ id: string }>;
 }
 
 export default async function Page({ params }: PageProps) {
-	const user = await fetchUser(params.id);
+	const user = await fetchUser((await params).id);
 	const companies = await fetchCompanies();
 
 	return (

@@ -5,13 +5,27 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
 	try {
-		// Get the current user session
 		const session = await getServerSession(authOptions);
+		console.log("SESSION", session);
 		if (!session?.user) {
-			return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+			return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
 		}
-
-		const { companyId, role } = session.user;
+		const user = await prisma.user.findUnique({
+			where: {
+				id: session.user.id,
+			},
+			select: {
+				role: true,
+				companyId: true,
+			},
+		});
+		if (!user) {
+			return NextResponse.json(
+				{ message: "Пользователь не найден" },
+				{ status: 401 },
+			);
+		}
+		const { role, companyId } = user;
 
 		let companies;
 		if (role === "ADMIN") {
