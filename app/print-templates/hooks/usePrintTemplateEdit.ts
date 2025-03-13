@@ -16,7 +16,7 @@ export const printTemplateEdit = async (
 
 export const usePrintTemplateEdit = (id: string) => {
 	return useQuery<PrintTemplateData>({
-		queryKey: ["printingTemplatesEdit"],
+		queryKey: ["printingTemplatesEdit", id],
 		queryFn: async () => await printTemplateEdit(id),
 	});
 };

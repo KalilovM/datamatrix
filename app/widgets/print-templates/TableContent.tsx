@@ -6,7 +6,6 @@ import PrintTemplateRow from "./PrintTemplateRow";
 
 const TableContent: React.FC = () => {
 	const { data: templates, isLoading, isError } = usePrintTemplates();
-	console.log(templates);
 
 	if (isLoading) return <p>Загрузка шаблонов...</p>;
 	if (isError) return <p>Ошибка при загрузке шаблонов</p>;

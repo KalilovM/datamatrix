@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -9,10 +10,17 @@ import PrintingPreview from "./PrintingPreview";
 
 enum TemplateFieldType {
 	NAME = "name",
-	MODEL_ARTICLE = "modelArticle",
+	MODEL_ARTICLE = "model_article",
 	COLOR = "color",
 	SIZE = "size",
 }
+
+const printRenamings = {
+	model_article: "modelArticle",
+	name: "name",
+	color: "color",
+	size: "size",
+};
 
 const fieldOptions = [
 	{ value: TemplateFieldType.NAME, label: "Имя" },
@@ -45,6 +53,7 @@ interface PrintTemplateEditFormProps {
 
 const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	// Map initialData to our form shape.
 	const defaultValues: EditPrintTemplateFormValues = {
 		name: initialData.name,
@@ -59,7 +68,7 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 			.sort((a, b) => a.order - b.order)
 			.map((field) => ({
 				id: field.id,
-				fieldType: field.fieldType,
+				fieldType: field.fieldType.toLowerCase(),
 				isBold: field.isBold,
 				// Convert fontSize from string to number for the input.
 				fontSize: Number(field.fontSize),
@@ -85,6 +94,7 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 
 	// Manage field count and defaults based on QR position.
 	useEffect(() => {
+		console.log(defaultValues);
 		if (qrPosition === "CENTER") {
 			// When in CENTER mode, only allow one field (with "Имя")
 			setValue("fields", [
@@ -118,9 +128,9 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 	// Update available fields options when not in CENTER mode.
 	const [availableFields, setAvailableFields] = useState(fieldOptions);
 	useEffect(() => {
+		console.log(fields);
 		if (qrPosition !== "CENTER") {
 			const selectedFields = getValues("fields").map((f) => f.fieldType);
-			console.log(selectedFields);
 			setAvailableFields(
 				fieldOptions.filter((opt) => !selectedFields.includes(opt.value)),
 			);
@@ -129,13 +139,19 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 
 	const onSubmit = async (data: EditPrintTemplateFormValues) => {
 		try {
-			const res = await fetch(`/api/printing-templates/${initialData.id}`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(data),
-			});
+			const res = await fetch(
+				`/api/printing-templates/${initialData.id}/edit`,
+				{
+					method: "PUT",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(data),
+				},
+			);
 			if (res.ok) {
 				toast.success("Шаблон печати успешно обновлен");
+				queryClient.invalidateQueries({
+					queryKey: ["printingTemplatesEdit", initialData.id],
+				});
 				router.push("/print-templates");
 			} else {
 				const { error } = await res.json();
@@ -230,7 +246,6 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 									(opt) => opt.value === currentValue,
 								);
 
-								console.log(availableFields);
 								const optionsToRender =
 									currentValue &&
 									!availableFields.some((opt) => opt.value === currentValue) &&
@@ -282,11 +297,18 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 				))}
 			</div>
 
-			<div className="w-full">
+			<div className="w-full h-full">
 				<PrintingPreview
-					textFields={fields}
+					textFields={fields.map((f) => ({
+						field: printRenamings[f.fieldType],
+						bold: f.isBold,
+						size: f.fontSize,
+					}))}
 					qrPosition={qrPosition}
-					canvasSize={canvasSize}
+					canvasSize={{
+						width: `${canvasSize.width}mm`,
+						height: `${canvasSize.height}mm`,
+					}}
 				/>
 			</div>
 

@@ -49,6 +49,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 		<div className="flex flex-col gap-2 p-2 w-full h-full">
 			{textFields.map((tf, index) => {
 				if (!tf.field) return null;
+				console.log(textFields);
 				return (
 					<div
 						key={index}
