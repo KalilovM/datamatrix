@@ -13,5 +13,5 @@ const Page = () => {
 };
 
 export default withRole(Page, {
-	allowedRoles: ["COMPANY_ADMIN", "COMPANY_USER"],
+	allowedRoles: ["COMPANY_ADMIN", "COMPANY_USER", "ADMIN"],
 });
