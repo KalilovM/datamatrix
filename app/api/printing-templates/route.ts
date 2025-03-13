@@ -24,6 +24,7 @@ export async function GET(request: Request) {
 				{ status: 401 },
 			);
 		}
+
 		if (!user?.companyId) {
 			return NextResponse.json(
 				{ error: "Требуется наличие компании" },
@@ -71,10 +72,30 @@ export async function POST(request: Request) {
 		// Ensure the user is authenticated and has an associated company
 		const session = await getServerSession(authOptions);
 		if (!session?.user) {
-			return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+			return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
+		}
+		const user = await prisma.user.findUnique({
+			where: {
+				id: session.user.id,
+			},
+			select: {
+				companyId: true,
+			},
+		});
+		if (!user) {
+			return NextResponse.json(
+				{ message: "Пользователь не найден" },
+				{ status: 401 },
+			);
 		}
 
-		const { companyId } = session.user;
+		if (!user?.companyId) {
+			return NextResponse.json(
+				{ error: "Требуется наличие компании" },
+				{ status: 401 },
+			);
+		}
+		const { companyId } = user;
 		if (!companyId) {
 			return NextResponse.json(
 				{ error: "Требуется наличие компании" },
