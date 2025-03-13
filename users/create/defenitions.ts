@@ -18,10 +18,10 @@ export const NewUserSchema = z.object({
     .string()
     .min(8, { message: "Пароль должен содержать не менее 8 символов" }),
   role: z.nativeEnum(Role, { message: "Неверное значение для роли" }),
-  companyId: z
-    .string()
-    .uuid({ message: "Некорректный UUID для компании" })
-    .optional(),
+  companyId: z.object({
+    value: z.string(),
+    label: z.string(),
+  }).nullable().optional()
 });
 
 export type FormState =
