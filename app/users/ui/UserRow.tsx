@@ -2,6 +2,7 @@
 
 import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { BinIcon, EditIcon } from "@/shared/ui/icons";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,6 +16,7 @@ interface UserRowProps {
 export default function UserRow({ user }: UserRowProps) {
 	const router = useRouter();
 	const [isModalOpen, setModalOpen] = useState(false);
+	const queryClient = useQueryClient();
 
 	const handleDelete = () => setModalOpen(true);
 
@@ -24,9 +26,11 @@ export default function UserRow({ user }: UserRowProps) {
 				method: "DELETE",
 			});
 			if (!res.ok) throw new Error("Ошибка удаления пользователя");
-
-			toast.success("Пользователь удален");
+			queryClient.invalidateQueries({
+				queryKey: ["users"],
+			});
 			router.refresh();
+			toast.success("Пользователь удален");
 		} catch (err) {
 			toast.error("Ошибка при удалении пользователя");
 		} finally {

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
@@ -19,6 +19,7 @@ interface Props {
 
 export default function UserEditForm({ user, companies }: Props) {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const {
 		register,
 		handleSubmit,
@@ -43,6 +44,9 @@ export default function UserEditForm({ user, companies }: Props) {
 		mutationFn: (data: FormData) => updateUser(user.id, data),
 		onSuccess: () => {
 			toast.success("Пользователь обновлен успешно!");
+			queryClient.invalidateQueries({
+				queryKey: ["user", user.id],
+			});
 			router.push("/companies");
 		},
 		onError: () => {
