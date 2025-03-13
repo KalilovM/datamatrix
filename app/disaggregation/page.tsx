@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import DisaggregationForm from "@/components/disaggregation/DisaggregationForm";
 import { withRole } from "@/shared/configs/withRole";
