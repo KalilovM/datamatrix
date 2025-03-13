@@ -1,16 +1,34 @@
 "use client";
 
 import { sidebarItems } from "@/shared/configs/SidebarItems";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function Sidebar() {
+	const { data: session, status } = useSession();
 	const pathname = usePathname();
+
+	if (status === "loading") {
+		return <div>Loading sidebar...</div>;
+	}
+
+	// By default, show all items.
+	let allowedItems = sidebarItems;
+
+	// For Пользователь role, filter items.
+	if (session?.user?.role === "COMPANY_USER") {
+		allowedItems = sidebarItems.filter((item) =>
+			["Агрегация", "Аггрегированные коды", "Разагрегация", "Заказы"].includes(
+				item.name,
+			),
+		);
+	}
 
 	return (
 		<aside className="fixed left-0 top-16 z-40 h-full w-64 bg-white px-3 py-4 print:hidden">
 			<ul className="space-y-2 font-medium">
-				{sidebarItems.map((item) => (
+				{allowedItems.map((item) => (
 					<li key={item.href}>
 						<Link
 							href={item.href}

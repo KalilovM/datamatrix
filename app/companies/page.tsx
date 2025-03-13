@@ -1,11 +1,12 @@
 "use client";
 
-import CompaniesTable from "./ui/CompaniesTable";
-import { useCompanies } from "./model/useCompanies";
+import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import UsersTable from "@/users/ui/UserTable";
+import { useCompanies } from "./model/useCompanies";
+import CompaniesTable from "./ui/CompaniesTable";
 
-export default function CompaniesPage() {
+const CompaniesPage = () => {
   const { companies, users, error, loading } = useCompanies();
 
   if (loading) return <p className="text-center mt-10">Загрузка данных...</p>;
@@ -19,3 +20,5 @@ export default function CompaniesPage() {
     </Layout>
   );
 }
+
+export default withRole(CompaniesPage, {allowedRoles: ["ADMIN", "COMPANY_ADMIN"]})

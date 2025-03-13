@@ -1,10 +1,11 @@
 "use server";
 
 import OrderCreationForm from "@/components/orders/OrderCreationForm";
+import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import { getCounteragentOptions } from "./actions";
 
-export default async function Page() {
+const Page= () => {
 	const counteragentOptions = await getCounteragentOptions();
 	return (
 		<Layout>
@@ -12,3 +13,6 @@ export default async function Page() {
 		</Layout>
 	);
 }
+
+
+export default withRole(Page, {allowedRoles:["ADMIN", "COMPANY_USER", "COMPANY_ADMIN"]})

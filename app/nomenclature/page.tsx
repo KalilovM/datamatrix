@@ -1,10 +1,11 @@
 "use client";
 
+import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import { useNomenclatures } from "./hooks/useNomenclatures";
 import NomenclatureTable from "./ui/NomenclatureTable";
 
-export default function Page() {
+const Page = () => {
 	const { data: nomenclatures, isLoading, error } = useNomenclatures();
 
 	if (isLoading) return <Layout>Загрузка...</Layout>;
@@ -15,4 +16,8 @@ export default function Page() {
 			<NomenclatureTable nomenclatures={nomenclatures} />
 		</Layout>
 	);
-}
+};
+
+export default withRole(Page, {
+	allowedRoles: ["ADMIN", "COMPANY_ADMIN"],
+});

@@ -1,7 +1,9 @@
+"use client";
 import type { Role } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Layout from "../ui/Layout";
 
 interface WithRoleOptions {
 	allowedRoles: Role[];
@@ -28,12 +30,11 @@ export function withRole<P extends object>(
 		}, [session, status, router]);
 
 		if (status === "loading" || !session) {
-			return <div>Loading...</div>;
+			return <Layout>Загрузка...</Layout>;
 		}
 
-		// Although the effect should handle redirection, this is an extra safeguard.
 		if (!options.allowedRoles.includes(session.user.role as Role)) {
-			return <div>Нет доступа</div>;
+			return <Layout>Нет доступа</Layout>;
 		}
 
 		return <WrappedComponent {...props} />;

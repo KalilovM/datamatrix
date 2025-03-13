@@ -33,7 +33,6 @@ export function LoginForm() {
 			setError(result.error);
 			return;
 		}
-
 		router.push("/companies");
 	};
 

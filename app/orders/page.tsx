@@ -2,10 +2,11 @@
 
 import OrderTableRow from "@/components/orders/OrderTableRow";
 import { useOrders } from "@/features/orders/hooks/useOrders";
+import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import Link from "next/link";
 
-export default function Page() {
+const Page = () => {
 	const { data: orders, error, isLoading } = useOrders();
 
 	if (isLoading) {
@@ -60,4 +61,8 @@ export default function Page() {
 			</div>
 		</Layout>
 	);
-}
+};
+
+export default withRole(Page, {
+	allowedRoles: ["ADMIN", "COMPANY_USER", "COMPANY_ADMIN"],
+});
