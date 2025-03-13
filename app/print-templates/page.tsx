@@ -1,3 +1,5 @@
+"use client";
+
 import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import TableContent from "@/widgets/print-templates/TableContent";
