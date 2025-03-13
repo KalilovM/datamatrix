@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { useConfigurations } from "../api/configurationApi";
@@ -22,14 +23,19 @@ export default function AggregationSelectors({
 		setSelectedConfiguration,
 		configurations,
 		setConfigurations,
+		reset,
 	} = useAggregationSelectionStore();
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		reset();
+	}, [reset]);
 
 	const { data: fetchedConfigurations } = useConfigurations(
 		selectedNomenclature?.id || null,
 	);
 
 	useEffect(() => {
-		console.log(fetchedConfigurations);
 		if (fetchedConfigurations) {
 			setConfigurations(fetchedConfigurations);
 		}
@@ -49,6 +55,9 @@ export default function AggregationSelectors({
 		option: { label: string; value: NomenclatureOption } | null,
 	) => {
 		setSelectedNomenclature(option ? option.value : null);
+		queryClient.invalidateQueries({
+			queryKey: ["configurations", selectedNomenclature?.id],
+		});
 	};
 
 	const handleConfigurationChange = (

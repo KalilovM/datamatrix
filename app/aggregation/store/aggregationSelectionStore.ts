@@ -1,5 +1,3 @@
-"use client";
-
 import { create } from "zustand";
 import type { AggregationConfig, NomenclatureOption } from "../model/types";
 
@@ -7,10 +5,10 @@ interface AggregationSelectionState {
 	selectedNomenclature: NomenclatureOption | null;
 	selectedConfiguration: AggregationConfig | null;
 	configurations: AggregationConfig[];
-
-	setSelectedNomenclature: (nomenclature: NomenclatureOption) => void;
-	setSelectedConfiguration: (config: AggregationConfig) => void;
+	setSelectedNomenclature: (nomenclature: NomenclatureOption | null) => void;
+	setSelectedConfiguration: (config: AggregationConfig | null) => void;
 	setConfigurations: (configs: AggregationConfig[]) => void;
+	reset: () => void;
 }
 
 export const useAggregationSelectionStore = create<AggregationSelectionState>(
@@ -27,5 +25,11 @@ export const useAggregationSelectionStore = create<AggregationSelectionState>(
 		setSelectedConfiguration: (config) =>
 			set({ selectedConfiguration: config }),
 		setConfigurations: (configs) => set({ configurations: configs }),
+		reset: () =>
+			set({
+				selectedNomenclature: null,
+				selectedConfiguration: null,
+				configurations: [],
+			}),
 	}),
 );

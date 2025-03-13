@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -16,6 +17,7 @@ import ConfigurationTable from "./ConfigurationTable";
 
 export default function NomenclatureForm() {
 	const { nomenclature, reset } = useNomenclatureStore();
+	const queryClient = useQueryClient();
 	const router = useRouter();
 	const {
 		register,
@@ -30,6 +32,9 @@ export default function NomenclatureForm() {
 		onSuccess: (nom) => {
 			toast.success("Номенклатура сохранена!");
 			reset();
+			queryClient.invalidateQueries({
+				queryKey: ["nomenclatures", "nomenclatureOptions"],
+			});
 			router.push(`/nomenclature/${nom.id}/edit`);
 		},
 		onError: (error) => {

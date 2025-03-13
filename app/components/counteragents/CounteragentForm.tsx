@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -8,6 +9,7 @@ import { toast } from "react-toastify";
 
 const CounteragentForm: React.FC = () => {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -20,6 +22,9 @@ const CounteragentForm: React.FC = () => {
 			});
 			if (res.ok) {
 				toast.success("Контрагент успешно сохранена!");
+				queryClient.invalidateQueries({
+					queryKey: ["counteragents", "counteragentOptions"],
+				});
 				router.push("/counteragents");
 			} else {
 				const data = await res.json();

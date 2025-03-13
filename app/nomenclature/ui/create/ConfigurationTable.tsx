@@ -32,17 +32,12 @@ export default function ConfigurationTable({
 
 	const handleSave = (config: ConfigurationOption) => {
 		if (editingConfig) {
-			// Update an existing configuration
 			const updated = configurations.map((c) =>
 				c.label === editingConfig.label ? config : c,
 			);
 			onChange(updated);
-			toast.success("Конфигурация обновлена");
-		} else {
-			// Add new configuration
-			onChange([...configurations, config]);
-			toast.success("Конфигурация добавлена");
 		}
+		toast.success("Конфигурация обновлена");
 		setIsModalOpen(false);
 		setEditingConfig(null);
 	};
@@ -59,9 +54,9 @@ export default function ConfigurationTable({
 							setEditingConfig(null);
 							setIsModalOpen(true);
 						}}
-						className="bg-blue-500 px-4 py-2 text-white rounded-md cursor-pointer"
+						className="bg-blue-500 px-4 py-2 text-white rounded-md cursor-pointer flex flex-row gap-1 items-center"
 					>
-						Создать
+						<span>Создать</span>
 						<PlusIcon className="size-5" />
 					</button>
 				</div>

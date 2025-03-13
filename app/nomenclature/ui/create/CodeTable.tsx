@@ -39,8 +39,9 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 					<button
 						type="button"
 						onClick={() => setIsModalOpen(true)}
-						className="bg-blue-500 px-4 py-2 text-white rounded-md cursor-pointer"
+						className="bg-blue-500 px-4 py-2 text-white rounded-md cursor-pointer flex flex-row gap-1 items-center"
 					>
+						<span>Загрузить</span>
 						<UploadIcon className="size-5" />
 					</button>
 				</div>

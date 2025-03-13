@@ -10,12 +10,14 @@ const Page = () => {
 		data: counteragentOptions,
 		isLoading,
 		isError,
+		error,
 	} = useCounteragentOptions();
 	if (isLoading) {
 		return <Layout>Загрузка...</Layout>;
 	}
 	if (isError) {
-		return <Layout>Произошла ошибка: {isError.message}</Layout>;
+		throw error;
+		// return <Layout>Произошла ошибка: {error}</Layout>;
 	}
 	return (
 		<Layout>
