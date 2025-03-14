@@ -125,7 +125,7 @@ export default function DisaggregationForm() {
 			<div className="flex flex-col w-full rounded-lg border border-blue-300 bg-white px-8 py-3 justify-center items-start gap-4">
 				<div className="w-1/2 flex flex-col">
 					<label htmlFor="generatedCode" className="block">
-						Датаматрикс Код
+						Агрегированный код
 					</label>
 					<input
 						name="generatedCode"

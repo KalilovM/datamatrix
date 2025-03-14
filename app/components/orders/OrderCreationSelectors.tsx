@@ -179,7 +179,7 @@ export default function OrderCreationSelectors({
 					</div>
 					<div className="w-1/2 flex flex-col">
 						<label htmlFor="configuration" className="block">
-							Датаматрикс Код
+							Агрегированный код
 						</label>
 						<input
 							ref={inputRef}

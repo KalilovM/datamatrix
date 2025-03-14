@@ -260,7 +260,7 @@ export const UploadCloudIcon = ({
 	</svg>
 );
 
-export const AggregationIcon = ({
+export const OrderIcon = ({
 	fill = "none",
 	stroke = "currentColor",
 	strokeWidth = "1.5",
@@ -359,6 +359,72 @@ export const UploadIcon = ({
 			strokeLinecap="round"
 			strokeLinejoin="round"
 			d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+		></path>
+	</svg>
+);
+
+export const AggregationIcon = ({
+	fill = "none",
+	stroke = "currentColor",
+	strokeWidth = "1.5",
+	className = "size-6",
+}: IconProps) => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		fill={fill}
+		stroke={stroke}
+		strokeWidth={strokeWidth}
+		className={className}
+		viewBox="0 0 24 24"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48 48 0 0 0-1.123-.08m-5.801 0q-.099.316-.1.664c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.3 2.3 0 0 0-.1-.664m-5.8 0A2.25 2.25 0 0 1 13.5 2.25H15a2.25 2.25 0 0 1 2.15 1.586m-5.8 0q-.563.035-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125zM6.75 12h.008v.008H6.75zm0 3h.008v.008H6.75zm0 3h.008v.008H6.75z"
+		></path>
+	</svg>
+);
+
+export const DisaggregationIcon = ({
+	fill = "none",
+	stroke = "currentColor",
+	strokeWidth = "1.5",
+	className = "size-6",
+}: IconProps) => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		fill={fill}
+		stroke={stroke}
+		strokeWidth={strokeWidth}
+		className={className}
+		viewBox="0 0 24 24"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192q.56-.045 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48 48 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.25 2.25 0 0 0 15 2.25h-1.5a2.25 2.25 0 0 0-2.15 1.586m5.8 0q.099.316.1.664v.75h-6V4.5q.001-.348.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9"
+		></path>
+	</svg>
+);
+
+export const AggregatedCodesIcon = ({
+	fill = "none",
+	stroke = "currentColor",
+	strokeWidth = "1.5",
+	className = "size-6",
+}: IconProps) => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		fill={fill}
+		stroke={stroke}
+		strokeWidth={strokeWidth}
+		className={className}
+		viewBox="0 0 24 24"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125"
 		></path>
 	</svg>
 );

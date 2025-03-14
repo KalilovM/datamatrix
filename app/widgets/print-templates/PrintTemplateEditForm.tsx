@@ -183,13 +183,13 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 					<option value="NOMENCLATURE">Номенклатура</option>
 				</select>
 
-				<label className="font-bold">Тип QR-кода:</label>
+				<label className="font-bold">Тип кода:</label>
 				<select {...register("qrType")} className="border rounded p-2 w-full">
 					<option value="QR">QR</option>
 					<option value="DATAMATRIX">Data Matrix</option>
 				</select>
 
-				<label className="font-bold">Позиция QR-кода:</label>
+				<label className="font-bold">Позиция кода:</label>
 				<select
 					{...register("qrPosition")}
 					className="border rounded p-2 w-full"
