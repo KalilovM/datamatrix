@@ -51,14 +51,17 @@ services:
 
   # Certbot container for automatic renewal
   certbot:
+    container_name: certbot
     image: certbot/certbot:latest
-    # Mount volumes so certbot can save/renew certs and place challenge files
+    depends_on:
+      - nginx
+    command: >-
+      certonly --reinstall --webroot --webroot-path=/var/www/certbot
+      --email mn.kalilov@gmail.com --agree-tos --no-eff-email
+      -d dm.alonamoda.com
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./letsencrypt:/etc/letsencrypt
-    # This container runs in the background, attempting to renew every 12 hours
-    entrypoint: /bin/sh
-    command: -c "trap exit 0 SIGTERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h; done"
 
 volumes:
   postgres_data:
