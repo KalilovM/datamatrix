@@ -118,7 +118,7 @@ export default function DisaggregationForm() {
 						onClick={handleSave}
 						className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md"
 					>
-						Сохарнить
+						Сохранить
 					</button>
 				</div>
 			</div>

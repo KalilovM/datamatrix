@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 		},
 	});
 	await prisma.code.updateMany({
-		where: { value: { in: packCodes } },
+		where: { formattedValue: { in: formattedValue } },
 		data: { used: true },
 	});
 	return new Response(JSON.stringify({ value: uniqueCode }), { status: 200 });
