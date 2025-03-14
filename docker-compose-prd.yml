@@ -35,16 +35,30 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:3000/api
     command: npm start
 
+  # Nginx container
   nginx:
     image: nginx:latest
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - /etc/letsencrypt/live/dm.alonamoda.com:/etc/nginx/ssl:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount the same directories Certbot uses so Nginx can serve and read the certs
+      - ./certbot/www:/var/www/certbot:ro
+      - ./letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - app
+
+  # Certbot container for automatic renewal
+  certbot:
+    image: certbot/certbot:latest
+    # Mount volumes so certbot can save/renew certs and place challenge files
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./letsencrypt:/etc/letsencrypt
+    # This container runs in the background, attempting to renew every 12 hours
+    entrypoint: /bin/sh
+    command: -c "trap exit 0 SIGTERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h; done"
 
 volumes:
   postgres_data:
