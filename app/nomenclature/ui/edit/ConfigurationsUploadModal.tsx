@@ -43,9 +43,6 @@ export default function ConfigurationsUploadModal({
 		};
 
 		onSave(newConfig);
-		toast.success(
-			config ? "Конфигурация обновлена!" : "Конфигурация добавлена!",
-		);
 		onClose();
 	};
 

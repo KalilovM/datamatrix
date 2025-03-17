@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
@@ -19,6 +20,7 @@ interface Props {
 
 export default function CompanyCreateForm({ users }: Props) {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const {
 		register,
 		handleSubmit,
@@ -38,6 +40,9 @@ export default function CompanyCreateForm({ users }: Props) {
 		mutationFn: createNewCompany,
 		onSuccess: () => {
 			toast.success("Компания создана успешно!");
+			queryClient.invalidateQueries({
+				queryKey: ["companies"],
+			});
 			router.push("/companies");
 		},
 		onError: () => {

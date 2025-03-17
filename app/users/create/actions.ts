@@ -10,6 +10,14 @@ export async function fetchCompanies() {
 }
 
 export async function createUser(data: FormData) {
+	const existingUsername = await prisma.user.findUnique({
+		where: { username: data.username },
+	});
+
+	if (existingUsername) {
+		throw new Error("Имя пользователя уже занято.");
+	}
+
 	await prisma.user.create({
 		data: {
 			email: data.email,

@@ -76,7 +76,6 @@ export async function POST(req: Request) {
 	try {
 		const { code } = await req.json();
 
-		// Find the generated code pack by its unique code value and include its associated codes
 		const generatedCodePack = await prisma.generatedCodePack.findUnique({
 			where: { value: code },
 			include: { codes: true },
@@ -106,7 +105,7 @@ export async function POST(req: Request) {
 		});
 
 		return NextResponse.json({
-			message: "Коды обновлены, пакет удалён",
+			message: "Коды обновлены, агрегированный код удалён",
 		});
 	} catch (error: any) {
 		console.error("Ошибка при обновлении кодов:", error);

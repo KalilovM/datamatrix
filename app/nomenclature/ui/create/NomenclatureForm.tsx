@@ -1,9 +1,11 @@
 "use client";
 
+import { useConfigurationsStore } from "@/nomenclature/stores/configurationsStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { createNomenclature } from "../../model/actions";
@@ -17,6 +19,7 @@ import ConfigurationTable from "./ConfigurationTable";
 
 export default function NomenclatureForm() {
 	const { nomenclature, reset } = useNomenclatureStore();
+	const resetConfigurations = useConfigurationsStore((state) => state.reset);
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const {
@@ -33,7 +36,10 @@ export default function NomenclatureForm() {
 			toast.success("Номенклатура сохранена!");
 			reset();
 			queryClient.invalidateQueries({
-				queryKey: ["nomenclatures", "nomenclatureOptions"],
+				queryKey: ["nomenclatures"],
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["nomenclaturesOptions"],
 			});
 			router.push(`/nomenclature/${nom.id}/edit`);
 		},
@@ -43,7 +49,12 @@ export default function NomenclatureForm() {
 		},
 	});
 
+	useEffect(() => {
+		resetConfigurations();
+	}, [resetConfigurations]);
+
 	const onSubmit = (data: NomenclatureFormData) => {
+		// console.log(data);
 		mutation.mutate({ ...data });
 	};
 

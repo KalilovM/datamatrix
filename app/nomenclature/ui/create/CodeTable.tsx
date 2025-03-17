@@ -41,7 +41,6 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	// When new code files are uploaded, we parse their CSV content.
 	const handleUpload = (newCodes: Code[]) => {
 		onChange([...codes, ...newCodes]);
-		console.log(newCodes);
 
 		// For each new code file, split the CSV content by new lines,
 		// trim each row, and filter out any empty rows.

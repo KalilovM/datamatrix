@@ -23,7 +23,10 @@ const CounteragentForm: React.FC = () => {
 			if (res.ok) {
 				toast.success("Контрагент успешно сохранена!");
 				queryClient.invalidateQueries({
-					queryKey: ["counteragents", "counteragentOptions"],
+					queryKey: ["counteragents"],
+				});
+				queryClient.invalidateQueries({
+					queryKey: ["counteragentOptions"],
 				});
 				router.push("/counteragents");
 			} else {

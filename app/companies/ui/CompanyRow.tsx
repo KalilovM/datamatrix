@@ -3,6 +3,7 @@
 import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { BinIcon, EditIcon } from "@/shared/ui/icons";
 import type { Company } from "@prisma/client";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +15,7 @@ interface CompanyRowProps {
 
 export default function CompanyRow({ company }: CompanyRowProps) {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const [isModalOpen, setModalOpen] = useState(false);
 
 	const confirmDelete = async () => {
@@ -22,7 +24,9 @@ export default function CompanyRow({ company }: CompanyRowProps) {
 				method: "DELETE",
 			});
 			if (!res.ok) throw new Error("Ошибка удаления компании");
-
+			queryClient.invalidateQueries({
+				queryKey: ["companies"],
+			});
 			toast.success("Компания удалена");
 			router.refresh();
 		} catch (err: unknown) {

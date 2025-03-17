@@ -1,9 +1,9 @@
+import { useConfigurationsStore } from "@/nomenclature/stores/configurationsStore";
 import { BinIcon, EditIcon, PlusIcon } from "@/shared/ui/icons";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import ConfigurationsUploadModal, {
-	type ConfigurationOption,
-} from "./ConfigurationsUploadModal";
+import ConfigurationsUploadModal from "./ConfigurationsUploadModal";
+import type { ConfigurationOption } from "./ConfigurationsUploadModal";
 
 interface ConfigurationTableProps {
 	value?: ConfigurationOption[]; // controlled configurations array
@@ -11,35 +11,57 @@ interface ConfigurationTableProps {
 }
 
 export default function ConfigurationTable({
-	value = [],
+	value,
 	onChange,
 }: ConfigurationTableProps) {
-	const configurations = value;
+	const {
+		configurations,
+		addConfiguration,
+		updateConfiguration,
+		removeConfiguration,
+	} = useConfigurationsStore();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingConfig, setEditingConfig] =
 		useState<ConfigurationOption | null>(null);
 
 	const handleEdit = (config: ConfigurationOption) => {
 		setEditingConfig(config);
+		updateConfiguration(config.label, config);
+		const updatedConfigurations = configurations.map((c) =>
+			c.label === config.label ? config : c,
+		);
+		onChange(updatedConfigurations);
 		setIsModalOpen(true);
 	};
 
 	const handleDelete = (label: string) => {
-		const updated = configurations.filter((config) => config.label !== label);
-		onChange(updated);
+		removeConfiguration(label);
+		const updatedConfigurations = configurations.filter(
+			(c) => c.label !== label,
+		);
+		onChange(updatedConfigurations);
 		toast.success("Конфигурация удалена");
 	};
 
 	const handleSave = (config: ConfigurationOption) => {
+		let updatedConfigurations: ConfigurationOption[];
+
 		if (editingConfig) {
-			const updated = configurations.map((c) =>
+			updateConfiguration(editingConfig.label, config);
+			updatedConfigurations = configurations.map((c) =>
 				c.label === editingConfig.label ? config : c,
 			);
-			onChange(updated);
+		} else {
+			addConfiguration(config);
+			updatedConfigurations = [...configurations, config];
 		}
-		toast.success("Конфигурация обновлена");
+
+		onChange(updatedConfigurations);
 		setIsModalOpen(false);
 		setEditingConfig(null);
+		toast.success(
+			editingConfig ? "Конфигурация обновлена!" : "Конфигурация добавлена!",
+		);
 	};
 
 	return (

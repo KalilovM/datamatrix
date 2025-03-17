@@ -10,7 +10,7 @@ datasource db {
 
 model User {
   id          String       @id @default(uuid())
-  email       String       @unique
+  email       String
   username    String       @unique
   password    String
   role        Role?
@@ -176,7 +176,7 @@ model Counteragent {
 }
 
 model Order {
-  id                   String                @id
+  id                   Int                   @id @default(autoincrement())
   company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId            String
   counteragent         Counteragent          @relation(fields: [counteragentId], references: [id], onDelete: Cascade)

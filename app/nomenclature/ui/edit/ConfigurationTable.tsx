@@ -37,7 +37,6 @@ export default function ConfigurationTable({
 				c.label === editingConfig.label ? config : c,
 			);
 			onChange(updated);
-			toast.success("Конфигурация обновлена");
 		} else {
 			// Add new configuration
 			onChange([...configurations, config]);

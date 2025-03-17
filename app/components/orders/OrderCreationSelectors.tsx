@@ -11,11 +11,13 @@ export default function OrderCreationSelectors({
 	onCodesFetched,
 	handleDownloadCSV,
 	codes,
+	setGeneratedCodes,
 }: {
 	counteragentOptionsProps: ICounteragentOption[];
 	onCodesFetched: (codes: string[]) => void;
 	handleDownloadCSV: () => void;
 	codes: string[];
+	setGeneratedCodes: (codes: string[]) => void;
 }) {
 	const router = useRouter();
 	const [counteragentOptions] = useState(
@@ -65,11 +67,11 @@ export default function OrderCreationSelectors({
 
 	const validateCode = async (code: string) => {
 		if (!code) return;
-
+		const generatedCode = code.trim();
 		try {
 			const response = await fetch("/api/orders/validate-generated-code", {
 				method: "POST",
-				body: JSON.stringify({ generatedCode: code }),
+				body: JSON.stringify({ generatedCode: generatedCode }),
 				headers: { "Content-Type": "application/json" },
 			});
 
@@ -82,6 +84,10 @@ export default function OrderCreationSelectors({
 				onCodesFetched((prevCodes: string[]) => [
 					...prevCodes,
 					...data.linkedCodes.map((c: { value: string }) => c.value),
+				]);
+				setGeneratedCodes((prevCodes: string[]) => [
+					...prevCodes,
+					generatedCode,
 				]);
 				setListDebouncedGeneratedCodes((prevCodes: string[]) => [
 					...prevCodes,

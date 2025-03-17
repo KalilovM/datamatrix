@@ -24,6 +24,7 @@ export default function UserCreateForm({ companies }: Props) {
 		handleSubmit,
 		control,
 		formState: { errors },
+		setError,
 	} = useForm<FormData>({
 		resolver: zodResolver(NewUserSchema),
 		defaultValues: {
@@ -41,8 +42,12 @@ export default function UserCreateForm({ companies }: Props) {
 			toast.success("Пользователь создан успешно!");
 			router.push("/companies");
 		},
-		onError: () => {
-			toast.error("Ошибка при создании пользователя");
+		onError: (error: any) => {
+			if (error.message.includes("Имя пользователя")) {
+				setError("username", { message: error.message });
+			} else {
+				toast.error("Ошибка при создании пользователя");
+			}
 		},
 	});
 
