@@ -132,7 +132,7 @@ model GeneratedCodePack {
   generatedCodePallet   GeneratedCodePallet? @relation(fields: [generatedCodePalletId], references: [id], onDelete: Cascade)
   generatedCodePalletId String?
   order                 Order?               @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  orderId               String?
+  orderId               Int?
 }
 
 model GeneratedCodePallet {
@@ -145,7 +145,7 @@ model GeneratedCodePallet {
   configurationId    String
   createdAt          DateTime            @default(now())
   order              Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  orderId            String?
+  orderId            Int?
 }
 
 model ServiceInfo {
@@ -177,6 +177,7 @@ model Counteragent {
 
 model Order {
   id                   Int                   @id @default(autoincrement())
+  showId               String?               @unique
   company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId            String
   counteragent         Counteragent          @relation(fields: [counteragentId], references: [id], onDelete: Cascade)

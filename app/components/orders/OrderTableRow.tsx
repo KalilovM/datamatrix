@@ -48,7 +48,7 @@ export default function OrderTableRow({ order }: { order: IOrder }) {
 		<>
 			<tr className="bg-white border-b border-gray-200 hover:bg-gray-50">
 				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-					{order.id}
+					{order.showId}
 				</td>
 				<td className="px-6 py-4 text-gray-600">{order.counteragent.name}</td>
 				<td className="px-6 py-4 text-right flex items-center justify-end">

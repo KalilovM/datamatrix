@@ -34,6 +34,7 @@ export async function GET(req: Request) {
 		where: { companyId: user.companyId },
 		select: {
 			id: true,
+			showId: true,
 			createdAt: true,
 			counteragent: {
 				select: {
@@ -90,14 +91,14 @@ export async function POST(req: Request) {
 		},
 	});
 
-	const orderId = `ORDER-${order.id.toString().padStart(7, "0")}`;
+	const orderId = `ORDER-${order.id.toString().padStart(8, "0")}`;
 
 	await prisma.order.update({
 		where: {
 			id: order.id,
 		},
 		data: {
-			id: orderId,
+			showId: orderId,
 		},
 	});
 
