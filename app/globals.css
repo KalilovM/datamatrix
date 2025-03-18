@@ -43,8 +43,6 @@
     @page {
         size: 58mm 40mm;
         /* size: auto; */
-        margin: 0;
-        paggin: 0;
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
@@ -68,14 +66,6 @@
     }
     .Toastify {
         display: none;
-    }
-    .print-container .centered {
-      text-align: start; /* Remove !important */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      width: fit-content;
-      align-items: start;
     }
 }
 

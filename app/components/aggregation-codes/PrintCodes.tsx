@@ -105,7 +105,7 @@ const PrintCodes: React.FC<Props> = ({
 							{sortedFields.map((field) => (
 								<div
 									key={field.order}
-									className="w-full h-full flex items-center text-start centered"
+									className="w-full h-full flex flex-col items-start text-start centered"
 									style={{ marginBottom: "1mm" }}
 								>
 									<strong
