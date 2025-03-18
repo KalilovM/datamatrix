@@ -2,14 +2,14 @@
 
 import type { IOrder } from "@/orders/defenitions";
 import ConfirmModal from "@/shared/ui/ConfirmModal";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { BinIcon, EditIcon } from "../Icons";
 
 export default function OrderTableRow({ order }: { order: IOrder }) {
-	const router = useRouter();
 	const [isModalOpen, setModalOpen] = useState(false);
+	const queryClient = useQueryClient();
 
 	const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
@@ -30,8 +30,10 @@ export default function OrderTableRow({ order }: { order: IOrder }) {
 				const error = await res.json();
 				toast.error(error.message || "Ошибка при удалении заказа");
 			} else {
+				queryClient.invalidateQueries({
+					queryKey: ["orders"],
+				});
 				toast.success("Заказ успешно удален");
-				router.refresh();
 			}
 		} catch (err) {
 			toast.error("Ошибка при удалении заказа");
