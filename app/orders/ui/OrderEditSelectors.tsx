@@ -1,16 +1,20 @@
 import type { ICounteragentOption } from "@/orders/create/defenitions";
-import { useOrderStore } from "@/orders/stores/useOrderStore";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { useOrderEditStore } from "../stores/useOrderEditStore";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-export default function OrderCreationSelectors({
+export default function OrderEditSelectors({
+	orderId,
+	initialSelectedCounteragent,
 	counteragentOptionsProps,
 	handleDownloadCSV,
 }: {
+	orderId: string;
+	initialSelectedCounteragent: { label: string; value: string };
 	counteragentOptionsProps: ICounteragentOption[];
 	handleDownloadCSV: () => void;
 }) {
@@ -21,12 +25,12 @@ export default function OrderCreationSelectors({
 			value: option.id,
 		})),
 	);
-	const { reset, addCodes, codes, getGeneratedCodes } = useOrderStore();
+	const { reset, addCodes, codes, getGeneratedCodes } = useOrderEditStore();
 	const [generatedCode, setGeneratedCode] = useState("");
 	const [selectedCounteragent, setSelectedCounteragent] = useState<{
 		label: string;
 		value: string;
-	} | null>(null);
+	}>(initialSelectedCounteragent);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -86,9 +90,11 @@ export default function OrderCreationSelectors({
 			return;
 		}
 
+		console.log(getGeneratedCodes());
+
 		try {
-			const response = await fetch("/api/orders/", {
-				method: "POST",
+			const response = await fetch(`/api/orders/${orderId}`, {
+				method: "PUT",
 				body: JSON.stringify({
 					counteragentId: selectedCounteragent.value,
 					generatedCodePacks: getGeneratedCodes(),
@@ -99,9 +105,9 @@ export default function OrderCreationSelectors({
 			const data = await response.json();
 
 			if (!response.ok) {
-				toast.error(data.error || "Ошибка при сохранении заказа");
+				toast.error(data.error || "Ошибка при обновлении заказа");
 			} else {
-				toast.success("Заказ успешно сохранен!");
+				toast.success("Заказ успешно сохрано обновлен!");
 				reset();
 				router.push("/orders");
 			}
