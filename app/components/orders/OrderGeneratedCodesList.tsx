@@ -1,24 +1,56 @@
-const OrderGeneratedCodesList = ({
-	generatedCodes,
-}: { generatedCodes: string[] }) => {
+import { useOrderStore } from "@/orders/stores/useOrderStore";
+import { BinIcon } from "@/shared/ui/icons";
+const OrderGeneratedCodesList = () => {
+	const { codes, setSelectedCode } = useOrderStore();
+
 	return (
-		<div className="table-layout flex flex-col h-full w-1/2">
-			<div className="table-header flex justify-between items-center">
-				<p className="table-header-title">Агрегированные коды</p>
-			</div>
-			<div className="table-rows-layout flex-1">
-				{generatedCodes.length === 0 ? (
-					<p className="text-gray-500 p-4">Нет агрегированных кодов</p>
-				) : (
-					<ul>
-						{generatedCodes.map((code) => (
-							<li key={code} className="p-2 border-b border-gray-200">
-								{code}
-							</li>
-						))}
-					</ul>
-				)}
-			</div>
+		<div className="relative overflow-x-auto shadow-md sm:rounded-lg h-full w-1/2 bg-white border border-blue-300">
+			<table className="w-full text-sm text-left text-gray-500">
+				<thead className="text-xs text-gray-700 uppercase bg-gray-50">
+					<tr>
+						<th scope="col" className="px-6 py-3">
+							Агрегированный код
+						</th>
+						<th scope="col" className="px-6 py-3">
+							Номенклатура
+						</th>
+						<th scope="col" className="px-6 py-3">
+							<span className="sr-only">Действия</span>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{codes.length === 0 ? (
+						<tr>
+							<td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+								Нет сгенерированных кодов
+							</td>
+						</tr>
+					) : (
+						codes.map((code) => (
+							<tr
+								key={code.generatedCode}
+								onClick={() => setSelectedCode(code.generatedCode)}
+								className="bg-white border-b hover:bg-gray-50"
+							>
+								<td className="px-6 py-4 font-medium text-gray-900">
+									{code.generatedCode}
+								</td>
+								<td className="px-6 py-4">{code.nomenclature}</td>
+								<td className="px-6 py-4">
+									<button
+										type="button"
+										// onClick={() => setModalOpen(true)}
+										className="bg-red-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer"
+									>
+										<BinIcon className="size-5" />
+									</button>
+								</td>
+							</tr>
+						))
+					)}
+				</tbody>
+			</table>
 		</div>
 	);
 };

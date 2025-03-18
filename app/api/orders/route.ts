@@ -74,6 +74,7 @@ export async function POST(req: Request) {
 	}
 
 	const { counteragentId, generatedCodePacks } = await req.json();
+	console.log(counteragentId, generatedCodePacks);
 	if (!counteragentId || !generatedCodePacks) {
 		return NextResponse.json(
 			{ message: "Не переданы обязательные параметры" },

@@ -1,9 +1,9 @@
 "use client";
 
 import type { ICounteragentOption } from "@/orders/create/defenitions";
+import { useOrderStore } from "@/orders/stores/useOrderStore";
 import { saveAs } from "file-saver";
 import Papa from "papaparse";
-import { useState } from "react";
 import OrderCodesList from "./OrderCodesList";
 import OrderCreationSelectors from "./OrderCreationSelectors";
 import OrderGeneratedCodesList from "./OrderGeneratedCodesList";
@@ -13,10 +13,10 @@ export default function OrderCreationForm({
 }: {
 	counteragentOptions: ICounteragentOption[];
 }) {
-	const [codes, setCodes] = useState<string[]>([]);
-	const [generatedCodes, setGeneratedCodes] = useState<string[]>([]);
+	const { getCodesRawData } = useOrderStore();
 
 	const handleDownloadCSV = () => {
+		const codes = getCodesRawData();
 		if (codes.length === 0) {
 			alert("Нет кодов для скачивания!");
 			return;
@@ -37,14 +37,11 @@ export default function OrderCreationForm({
 		<div className="flex flex-col w-full h-full gap-4">
 			<OrderCreationSelectors
 				counteragentOptionsProps={counteragentOptions}
-				onCodesFetched={setCodes}
 				handleDownloadCSV={handleDownloadCSV}
-				setGeneratedCodes={setGeneratedCodes}
-				codes={codes}
 			/>
 			<div className="flex flex-row w-full gap-4 h-full">
-				<OrderGeneratedCodesList generatedCodes={generatedCodes} />
-				<OrderCodesList codes={codes} />
+				<OrderGeneratedCodesList />
+				<OrderCodesList />
 			</div>
 		</div>
 	);

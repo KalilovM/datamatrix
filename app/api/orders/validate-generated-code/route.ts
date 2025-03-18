@@ -11,27 +11,31 @@ export async function POST(req: Request) {
 			);
 		}
 
-		// Check if the code exists
 		const codePack = await prisma.generatedCodePack.findUnique({
 			where: { value: generatedCode },
-			include: { codes: true },
+			include: { codes: true, nomenclature: true },
 		});
 
 		const codePallet = await prisma.generatedCodePallet.findUnique({
 			where: { value: generatedCode },
-			include: { generatedCodePacks: { include: { codes: true } } },
+			include: {
+				generatedCodePacks: { include: { codes: true, nomenclature: true } },
+			},
 		});
 
 		if (!codePack && !codePallet) {
 			return NextResponse.json({ error: "Код не найден!" }, { status: 404 });
 		}
 
-		// Extract codes
 		const linkedCodes = codePack
 			? codePack.codes
 			: codePallet?.generatedCodePacks.flatMap((pack) => pack.codes) || [];
 
-		return NextResponse.json({ linkedCodes });
+		const nomenclature =
+			codePack?.nomenclature.name ||
+			codePallet?.generatedCodePacks[0].nomenclature.name;
+
+		return NextResponse.json({ linkedCodes, nomenclature });
 	} catch (error) {
 		return NextResponse.json(
 			{ error: "Ошибка сервера. Попробуйте позже." },

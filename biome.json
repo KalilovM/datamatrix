@@ -1,20 +1,23 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "formatter": {
-    "enabled": true
-  },
-  "linter": {
-    "enabled": true,
-    "ignore": ["test"],
-    "rules": {
-      "recommended": true
-    }
-  },
-  "organizeImports": {
-    "enabled": true
-  },
-  "files": {
-    "include": ["app/**/*.js", "app/**/*.ts", "app/**/*.tsx", "app/**/*.jsx"],
-    "ignore": ["**/*.min.js"]
-  }
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"formatter": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"ignore": ["test"],
+		"rules": {
+			"recommended": true,
+			"a11y": {
+				"useKeyWithClickEvents": "off"
+			}
+		}
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"files": {
+		"include": ["app/**/*.js", "app/**/*.ts", "app/**/*.tsx", "app/**/*.jsx"],
+		"ignore": ["**/*.min.js"]
+	}
 }

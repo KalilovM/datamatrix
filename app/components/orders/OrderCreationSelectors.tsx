@@ -1,4 +1,5 @@
 import type { ICounteragentOption } from "@/orders/create/defenitions";
+import { useOrderStore } from "@/orders/stores/useOrderStore";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -8,16 +9,10 @@ const Select = dynamic(() => import("react-select"), { ssr: false });
 
 export default function OrderCreationSelectors({
 	counteragentOptionsProps,
-	onCodesFetched,
 	handleDownloadCSV,
-	codes,
-	setGeneratedCodes,
 }: {
 	counteragentOptionsProps: ICounteragentOption[];
-	onCodesFetched: (codes: string[]) => void;
 	handleDownloadCSV: () => void;
-	codes: string[];
-	setGeneratedCodes: (codes: string[]) => void;
 }) {
 	const router = useRouter();
 	const [counteragentOptions] = useState(
@@ -26,73 +21,50 @@ export default function OrderCreationSelectors({
 			value: option.id,
 		})),
 	);
-	const [isSaving, setIsSaving] = useState(false);
-
+	const { reset, addCodes, codes, getGeneratedCodes } = useOrderStore();
+	const [generatedCode, setGeneratedCode] = useState("");
 	const [selectedCounteragent, setSelectedCounteragent] = useState<{
 		label: string;
 		value: string;
 	} | null>(null);
-
-	const [generatedCode, setGeneratedCode] = useState<string>("");
-	const [debouncedGeneratedCode, setDebouncedGeneratedCode] =
-		useState<string>("");
-	const [listDebouncedGeneratedCodes, setListDebouncedGeneratedCodes] =
-		useState<string[]>([]);
-	const [error, setError] = useState<string | null>(null);
-
-	// Ref for focusing input
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
-		const handler = setTimeout(() => {
-			setDebouncedGeneratedCode(generatedCode);
-		}, 200);
-
-		return () => clearTimeout(handler); // Cleanup timeout on every change
-	}, [generatedCode]);
-
-	// Validate when the debounced value updates
-	useEffect(() => {
-		if (debouncedGeneratedCode) {
-			validateCode(debouncedGeneratedCode);
-		}
-	}, [debouncedGeneratedCode]);
+		const timer = setTimeout(() => {
+			validateCode(generatedCode.trim());
+		}, 300);
+		return () => clearTimeout(timer);
+	});
 
 	const handleCounteragentChange = (option: {
 		label: string;
 		value: string;
 	}) => {
 		setSelectedCounteragent(option);
+		reset();
 	};
 
 	const validateCode = async (code: string) => {
 		if (!code) return;
-		const generatedCode = code.trim();
+		const aggregatedCode = code.trim();
 		try {
 			const response = await fetch("/api/orders/validate-generated-code", {
 				method: "POST",
-				body: JSON.stringify({ generatedCode: generatedCode }),
+				body: JSON.stringify({ generatedCode: aggregatedCode }),
 				headers: { "Content-Type": "application/json" },
 			});
 
 			const data = await response.json();
 			if (!response.ok) {
 				toast.error(data.error);
-				onCodesFetched([]);
 			} else {
 				toast.success("Коды успешно загружены!");
-				onCodesFetched((prevCodes: string[]) => [
-					...prevCodes,
-					...data.linkedCodes.map((c: { value: string }) => c.value),
-				]);
-				setGeneratedCodes((prevCodes: string[]) => [
-					...prevCodes,
-					generatedCode,
-				]);
-				setListDebouncedGeneratedCodes((prevCodes: string[]) => [
-					...prevCodes,
-					generatedCode,
-				]);
+				console.log(data);
+				addCodes({
+					generatedCode: aggregatedCode,
+					codes: data.linkedCodes.map((code: string) => code.value),
+					nomenclature: data.nomenclature,
+				});
 				setGeneratedCode("");
 
 				setTimeout(() => {
@@ -101,7 +73,6 @@ export default function OrderCreationSelectors({
 			}
 		} catch {
 			toast.error("Ошибка сервера. Попробуйте позже.");
-			onCodesFetched([]);
 		}
 	};
 
@@ -116,14 +87,12 @@ export default function OrderCreationSelectors({
 			return;
 		}
 
-		setIsSaving(true);
-
 		try {
 			const response = await fetch("/api/orders/", {
 				method: "POST",
 				body: JSON.stringify({
 					counteragentId: selectedCounteragent.value,
-					generatedCodePacks: listDebouncedGeneratedCodes,
+					generatedCodePacks: getGeneratedCodes(),
 				}),
 				headers: { "Content-Type": "application/json" },
 			});
@@ -134,13 +103,11 @@ export default function OrderCreationSelectors({
 				toast.error(data.error || "Ошибка при сохранении заказа");
 			} else {
 				toast.success("Заказ успешно сохранен!");
-				onCodesFetched([]);
+				reset();
 				router.push("/orders");
 			}
 		} catch {
 			toast.error("Ошибка сервера. Попробуйте позже.");
-		} finally {
-			setIsSaving(false);
 		}
 	};
 
@@ -150,19 +117,18 @@ export default function OrderCreationSelectors({
 				<h1 className="leading-6 text-xl font-bold">Новый Заказ</h1>
 				<div className="flex items-center justify-center gap-2">
 					<button
+						type="button"
 						onClick={handleDownloadCSV}
 						className="bg-green-500 text-white px-4 py-2 rounded-md self-start"
 					>
 						Скачать коды (CSV)
 					</button>
 					<button
+						type="button"
 						onClick={handleSaveOrder}
-						disabled={isSaving}
-						className={`bg-blue-500 text-white px-4 py-2 rounded-md ${
-							isSaving ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
-						}`}
+						className={"bg-blue-500 text-white px-4 py-2 rounded-md"}
 					>
-						{isSaving ? "Сохранение..." : "Сохранить заказ"}
+						Сохранить заказ
 					</button>
 				</div>
 			</div>
@@ -194,7 +160,6 @@ export default function OrderCreationSelectors({
 							onChange={(e) => setGeneratedCode(e.target.value)}
 							className="border rounded-sm px-1 py-1.5 w-full"
 						/>
-						{error && <p className="text-red-500 text-sm">{error}</p>}
 					</div>
 				</div>
 			</div>
