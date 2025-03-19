@@ -53,7 +53,7 @@ const PrintCodes: React.FC<Props> = ({
 	};
 
 	return (
-		<div className="print-container printable print:block text:black">
+		<div className="print-container printable hidden print:block text:black">
 			{codes &&
 				codes.map((code, index) => {
 					// Sort fields based on the 'order' property from the template
@@ -68,6 +68,7 @@ const PrintCodes: React.FC<Props> = ({
 						display: "flex",
 						flexDirection: "row" as const,
 						boxSizing: "border-box" as const,
+						paddingLeft: "2mm",
 					};
 
 					// QR Column styling

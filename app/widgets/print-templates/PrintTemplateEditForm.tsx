@@ -94,7 +94,6 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 
 	// Manage field count and defaults based on QR position.
 	useEffect(() => {
-		console.log(defaultValues);
 		if (qrPosition === "CENTER") {
 			// When in CENTER mode, only allow one field (with "Имя")
 			setValue("fields", [
@@ -123,19 +122,18 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 				);
 			}
 		}
-	}, [qrPosition, setValue, fields.length, defaultValues.fields]);
+	}, [qrPosition, setValue, fields.length]);
 
 	// Update available fields options when not in CENTER mode.
 	const [availableFields, setAvailableFields] = useState(fieldOptions);
 	useEffect(() => {
-		console.log(fields);
 		if (qrPosition !== "CENTER") {
 			const selectedFields = getValues("fields").map((f) => f.fieldType);
 			setAvailableFields(
 				fieldOptions.filter((opt) => !selectedFields.includes(opt.value)),
 			);
 		}
-	}, [fields, getValues, qrPosition]);
+	}, [getValues, qrPosition]);
 
 	const onSubmit = async (data: EditPrintTemplateFormValues) => {
 		try {
