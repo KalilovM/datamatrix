@@ -43,10 +43,18 @@
     @page {
         size: 58mm 40mm;
         /* size: auto; */
+        margin: 0;
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
     /* Hide everything on the page */
+    body, html {
+        width: 58mm;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
     /* Only display the print container */
     body *::-webkit-scrollbar {
         display: none;
