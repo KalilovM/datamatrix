@@ -16,8 +16,8 @@ const Page = () => {
 		return <Layout>Загрузка...</Layout>;
 	}
 	if (isError) {
-		throw error;
-		// return <Layout>Произошла ошибка: {error}</Layout>;
+		// throw error;
+		return <Layout>Произошла ошибка</Layout>;
 	}
 	return (
 		<Layout>

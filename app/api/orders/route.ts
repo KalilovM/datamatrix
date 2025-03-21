@@ -2,6 +2,7 @@ import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { convertToSpecialCodeFormat } from "./validate-code/route";
 
 export async function GET(req: Request) {
 	const session = await getServerSession(authOptions);
@@ -51,14 +52,10 @@ export async function POST(req: Request) {
 	if (!session?.user) {
 		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
 	}
+
 	const user = await prisma.user.findUnique({
-		where: {
-			id: session.user.id,
-		},
-		select: {
-			role: true,
-			companyId: true,
-		},
+		where: { id: session.user.id },
+		select: { role: true, companyId: true },
 	});
 	if (!user) {
 		return NextResponse.json(
@@ -73,15 +70,27 @@ export async function POST(req: Request) {
 		);
 	}
 
-	const { counteragentId, generatedCodePacks } = await req.json();
-	console.log(counteragentId, generatedCodePacks);
-	if (!counteragentId || !generatedCodePacks) {
+	const {
+		counteragentId,
+		generatedCodePacks: allCodePacks,
+		rows,
+	} = await req.json();
+	const isUUID = (str: string) =>
+		/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+	const generatedCodePacks = allCodePacks.filter(isUUID);
+
+	const codes = allCodePacks
+		.filter((code: string) => !isUUID(code))
+		.map(convertToSpecialCodeFormat);
+	if (!counteragentId || !generatedCodePacks || !rows) {
 		return NextResponse.json(
 			{ message: "Не переданы обязательные параметры" },
 			{ status: 400 },
 		);
 	}
 
+	// Create order
 	const order = await prisma.order.create({
 		data: {
 			companyId: user.companyId,
@@ -92,14 +101,37 @@ export async function POST(req: Request) {
 		},
 	});
 
+	// Generate order ID
 	const orderId = `ORDER-${order.id.toString().padStart(8, "0")}`;
-
 	await prisma.order.update({
+		where: { id: order.id },
+		data: { showId: orderId },
+	});
+
+	// Format order nomenclature data
+	const orderNomenclatureData = rows.map((row) => ({
+		orderId: order.id,
+		nomenclatureId: row.nomenclature.value, // Extract the ID
+		quantity: Number.parseInt(row.numberOfOrders, 10),
+		preparedQuantity: Number.parseInt(row.numberOfPreparedOrders, 10),
+	}));
+
+	// Insert into OrderNomenclature table
+	if (orderNomenclatureData.length > 0) {
+		await prisma.orderNomenclature.createMany({
+			data: orderNomenclatureData,
+		});
+	}
+	// updating codes
+	await prisma.code.updateMany({
 		where: {
-			id: order.id,
+			value: {
+				in: codes,
+			},
 		},
 		data: {
-			showId: orderId,
+			used: true,
+			orderId: order.id,
 		},
 	});
 

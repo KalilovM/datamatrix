@@ -4,9 +4,11 @@ import type { ICounteragentOption } from "@/orders/create/defenitions";
 import { useOrderStore } from "@/orders/stores/useOrderStore";
 import { saveAs } from "file-saver";
 import Papa from "papaparse";
+import { useState } from "react";
 import OrderCodesList from "./OrderCodesList";
 import OrderCreationSelectors from "./OrderCreationSelectors";
 import OrderGeneratedCodesList from "./OrderGeneratedCodesList";
+import OrderNomenclatures from "./OrderNomenclatures";
 
 export default function OrderCreationForm({
 	counteragentOptions,
@@ -14,6 +16,7 @@ export default function OrderCreationForm({
 	counteragentOptions: ICounteragentOption[];
 }) {
 	const { getCodesRawData } = useOrderStore();
+	const [activeTab, setActiveTab] = useState(1);
 
 	const handleDownloadCSV = () => {
 		const codes = getCodesRawData();
@@ -22,13 +25,11 @@ export default function OrderCreationForm({
 			return;
 		}
 
-		// Convert codes into CSV format (each code in a new row)
 		const csv = Papa.unparse(
 			codes.map((code) => [code]),
 			{ header: false },
 		);
 
-		// Convert CSV string into a Blob and trigger download
 		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 		saveAs(blob, "order_codes.csv");
 	};
@@ -38,10 +39,46 @@ export default function OrderCreationForm({
 			<OrderCreationSelectors
 				counteragentOptionsProps={counteragentOptions}
 				handleDownloadCSV={handleDownloadCSV}
+				activeTab={activeTab}
 			/>
-			<div className="flex flex-row w-full gap-4 h-full">
-				<OrderGeneratedCodesList />
-				<OrderCodesList />
+
+			<ul className="flex flex-wrap text-sm font-medium text-center text-gray-500">
+				<li className="me-2">
+					<button
+						type="button"
+						onClick={() => setActiveTab(1)}
+						className={`inline-block px-4 py-3 rounded-lg ${
+							activeTab === 1
+								? "text-white bg-blue-600"
+								: "hover:text-gray-900 hover:bg-gray-100"
+						}`}
+					>
+						Вкладка 1
+					</button>
+				</li>
+				<li className="me-2">
+					<button
+						type="button"
+						onClick={() => setActiveTab(2)}
+						className={`inline-block px-4 py-3 rounded-lg ${
+							activeTab === 2
+								? "text-white bg-blue-600"
+								: "hover:text-gray-900 hover:bg-gray-100"
+						}`}
+					>
+						Вкладка 2
+					</button>
+				</li>
+			</ul>
+
+			<div className="w-full h-full">
+				{activeTab === 1 && <OrderNomenclatures />}
+				{activeTab === 2 && (
+					<div className="flex flex-row w-full gap-4 h-full">
+						<OrderGeneratedCodesList />
+						<OrderCodesList />
+					</div>
+				)}
 			</div>
 		</div>
 	);

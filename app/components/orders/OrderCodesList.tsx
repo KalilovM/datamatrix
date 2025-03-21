@@ -1,19 +1,11 @@
 "use client";
 
 import { useOrderStore } from "@/orders/stores/useOrderStore";
-import { useEffect, useState } from "react";
 
 export default function OrderCodesList() {
-	const { getCodesRawData, selectedCode, getCodesByGeneratedCode } =
-		useOrderStore();
-	const [codes, setCodes] = useState<string[]>([]);
+	const { selectedCode, getCodesByGeneratedCode } = useOrderStore();
 
-	useEffect(() => {
-		const data = selectedCode
-			? getCodesByGeneratedCode(selectedCode)?.codes || []
-			: getCodesRawData();
-		setCodes(data);
-	}, [getCodesByGeneratedCode, getCodesRawData, selectedCode]);
+	const codeEntry = selectedCode ? getCodesByGeneratedCode(selectedCode) : null;
 
 	return (
 		<div className="relative overflow-x-auto shadow-md sm:rounded-lg h-full w-1/2 bg-white border border-blue-300">
@@ -26,12 +18,12 @@ export default function OrderCodesList() {
 					</tr>
 				</thead>
 				<tbody>
-					{codes.length === 0 ? (
+					{!codeEntry || codeEntry.codes.length === 0 ? (
 						<tr>
 							<td className="px-6 py-4 text-center text-gray-500">Нет кодов</td>
 						</tr>
 					) : (
-						codes.map((code) => (
+						codeEntry.codes.map((code) => (
 							<tr key={code} className="bg-white border-b hover:bg-gray-50">
 								<td className="px-6 py-4 font-medium text-gray-900 break-all">
 									{code}

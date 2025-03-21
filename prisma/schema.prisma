@@ -82,6 +82,7 @@ model Nomenclature {
   updatedAt            DateTime              @updatedAt
   generatedCodePacks   GeneratedCodePack[]
   generatedCodePallets GeneratedCodePallet[]
+  orderNomenclature    OrderNomenclature[]
 }
 
 model Code {
@@ -92,6 +93,8 @@ model Code {
   codePackId          String
   used                Boolean            @default(false)
   createdAt           DateTime           @default(now())
+  order               Order?             @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderId             Int?
   generatedCodePack   GeneratedCodePack? @relation(fields: [generatedCodePackId], references: [id], onDelete: SetNull)
   generatedCodePackId String?
 }
@@ -175,6 +178,18 @@ model Counteragent {
   orders    Order[]
 }
 
+model OrderNomenclature {
+  id               Int          @id @default(autoincrement())
+  order            Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId          Int
+  nomenclature     Nomenclature @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
+  nomenclatureId   String
+  quantity         Int
+  preparedQuantity Int
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
 model Order {
   id                   Int                   @id @default(autoincrement())
   showId               String?               @unique
@@ -186,6 +201,8 @@ model Order {
   generatedCodePacks   GeneratedCodePack[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
+  orderNomenclature    OrderNomenclature[]
+  code                 Code[]
 }
 
 enum QrPosition {

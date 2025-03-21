@@ -10,8 +10,9 @@ interface IOrderStore {
 	codes: ICodes[];
 	selectedCode: string | null;
 	setCodes: (codes: ICodes[]) => void;
-	setSelectedCode: (code: string) => void;
+	setSelectedCode: (code: string | null) => void;
 	addCodes: (code: ICodes) => void;
+	removeCode: (generatedCode: string) => void;
 	getCodesByGeneratedCode: (generatedCode: string) => ICodes | undefined;
 	getGeneratedCodes: () => string[];
 	getCodesRawData: () => string[];
@@ -24,12 +25,18 @@ export const useOrderStore = create<IOrderStore>((set, get) => ({
 	setCodes: (codes: ICodes[]) => {
 		set({ codes });
 	},
-	setSelectedCode: (code: string) => {
+	setSelectedCode: (code: string | null) => {
 		set({ selectedCode: code });
 	},
 	addCodes: (code: ICodes) => {
 		const { codes } = get();
 		set({ codes: [...codes, code] });
+	},
+	removeCode: (generatedCode: string) => {
+		const { codes } = get();
+		set({
+			codes: codes.filter((code) => code.generatedCode !== generatedCode),
+		});
 	},
 	getCodesByGeneratedCode: (generatedCode: string) => {
 		const { codes } = get();

@@ -51,7 +51,7 @@ const Page = () => {
 							) : (
 								<tr>
 									<td colSpan={3} className="text-center py-4 text-gray-500">
-										Нет доступных закзаов
+										Нет доступных заказов
 									</td>
 								</tr>
 							)}

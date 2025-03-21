@@ -1,7 +1,12 @@
 import { useOrderStore } from "@/orders/stores/useOrderStore";
 import { BinIcon } from "@/shared/ui/icons";
 const OrderGeneratedCodesList = () => {
-	const { codes, setSelectedCode } = useOrderStore();
+	const { codes, setSelectedCode, removeCode } = useOrderStore();
+
+	const handleDeleteCode = (generatedCode: string) => {
+		removeCode(generatedCode);
+		setSelectedCode(null);
+	};
 
 	return (
 		<div className="relative overflow-x-auto shadow-md sm:rounded-lg h-full w-1/2 bg-white border border-blue-300">
@@ -13,6 +18,9 @@ const OrderGeneratedCodesList = () => {
 						</th>
 						<th scope="col" className="px-6 py-3">
 							Номенклатура
+						</th>
+						<th scope="col" className="px-6 py-3">
+							Кол-во
 						</th>
 						<th scope="col" className="px-6 py-3">
 							<span className="sr-only">Действия</span>
@@ -33,14 +41,15 @@ const OrderGeneratedCodesList = () => {
 								onClick={() => setSelectedCode(code.generatedCode)}
 								className="bg-white border-b hover:bg-gray-50"
 							>
-								<td className="px-6 py-4 font-medium text-gray-900">
+								<td className="px-6 py-4 font-medium text-gray-900 max-w-[320px] truncate">
 									{code.generatedCode}
 								</td>
 								<td className="px-6 py-4">{code.nomenclature}</td>
+								<td className="px-6 py-4">{code.codes.length}</td>
 								<td className="px-6 py-4">
 									<button
 										type="button"
-										// onClick={() => setModalOpen(true)}
+										onClick={() => handleDeleteCode(code.generatedCode)}
 										className="bg-red-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer"
 									>
 										<BinIcon className="size-5" />
