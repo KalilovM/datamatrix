@@ -5,9 +5,19 @@ import OrderTableRow from "@/orders/ui/OrderTableRow";
 import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useOrderNomenclatureStore } from "./stores/useOrderNomenclatureStore";
+import { useOrderStore } from "./stores/useOrderStore";
 
 const Page = () => {
 	const { data: orders, error, isLoading } = useOrders();
+	const { reset } = useOrderStore();
+	const { resetRows } = useOrderNomenclatureStore();
+
+	useEffect(() => {
+		reset();
+		resetRows();
+	}, []);
 
 	if (isLoading) {
 		return <Layout>Загрузка...</Layout>;

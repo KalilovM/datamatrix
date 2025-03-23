@@ -1,25 +1,22 @@
 import type { ICounteragentOption } from "@/orders/create/defenitions";
-import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
-import { useOrderStore } from "@/orders/stores/useOrderStore";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { useOrderEditStore } from "../stores/useOrderEditStore";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-export default function OrderCreationSelectors({
-	orderData,
-	selectedCounteragent: initialCounteragent,
+export default function OrderEditSelectors({
+	orderId,
+	initialSelectedCounteragent,
 	counteragentOptionsProps,
 	handleDownloadCSV,
-	activeTab,
 }: {
-	orderData: { id: number; showId: string };
-	selectedCounteragent: { label: string; value: string };
+	orderId: string;
+	initialSelectedCounteragent: { label: string; value: string };
 	counteragentOptionsProps: ICounteragentOption[];
 	handleDownloadCSV: () => void;
-	activeTab: number;
 }) {
 	const router = useRouter();
 	const [counteragentOptions] = useState(
@@ -28,13 +25,12 @@ export default function OrderCreationSelectors({
 			value: option.id,
 		})),
 	);
-	const { reset, addCodes, codes, getGeneratedCodes } = useOrderStore();
-	const { rows, resetRows } = useOrderNomenclatureStore();
+	const { reset, addCodes, codes, getGeneratedCodes } = useOrderEditStore();
 	const [generatedCode, setGeneratedCode] = useState("");
 	const [selectedCounteragent, setSelectedCounteragent] = useState<{
 		label: string;
 		value: string;
-	}>(initialCounteragent);
+	}>(initialSelectedCounteragent);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -54,54 +50,32 @@ export default function OrderCreationSelectors({
 	const validateCode = async (code: string) => {
 		if (!code) return;
 		const aggregatedCode = code.trim();
-		if (aggregatedCode.length === 83) {
-			const response = await fetch("/api/orders/validate-code", {
+		try {
+			const response = await fetch("/api/orders/validate-generated-code", {
 				method: "POST",
-				body: JSON.stringify({ code: aggregatedCode }),
+				body: JSON.stringify({ generatedCode: aggregatedCode }),
 				headers: { "Content-Type": "application/json" },
 			});
+
 			const data = await response.json();
 			if (!response.ok) {
 				toast.error(data.error);
 			} else {
-				toast.success("Код успешно загружен!");
+				toast.success("Коды успешно загружены!");
+				console.log(data);
 				addCodes({
 					generatedCode: aggregatedCode,
-					codes: [data.code],
+					codes: data.linkedCodes.map((code: string) => code.value),
 					nomenclature: data.nomenclature,
 				});
 				setGeneratedCode("");
+
 				setTimeout(() => {
 					inputRef.current?.focus();
-				});
+				}, 0);
 			}
-		} else {
-			try {
-				const response = await fetch("/api/orders/validate-generated-code", {
-					method: "POST",
-					body: JSON.stringify({ generatedCode: aggregatedCode }),
-					headers: { "Content-Type": "application/json" },
-				});
-
-				const data = await response.json();
-				if (!response.ok) {
-					toast.error(data.error);
-				} else {
-					toast.success("Коды успешно загружены!");
-					addCodes({
-						generatedCode: aggregatedCode,
-						codes: data.linkedCodes.map((code: string) => code.value),
-						nomenclature: data.nomenclature,
-					});
-					setGeneratedCode("");
-
-					setTimeout(() => {
-						inputRef.current?.focus();
-					}, 0);
-				}
-			} catch {
-				toast.error("Ошибка сервера. Попробуйте позже.");
-			}
+		} catch {
+			toast.error("Ошибка сервера. Попробуйте позже.");
 		}
 	};
 
@@ -116,32 +90,14 @@ export default function OrderCreationSelectors({
 			return;
 		}
 
-		if (rows.length === 0) {
-			toast.error("Нет номенклатур для сохранения!");
-			return;
-		}
-		const invalidRow = rows.find((row) => {
-			return (
-				row.numberOfOrders <= 0 ||
-				row.numberOfPreparedOrders < 0 ||
-				row.numberOfPreparedOrders > row.numberOfOrders
-			);
-		});
-
-		if (invalidRow) {
-			toast.error(
-				"Проверьте значения в номенклатуре: количество должно быть больше 0, а подготовлено не может превышать заказанное!",
-			);
-			return;
-		}
+		console.log(getGeneratedCodes());
 
 		try {
-			const response = await fetch("/api/orders/", {
-				method: "POST",
+			const response = await fetch(`/api/orders/${orderId}`, {
+				method: "PUT",
 				body: JSON.stringify({
 					counteragentId: selectedCounteragent.value,
 					generatedCodePacks: getGeneratedCodes(),
-					rows: rows,
 				}),
 				headers: { "Content-Type": "application/json" },
 			});
@@ -149,11 +105,10 @@ export default function OrderCreationSelectors({
 			const data = await response.json();
 
 			if (!response.ok) {
-				toast.error(data.error || "Ошибка при сохранении заказа");
+				toast.error(data.error || "Ошибка при обновлении заказа");
 			} else {
-				toast.success("Заказ успешно сохранен!");
+				toast.success("Заказ успешно сохрано обновлен!");
 				reset();
-				resetRows();
 				router.push("/orders");
 			}
 		} catch {
@@ -164,9 +119,7 @@ export default function OrderCreationSelectors({
 	return (
 		<div className="gap-4 flex flex-col">
 			<div className="flex items-center justify-between">
-				<h1 className="leading-6 text-xl font-bold">
-					Редактирование заказа {orderData.showId}
-				</h1>
+				<h1 className="leading-6 text-xl font-bold">Новый Заказ</h1>
 				<div className="flex items-center justify-center gap-2">
 					<button
 						type="button"
@@ -186,37 +139,33 @@ export default function OrderCreationSelectors({
 			</div>
 			<div className="flex flex-col w-full rounded-lg border border-blue-300 bg-white px-8 py-3 justify-between items-center gap-4">
 				<div className="flex flex-row w-full gap-4">
-					{activeTab === 1 && (
-						<div className="w-1/2 flex flex-col">
-							<label htmlFor="nomenclature" className="block">
-								Контрагент
-							</label>
-							<Select
-								options={counteragentOptions}
-								value={selectedCounteragent}
-								onChange={(option) =>
-									handleCounteragentChange(
-										option as { label: string; value: string },
-									)
-								}
-								placeholder="Выберите контрагента"
-							/>
-						</div>
-					)}
-					{activeTab === 2 && (
-						<div className="w-1/2 flex flex-col">
-							<label htmlFor="configuration" className="block">
-								Агрегированный код
-							</label>
-							<input
-								ref={inputRef}
-								type="text"
-								value={generatedCode}
-								onChange={(e) => setGeneratedCode(e.target.value)}
-								className="border rounded-sm px-1 py-1.5 w-full"
-							/>
-						</div>
-					)}
+					<div className="w-1/2 flex flex-col">
+						<label htmlFor="nomenclature" className="block">
+							Контрагент
+						</label>
+						<Select
+							options={counteragentOptions}
+							value={selectedCounteragent}
+							onChange={(option) =>
+								handleCounteragentChange(
+									option as { label: string; value: string },
+								)
+							}
+							placeholder="Выберите контрагента"
+						/>
+					</div>
+					<div className="w-1/2 flex flex-col">
+						<label htmlFor="configuration" className="block">
+							Агрегированный код
+						</label>
+						<input
+							ref={inputRef}
+							type="text"
+							value={generatedCode}
+							onChange={(e) => setGeneratedCode(e.target.value)}
+							className="border rounded-sm px-1 py-1.5 w-full"
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
