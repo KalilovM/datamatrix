@@ -8,6 +8,8 @@ const OrderGeneratedCodesList = () => {
 		setSelectedCode(null);
 	};
 
+	const totalCodes = codes.reduce((sum, code) => sum + code.codes.length, 0);
+
 	return (
 		<div className="relative overflow-x-auto shadow-md sm:rounded-lg h-full w-1/2 bg-white border border-blue-300">
 			<table className="w-full text-sm text-left text-gray-500">
@@ -59,6 +61,14 @@ const OrderGeneratedCodesList = () => {
 						))
 					)}
 				</tbody>
+				<tfoot className="sticky bottom-0 bg-white border-t border-blue-300">
+					<tr className="text-base font-semibold text-gray-700">
+						<td className="px-6 py-3">Итого</td>
+						<td className="px-6 py-3"></td>
+						<td className="px-6 py-3">{totalCodes}</td>
+						<td className="px-6 py-3"></td>
+					</tr>
+				</tfoot>
 			</table>
 		</div>
 	);

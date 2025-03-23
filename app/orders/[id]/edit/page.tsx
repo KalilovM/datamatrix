@@ -2,9 +2,12 @@
 
 import useCounteragentOptions from "@/orders/hooks/useCounteragentOptions";
 import useOrderEdit from "@/orders/hooks/useOrderEdit";
+import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
+import { useOrderStore } from "@/orders/stores/useOrderStore";
 import OrderEditForm from "@/orders/ui/OrderEditForm";
 import Layout from "@/shared/ui/Layout";
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
 
 const Page = () => {
 	const { id } = useParams();
@@ -14,6 +17,15 @@ const Page = () => {
 		isLoading: counteragentOptionsIsLoading,
 		isError: counteragentOptionsIsError,
 	} = useCounteragentOptions();
+	const { setCodes } = useOrderStore();
+	const { setRows } = useOrderNomenclatureStore();
+
+	useEffect(() => {
+		console.log(data);
+		if (!data) return;
+		setRows(data.initialRows);
+		setCodes(data.initialCodes);
+	}, [data, setRows]);
 
 	if (isLoading || counteragentOptionsIsLoading) {
 		return <Layout>Загрузка...</Layout>;
@@ -25,8 +37,8 @@ const Page = () => {
 	return (
 		<Layout>
 			<OrderEditForm
-				id={id}
-				initialData={data}
+				orderData={data.orderData}
+				selectedCounteragent={data.initialSelectedCounteragent}
 				counteragentOptions={counteragentOptions}
 			/>
 		</Layout>

@@ -1,45 +1,31 @@
+"use client";
+
 import type { ICounteragentOption } from "@/orders/create/defenitions";
+import { useOrderStore } from "@/orders/stores/useOrderStore";
 import { saveAs } from "file-saver";
 import Papa from "papaparse";
-import { useEffect } from "react";
-import { useOrderEditStore } from "../stores/useOrderEditStore";
-import OrderEditCodesList from "./OrderEditCodesList";
-import OrderEditGeneratedCodesList from "./OrderEditGeneratedCodesList";
-import OrderEditSelectors from "./OrderEditSelectors";
+import { useState } from "react";
+import OrderCodesList from "./OrderCodesList";
+import OrderCreationSelectors from "./OrderCreationSelectors";
+import OrderGeneratedCodesList from "./OrderGeneratedCodesList";
+import OrderNomenclatures from "./OrderNomenclatures";
 
-interface aggregatedCodesType {
-	id: string;
-	codes: string[];
+interface IinitialCounteragent {
+	label: string;
 	value: string;
-	nomenclature: string;
 }
 
-interface InitialDataType {
-	initialSelectedCounteragent: { label: string; value: string };
-	initialAggregatedCodes: aggregatedCodesType[];
-}
-
-export default function OrderEditForm({
-	id,
+export default function OrderCreationForm({
+	orderData,
 	counteragentOptions,
-	initialData,
+	selectedCounteragent,
 }: {
-	id: string;
+	orderData: { id: number; showId: string };
 	counteragentOptions: ICounteragentOption[];
-	initialData: InitialDataType;
+	selectedCounteragent: IinitialCounteragent;
 }) {
-	const { setCodes, reset, getCodesRawData } = useOrderEditStore();
-
-	useEffect(() => {
-		reset();
-		setCodes(
-			initialData.initialAggregatedCodes.map((code) => ({
-				generatedCode: code.value,
-				nomenclature: code.nomenclature,
-				codes: code.codes,
-			})),
-		);
-	}, [initialData, setCodes]);
+	const { getCodesRawData } = useOrderStore();
+	const [activeTab, setActiveTab] = useState(1);
 
 	const handleDownloadCSV = () => {
 		const codes = getCodesRawData();
@@ -48,28 +34,62 @@ export default function OrderEditForm({
 			return;
 		}
 
-		// Convert codes into CSV format (each code in a new row)
 		const csv = Papa.unparse(
 			codes.map((code) => [code]),
 			{ header: false },
 		);
 
-		// Convert CSV string into a Blob and trigger download
 		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 		saveAs(blob, "order_codes.csv");
 	};
 
 	return (
 		<div className="flex flex-col w-full h-full gap-4">
-			<OrderEditSelectors
-				orderId={id}
-				initialSelectedCounteragent={initialData.initialSelectedCounteragent}
+			<OrderCreationSelectors
+				orderData={orderData}
+				selectedCounteragent={selectedCounteragent}
 				counteragentOptionsProps={counteragentOptions}
 				handleDownloadCSV={handleDownloadCSV}
+				activeTab={activeTab}
 			/>
-			<div className="flex flex-row w-full gap-4 h-full">
-				<OrderEditGeneratedCodesList />
-				<OrderEditCodesList />
+
+			<ul className="flex flex-wrap text-sm font-medium text-center text-gray-500">
+				<li className="me-2">
+					<button
+						type="button"
+						onClick={() => setActiveTab(1)}
+						className={`inline-block px-4 py-3 rounded-lg ${
+							activeTab === 1
+								? "text-white bg-blue-600"
+								: "hover:text-gray-900 hover:bg-gray-100"
+						}`}
+					>
+						Шаг 1
+					</button>
+				</li>
+				<li className="me-2">
+					<button
+						type="button"
+						onClick={() => setActiveTab(2)}
+						className={`inline-block px-4 py-3 rounded-lg ${
+							activeTab === 2
+								? "text-white bg-blue-600"
+								: "hover:text-gray-900 hover:bg-gray-100"
+						}`}
+					>
+						Шаг 2
+					</button>
+				</li>
+			</ul>
+
+			<div className="w-full h-full">
+				{activeTab === 1 && <OrderNomenclatures />}
+				{activeTab === 2 && (
+					<div className="flex flex-row w-full gap-4 h-full">
+						<OrderGeneratedCodesList />
+						<OrderCodesList />
+					</div>
+				)}
 			</div>
 		</div>
 	);

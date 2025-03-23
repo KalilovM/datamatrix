@@ -1,6 +1,6 @@
 "use client";
 
-import OrderCreationForm from "@/components/orders/OrderCreationForm";
+import OrderCreationForm from "@/orders/ui/OrderCreationForm";
 import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import useCounteragentOptions from "../hooks/useCounteragentOptions";

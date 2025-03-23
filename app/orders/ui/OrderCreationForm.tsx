@@ -53,7 +53,7 @@ export default function OrderCreationForm({
 								: "hover:text-gray-900 hover:bg-gray-100"
 						}`}
 					>
-						Вкладка 1
+						Шаг 1
 					</button>
 				</li>
 				<li className="me-2">
@@ -66,7 +66,7 @@ export default function OrderCreationForm({
 								: "hover:text-gray-900 hover:bg-gray-100"
 						}`}
 					>
-						Вкладка 2
+						Шаг 2
 					</button>
 				</li>
 			</ul>

@@ -1,7 +1,7 @@
 "use client";
 
-import OrderTableRow from "@/components/orders/OrderTableRow";
 import { useOrders } from "@/features/orders/hooks/useOrders";
+import OrderTableRow from "@/orders/ui/OrderTableRow";
 import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import Link from "next/link";
@@ -37,6 +37,12 @@ const Page = () => {
 								</th>
 								<th scope="col" className="px-6 py-3">
 									ИНН
+								</th>
+								<th scope="col" className="px-6 py-3">
+									Заказано
+								</th>
+								<th scope="col" className="px-6 py-3">
+									Отгружено
 								</th>
 								<th scope="col" className="px-6 py-3 text-right">
 									Действия

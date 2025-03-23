@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 interface IRow {
+	id?: number;
 	nomenclature: {
 		label: string;
 		value: string;
@@ -11,6 +12,7 @@ interface IRow {
 
 interface IOrderNomenclatureStore {
 	rows: IRow[];
+	setRows: (rows: IRow[]) => void;
 	addRow: (row: IRow) => void;
 	updateRow: (index: number, updatedRow: Partial<IRow>) => void;
 	resetRows: () => void;
@@ -23,6 +25,7 @@ interface IOrderNomenclatureStore {
 export const useOrderNomenclatureStore = create<IOrderNomenclatureStore>(
 	(set) => ({
 		rows: [],
+		setRows: (rows) => set({ rows }),
 		addRow: (row) => set((state) => ({ rows: [...state.rows, row] })),
 		updateRow: (index, updatedRow) =>
 			set((state) => {

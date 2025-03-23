@@ -9,10 +9,14 @@ import { toast } from "react-toastify";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 export default function OrderCreationSelectors({
+	orderData,
+	selectedCounteragent: initialCounteragent,
 	counteragentOptionsProps,
 	handleDownloadCSV,
 	activeTab,
 }: {
+	orderData: { id: number; showId: string };
+	selectedCounteragent: { label: string; value: string };
 	counteragentOptionsProps: ICounteragentOption[];
 	handleDownloadCSV: () => void;
 	activeTab: number;
@@ -30,7 +34,7 @@ export default function OrderCreationSelectors({
 	const [selectedCounteragent, setSelectedCounteragent] = useState<{
 		label: string;
 		value: string;
-	} | null>(null);
+	}>(initialCounteragent);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -160,7 +164,9 @@ export default function OrderCreationSelectors({
 	return (
 		<div className="gap-4 flex flex-col">
 			<div className="flex items-center justify-between">
-				<h1 className="leading-6 text-xl font-bold">Новый Заказ</h1>
+				<h1 className="leading-6 text-xl font-bold">
+					Редактирование заказа {orderData.showId}
+				</h1>
 				<div className="flex items-center justify-center gap-2">
 					<button
 						type="button"

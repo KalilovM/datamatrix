@@ -6,45 +6,69 @@ import { convertToSpecialCodeFormat } from "./validate-code/route";
 
 export async function GET(req: Request) {
 	const session = await getServerSession(authOptions);
+
 	if (!session?.user) {
 		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
 	}
+
 	const user = await prisma.user.findUnique({
-		where: {
-			id: session.user.id,
-		},
-		select: {
-			role: true,
-			companyId: true,
-		},
+		where: { id: session.user.id },
+		select: { role: true, companyId: true },
 	});
+
 	if (!user) {
 		return NextResponse.json(
 			{ message: "Пользователь не найден" },
 			{ status: 401 },
 		);
 	}
-	if (!user?.companyId) {
+
+	if (!user.companyId) {
 		return NextResponse.json(
 			{ message: "Не найдена компания пользователя" },
 			{ status: 400 },
 		);
 	}
 
+	// Fetch orders and include OrderNomenclatures
 	const orders = await prisma.order.findMany({
 		where: { companyId: user.companyId },
 		select: {
 			id: true,
 			showId: true,
 			createdAt: true,
-			counteragent: {
+			counteragent: { select: { name: true } },
+			orderNomenclature: {
 				select: {
-					name: true,
+					quantity: true,
+					preparedQuantity: true,
 				},
 			},
 		},
 	});
-	return NextResponse.json(orders);
+
+	// Add total fields to each order
+	const enrichedOrders = orders.map((order) => {
+		const totalQuantity = order.orderNomenclature.reduce(
+			(sum, item) => sum + item.quantity,
+			0,
+		);
+		const totalPrepared = order.orderNomenclature.reduce(
+			(sum, item) => sum + item.preparedQuantity,
+			0,
+		);
+
+		return {
+			id: order.id,
+			showId: order.showId,
+			createdAt: order.createdAt,
+			counteragent: order.counteragent,
+			totalQuantity,
+			totalPrepared,
+		};
+	});
+
+	return NextResponse.json(enrichedOrders);
 }
 
 export async function POST(req: Request) {

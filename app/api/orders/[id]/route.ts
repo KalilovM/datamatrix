@@ -28,6 +28,7 @@ export async function GET(
 		where: { id: Number.parseInt(id, 10) },
 		select: {
 			id: true,
+			showId: true,
 			counteragent: {
 				select: {
 					id: true,
@@ -50,8 +51,21 @@ export async function GET(
 					},
 				},
 			},
+			orderNomenclature: {
+				select: {
+					id: true,
+					nomenclature: {
+						select: {
+							name: true,
+						},
+					},
+					quantity: true,
+					preparedQuantity: true,
+				},
+			},
 		},
 	});
+
 	if (!order) {
 		return NextResponse.json(
 			{ message: "Order not found" },
@@ -61,21 +75,62 @@ export async function GET(
 		);
 	}
 
+	const linkedCodes = await prisma.code.findMany({
+		where: { orderId: Number.parseInt(id, 10) },
+		select: {
+			value: true,
+			codePack: {
+				select: {
+					nomenclature: {
+						select: {
+							name: true,
+						},
+					},
+				},
+			},
+		},
+	});
+
+	const linked = linkedCodes.map((code) => ({
+		generatedCode: code.value,
+		nomenclature: code.codePack.nomenclature.name,
+		codes: [code.value],
+	}));
+
 	const initialSelectedCounteragent = {
 		label: order.counteragent.name,
 		value: order.counteragent.id,
 	};
 
-	const initialAggregatedCodes = order.generatedCodePacks.map((pack) => ({
+	const aggregated = order.generatedCodePacks.map((pack) => ({
 		id: pack.id,
 		codes: pack.codes.map((code) => code.value),
-		value: pack.value,
+		generatedCode: pack.value,
 		nomenclature: pack.nomenclature.name,
 	}));
 
+	const initialRows = order.orderNomenclature.map((row) => ({
+		id: row.id,
+		nomenclature: {
+			label: row.nomenclature.name,
+			value: row.nomenclature.name,
+		},
+		numberOfOrders: row.quantity,
+		numberOfPreparedOrders: row.preparedQuantity,
+	}));
+
+	const initialCodes = [...linked, ...aggregated];
+
+	const orderData = {
+		id: order.id,
+		showId: order.showId,
+	};
+
 	return NextResponse.json({
 		initialSelectedCounteragent,
-		initialAggregatedCodes,
+		initialCodes,
+		initialRows,
+		orderData,
 	});
 }
 

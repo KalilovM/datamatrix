@@ -1,7 +1,10 @@
 export interface IOrder {
-  id: string;
-  createdAt: Date;
-  counteragent: {
-    name: string;
-  };
+	id: number;
+	showId: string;
+	createdAt: Date;
+	counteragent: {
+		name: string;
+	};
+	totalQuantity: number;
+	totalPrepared: number;
 }
