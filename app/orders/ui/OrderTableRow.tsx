@@ -75,7 +75,7 @@ export default function OrderTableRow({ order }: { order: IOrder }) {
 				<ConfirmModal
 					isOpen={isModalOpen}
 					title="Удалить заказ?"
-					message={`Вы уверены, что хотите удалить "${order.id}"?`}
+					message={`Вы уверены, что хотите удалить "${order.showId}"?`}
 					onConfirm={handleConfirmDelete}
 					onCancel={() => setModalOpen(false)}
 				/>

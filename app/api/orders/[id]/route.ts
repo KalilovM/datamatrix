@@ -4,6 +4,12 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { convertToSpecialCodeFormat } from "../validate-code/route";
 
+function convertToFlatCodeFormat(input) {
+	return input
+		.replace(/^�/, "") // remove the leading �
+		.replace(/\x1D/g, ""); // remove all ASCII GS characters
+}
+
 export async function DELETE(
 	req: Request,
 	{ params }: { params: Promise<{ id: string }> },
@@ -96,7 +102,7 @@ export async function GET(
 	});
 
 	const linked = linkedCodes.map((code) => ({
-		generatedCode: code.value,
+		generatedCode: convertToFlatCodeFormat(code.value),
 		nomenclature: code.codePack.nomenclature.name,
 		codes: [code.value],
 	}));

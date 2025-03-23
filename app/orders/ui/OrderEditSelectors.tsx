@@ -30,7 +30,7 @@ export default function OrderEditSelectors({
 		})),
 	);
 	const { reset, addCodes, codes, getGeneratedCodes } = useOrderStore();
-	const { rows, resetRows } = useOrderNomenclatureStore();
+	const { rows, resetRows, updatePreparedOrders } = useOrderNomenclatureStore();
 	const [generatedCode, setGeneratedCode] = useState("");
 	const [selectedCounteragent, setSelectedCounteragent] = useState<{
 		label: string;
@@ -106,14 +106,13 @@ export default function OrderEditSelectors({
 		}
 	};
 
+	useEffect(() => {
+		updatePreparedOrders(codes);
+	}, [codes, updatePreparedOrders]);
+
 	const handleSaveOrder = async () => {
 		if (!selectedCounteragent) {
 			toast.error("Выберите контрагента перед сохранением!");
-			return;
-		}
-
-		if (codes.length === 0) {
-			toast.error("Нет кодов для сохранения!");
 			return;
 		}
 
@@ -169,12 +168,12 @@ export default function OrderEditSelectors({
 					Редактирование заказа {orderData.showId}
 				</h1>
 				<div className="flex items-center justify-center gap-2">
-				<Link
-					href="/orders"
-					className="bg-gray-500 text-white px-4 py-2 rounded-md self-start"
-				>
-					Отмена
-				</Link>
+					<Link
+						href="/orders"
+						className="bg-gray-500 text-white px-4 py-2 rounded-md self-start"
+					>
+						Отмена
+					</Link>
 
 					<button
 						type="button"

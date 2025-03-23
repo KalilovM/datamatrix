@@ -24,7 +24,7 @@ export default function OrderCreationSelectors({
 		})),
 	);
 	const { reset, addCodes, codes, getGeneratedCodes } = useOrderStore();
-	const { rows, resetRows } = useOrderNomenclatureStore();
+	const { rows, resetRows, updatePreparedOrders } = useOrderNomenclatureStore();
 	const [generatedCode, setGeneratedCode] = useState("");
 	const [selectedCounteragent, setSelectedCounteragent] = useState<{
 		label: string;
@@ -99,6 +99,10 @@ export default function OrderCreationSelectors({
 			}
 		}
 	};
+
+	useEffect(() => {
+		updatePreparedOrders(codes);
+	}, [codes, updatePreparedOrders]);
 
 	const handleSaveOrder = async () => {
 		if (!selectedCounteragent) {
@@ -198,7 +202,7 @@ export default function OrderCreationSelectors({
 					{activeTab === 2 && (
 						<div className="w-1/2 flex flex-col">
 							<label htmlFor="configuration" className="block">
-								Агрегированный код
+								Отсканируйте код
 							</label>
 							<input
 								ref={inputRef}
