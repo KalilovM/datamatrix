@@ -6,7 +6,7 @@ import { saveAs } from "file-saver";
 import Papa from "papaparse";
 import { useState } from "react";
 import OrderCodesList from "./OrderCodesList";
-import OrderCreationSelectors from "./OrderCreationSelectors";
+import OrderEditSelectors from "./OrderEditSelectors";
 import OrderGeneratedCodesList from "./OrderGeneratedCodesList";
 import OrderNomenclatures from "./OrderNomenclatures";
 
@@ -45,7 +45,7 @@ export default function OrderCreationForm({
 
 	return (
 		<div className="flex flex-col w-full h-full gap-4">
-			<OrderCreationSelectors
+			<OrderEditSelectors
 				orderData={orderData}
 				selectedCounteragent={selectedCounteragent}
 				counteragentOptionsProps={counteragentOptions}

@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-export default function OrderCreationSelectors({
+export default function OrderEditSelectors({
 	orderData,
 	selectedCounteragent: initialCounteragent,
 	counteragentOptionsProps,
