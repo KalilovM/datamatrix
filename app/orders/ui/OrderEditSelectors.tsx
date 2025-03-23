@@ -2,6 +2,7 @@ import type { ICounteragentOption } from "@/orders/create/defenitions";
 import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
 import { useOrderStore } from "@/orders/stores/useOrderStore";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -136,8 +137,8 @@ export default function OrderEditSelectors({
 		}
 
 		try {
-			const response = await fetch("/api/orders/", {
-				method: "POST",
+			const response = await fetch(`/api/orders/${orderData.id}`, {
+				method: "PUT",
 				body: JSON.stringify({
 					counteragentId: selectedCounteragent.value,
 					generatedCodePacks: getGeneratedCodes(),
@@ -168,6 +169,13 @@ export default function OrderEditSelectors({
 					Редактирование заказа {orderData.showId}
 				</h1>
 				<div className="flex items-center justify-center gap-2">
+				<Link
+					href="/orders"
+					className="bg-gray-500 text-white px-4 py-2 rounded-md self-start"
+				>
+					Отмена
+				</Link>
+
 					<button
 						type="button"
 						onClick={handleDownloadCSV}
@@ -180,7 +188,7 @@ export default function OrderEditSelectors({
 						onClick={handleSaveOrder}
 						className={"bg-blue-500 text-white px-4 py-2 rounded-md"}
 					>
-						Сохранить заказ
+						Сохранить
 					</button>
 				</div>
 			</div>

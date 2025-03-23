@@ -2,6 +2,7 @@ import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { convertToSpecialCodeFormat } from "../validate-code/route";
 
 export async function DELETE(
 	req: Request,
@@ -47,6 +48,7 @@ export async function GET(
 					nomenclature: {
 						select: {
 							name: true,
+							id: true,
 						},
 					},
 				},
@@ -57,6 +59,7 @@ export async function GET(
 					nomenclature: {
 						select: {
 							name: true,
+							id: true,
 						},
 					},
 					quantity: true,
@@ -84,6 +87,7 @@ export async function GET(
 					nomenclature: {
 						select: {
 							name: true,
+							id: true,
 						},
 					},
 				},
@@ -113,7 +117,7 @@ export async function GET(
 		id: row.id,
 		nomenclature: {
 			label: row.nomenclature.name,
-			value: row.nomenclature.name,
+			value: row.nomenclature.id,
 		},
 		numberOfOrders: row.quantity,
 		numberOfPreparedOrders: row.preparedQuantity,
@@ -138,79 +142,100 @@ export async function PUT(
 	req: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
-	try {
-		const orderId = Number.parseInt((await params).id);
-		const session = await getServerSession(authOptions);
-		if (!session?.user) {
-			return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
-		}
+	const session = await getServerSession(authOptions);
+	if (!session?.user) {
+		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
+	}
 
-		const user = await prisma.user.findUnique({
-			where: { id: session.user.id },
-			select: { role: true, companyId: true },
-		});
+	const user = await prisma.user.findUnique({
+		where: { id: session.user.id },
+		select: { companyId: true },
+	});
 
-		if (!user) {
-			return NextResponse.json(
-				{ message: "Пользователь не найден" },
-				{ status: 401 },
-			);
-		}
-
-		if (!user.companyId) {
-			return NextResponse.json(
-				{ message: "Не найдена компания пользователя" },
-				{ status: 400 },
-			);
-		}
-
-		// Parse incoming request body
-		const { counteragentId, generatedCodePacks } = await req.json();
-		console.log(generatedCodePacks);
-
-		// Validate required fields
-		if (!orderId || !counteragentId || !generatedCodePacks) {
-			return NextResponse.json(
-				{ message: "Не переданы обязательные параметры" },
-				{ status: 400 },
-			);
-		}
-
-		// Ensure the order exists and belongs to the company
-		const existingOrder = await prisma.order.findUnique({
-			where: { id: orderId },
-			select: { companyId: true },
-		});
-
-		if (!existingOrder) {
-			return NextResponse.json({ message: "Заказ не найден" }, { status: 404 });
-		}
-
-		if (existingOrder.companyId !== user.companyId) {
-			return NextResponse.json(
-				{ message: "Нет доступа к этому заказу" },
-				{ status: 403 },
-			);
-		}
-
-		// Update order: clear existing generated codes and set new ones
-		const updatedOrder = await prisma.order.update({
-			where: { id: orderId },
-			data: {
-				counteragentId,
-				generatedCodePacks: {
-					set: [],
-					connect: generatedCodePacks.map((code: string) => ({ value: code })),
-				},
-			},
-		});
-
-		return NextResponse.json(updatedOrder);
-	} catch (error: any) {
-		console.error("Ошибка при обновлении заказа:", error);
+	if (!user?.companyId) {
 		return NextResponse.json(
-			{ message: "Ошибка при обновлении заказа", error: error.message },
-			{ status: 500 },
+			{ message: "Компания не найдена" },
+			{ status: 400 },
 		);
 	}
+
+	const orderId = Number.parseInt((await params).id);
+	if (Number.isNaN(orderId)) {
+		return NextResponse.json(
+			{ message: "Неверный ID заказа" },
+			{ status: 400 },
+		);
+	}
+
+	const {
+		counteragentId,
+		generatedCodePacks: allCodePacks,
+		rows,
+	} = await req.json();
+
+	const isUUID = (str: string) =>
+		/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+	const generatedCodePacks = allCodePacks.filter(isUUID);
+	const codes = allCodePacks
+		.filter((code: string) => !isUUID(code))
+		.map(convertToSpecialCodeFormat);
+
+	// Verify order belongs to the user's company
+	const existingOrder = await prisma.order.findUnique({
+		where: { id: orderId },
+		select: { companyId: true },
+	});
+
+	if (!existingOrder || existingOrder.companyId !== user.companyId) {
+		return NextResponse.json({ message: "Доступ запрещен" }, { status: 403 });
+	}
+
+	// Disconnect old relations
+	await prisma.order.update({
+		where: { id: orderId },
+		data: {
+			generatedCodePacks: { set: [] },
+		},
+	});
+
+	await prisma.orderNomenclature.deleteMany({ where: { orderId } });
+	await prisma.code.updateMany({
+		where: { orderId },
+		data: { used: false, orderId: null },
+	});
+
+	// Re-attach updated data
+	await prisma.order.update({
+		where: { id: orderId },
+		data: {
+			counteragentId,
+			generatedCodePacks: {
+				connect: generatedCodePacks.map((code: string) => ({ value: code })),
+			},
+		},
+	});
+
+	if (rows.length > 0) {
+		await prisma.orderNomenclature.createMany({
+			data: rows.map((row) => ({
+				orderId,
+				nomenclatureId: row.nomenclature.value,
+				quantity: Number(row.numberOfOrders),
+				preparedQuantity: Number(row.numberOfPreparedOrders),
+			})),
+		});
+	}
+
+	await prisma.code.updateMany({
+		where: {
+			value: { in: codes },
+		},
+		data: {
+			used: true,
+			orderId: orderId,
+		},
+	});
+
+	return NextResponse.json({ message: "Заказ успешно обновлен" });
 }

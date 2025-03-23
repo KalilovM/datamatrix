@@ -40,7 +40,7 @@ export default function OrderCreationForm({
 		);
 
 		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-		saveAs(blob, "order_codes.csv");
+		saveAs(blob, `${orderData.showId}.csv`);
 	};
 
 	return (

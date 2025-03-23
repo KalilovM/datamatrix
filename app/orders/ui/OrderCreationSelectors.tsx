@@ -2,6 +2,7 @@ import type { ICounteragentOption } from "@/orders/create/defenitions";
 import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
 import { useOrderStore } from "@/orders/stores/useOrderStore";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -10,11 +11,9 @@ const Select = dynamic(() => import("react-select"), { ssr: false });
 
 export default function OrderCreationSelectors({
 	counteragentOptionsProps,
-	handleDownloadCSV,
 	activeTab,
 }: {
 	counteragentOptionsProps: ICounteragentOption[];
-	handleDownloadCSV: () => void;
 	activeTab: number;
 }) {
 	const router = useRouter();
@@ -162,19 +161,18 @@ export default function OrderCreationSelectors({
 			<div className="flex items-center justify-between">
 				<h1 className="leading-6 text-xl font-bold">Новый Заказ</h1>
 				<div className="flex items-center justify-center gap-2">
-					<button
-						type="button"
-						onClick={handleDownloadCSV}
-						className="bg-green-500 text-white px-4 py-2 rounded-md self-start"
+					<Link
+						href="/orders"
+						className="bg-gray-500 text-white px-4 py-2 rounded-md self-start"
 					>
-						Скачать коды (CSV)
-					</button>
+						Отмена
+					</Link>
 					<button
 						type="button"
 						onClick={handleSaveOrder}
 						className={"bg-blue-500 text-white px-4 py-2 rounded-md"}
 					>
-						Сохранить заказ
+						Сохранить
 					</button>
 				</div>
 			</div>
