@@ -153,7 +153,7 @@ export default function OrderCreationSelectors({
 				toast.success("Заказ успешно сохранен!");
 				reset();
 				resetRows();
-				router.push("/orders");
+				router.push(`/orders/${data.id}/edit`);
 			}
 		} catch {
 			toast.error("Ошибка сервера. Попробуйте позже.");

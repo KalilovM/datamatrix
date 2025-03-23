@@ -12,19 +12,22 @@ export async function POST(req: Request) {
 		}
 
 		const codePack = await prisma.generatedCodePack.findUnique({
-			where: { value: generatedCode },
+			where: { value: generatedCode, orderId: null },
 			include: { codes: true, nomenclature: true },
 		});
 
 		const codePallet = await prisma.generatedCodePallet.findUnique({
-			where: { value: generatedCode },
+			where: { value: generatedCode, orderId: null },
 			include: {
 				generatedCodePacks: { include: { codes: true, nomenclature: true } },
 			},
 		});
 
 		if (!codePack && !codePallet) {
-			return NextResponse.json({ error: "Код не найден!" }, { status: 404 });
+			return NextResponse.json(
+				{ error: "Код не найден или уже использован!" },
+				{ status: 404 },
+			);
 		}
 
 		const linkedCodes = codePack
