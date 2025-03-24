@@ -213,7 +213,7 @@ export default function OrderEditSelectors({
 					{activeTab === 2 && (
 						<div className="w-1/2 flex flex-col">
 							<label htmlFor="configuration" className="block">
-								Агрегированный код
+								Отсканируйте код
 							</label>
 							<input
 								ref={inputRef}

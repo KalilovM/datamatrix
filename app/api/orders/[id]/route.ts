@@ -15,6 +15,10 @@ export async function DELETE(
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const id = Number.parseInt((await params).id);
+	await prisma.code.updateMany({
+		where: { orderId: id },
+		data: { used: false, orderId: null },
+	});
 	await prisma.order.delete({
 		where: { id },
 	});

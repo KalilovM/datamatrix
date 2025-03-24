@@ -22,10 +22,10 @@ export default function ConfigurationsUploadModal({
 	config,
 }: ConfigurationsUploadModalProps) {
 	const [pieceInPack, setPieceInPack] = useState<number>(
-		config ? config.value.pieceInPack : 1,
+		config ? config.value.pieceInPack : 0,
 	);
 	const [packInPallet, setPackInPallet] = useState<number>(
-		config ? config.value.packInPallet : 1,
+		config ? config.value.packInPallet : 0,
 	);
 
 	const handleSubmit = () => {
