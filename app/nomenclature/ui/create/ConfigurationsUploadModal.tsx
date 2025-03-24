@@ -21,10 +21,10 @@ export default function ConfigurationsUploadModal({
 	config,
 }: ConfigurationsUploadModalProps) {
 	const [pieceInPack, setPieceInPack] = useState<number>(
-		config ? config.value.pieceInPack : 0,
+		config ? config.value.pieceInPack : 1,
 	);
 	const [packInPallet, setPackInPallet] = useState<number>(
-		config ? config.value.packInPallet : 0,
+		config ? config.value.packInPallet : 1,
 	);
 
 	const handleSubmit = () => {
@@ -55,7 +55,7 @@ export default function ConfigurationsUploadModal({
 					<div className="flex flex-row gap-4">
 						<div>
 							<label htmlFor="pack" className="block mb-1">
-								Штучек в упаковке:
+								Штук в упаковке:
 							</label>
 							<input
 								name="pack"
