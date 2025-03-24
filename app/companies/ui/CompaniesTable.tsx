@@ -13,7 +13,7 @@ export default function CompaniesTable({ companies }: CompaniesTableProps) {
 		<div className="table-layout">
 			{/* Table Header */}
 			<div className="table-header">
-				<p className="table-header-title">Компании</p>
+				<p className="table-header-title">Компания</p>
 				<Link
 					href="/companies/create"
 					className="bg-blue-500 px-4 py-2 text-white rounded-md cursor-pointer"

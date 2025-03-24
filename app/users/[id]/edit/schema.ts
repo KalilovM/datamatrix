@@ -13,4 +13,5 @@ export const EditUserSchema = z.object({
 		})
 		.nullable()
 		.optional(),
+	password: z.string().min(5).optional().or(z.literal("")),
 });

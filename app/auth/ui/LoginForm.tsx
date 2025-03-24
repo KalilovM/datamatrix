@@ -61,7 +61,7 @@ export function LoginForm() {
 				</div>
 				<PasswordInput register={register} errors={errors} />
 				<SubmitButton loading={false} />
-				<Link href="#" className="text-blue-500 hover:underline">
+				<Link href="#" className="text-blue-500 hover:underline hidden">
 					Восстановить пароль
 				</Link>
 			</form>

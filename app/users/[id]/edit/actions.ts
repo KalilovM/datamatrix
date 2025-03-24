@@ -33,4 +33,12 @@ export async function updateUser(id: string, data: FormData) {
 			companyId: data.companyId.value || null,
 		},
 	});
+	if (data.password && data.password.trim().length >= 5) {
+		await prisma.user.update({
+			where: { id },
+			data: {
+				password: data.password,
+			},
+		});
+	}
 }

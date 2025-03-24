@@ -16,4 +16,5 @@ export interface FormData {
 	username: string;
 	role: "ADMIN" | "COMPANY_ADMIN" | "COMPANY_USER" | null;
 	companyId: string | null;
+	password: string;
 }

@@ -154,6 +154,23 @@ export default function UserEditForm({ user, companies }: Props) {
 						)}
 					</div>
 				</div>
+				<div className="w-full flex flex-row gap-16">
+					<div className="w-1/2 flex flex-col">
+						<label htmlFor="password">Новый пароль</label>
+						<input
+							{...register("password")}
+							type="password"
+							placeholder="Оставьте пустым, чтобы не менять"
+							className={`w-full rounded-lg border px-3 py-2 ${
+								errors.username ? "border-red-500" : "border-gray-300"
+							}`}
+						/>
+						{errors.password && (
+							<p className="text-sm text-red-500">{errors.password.message}</p>
+						)}
+					</div>
+					<div className="w-1/2 flex flex-col"> </div>
+				</div>
 			</div>
 		</form>
 	);
