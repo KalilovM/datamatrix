@@ -50,6 +50,9 @@ export default function OrderTableRow({ order }: { order: IOrder }) {
 				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
 					{order.showId}
 				</td>
+				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+					{new Date(order.createdAt).toLocaleDateString("ru-RU")}
+				</td>
 				<td className="px-6 py-4 text-gray-600">{order.counteragent.name}</td>
 				<td className="px-6 py-4 text-gray-600">{order.totalQuantity}</td>
 				<td className="px-6 py-4 text-gray-600">{order.totalPrepared}</td>
