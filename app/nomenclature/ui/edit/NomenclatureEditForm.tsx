@@ -112,7 +112,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 					<div className="flex flex-row gap-4">
 						{/* Модель/Артикул */}
 						<div className="flex flex-col flex-1">
-							<label htmlFor="modelArticle">Модель/Артикул</label>
+							<label htmlFor="modelArticle">Модель</label>
 							<input
 								{...register("modelArticle")}
 								type="text"
@@ -144,16 +144,16 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 
 						{/* Размер */}
 						<div className="flex flex-col flex-1">
-							<label htmlFor="size">Размер</label>
+							<label htmlFor="size">GTIN</label>
 							<input
-								{...register("size")}
+								{...register("GTIN")}
 								type="text"
 								className={`w-full rounded-lg border px-3 py-2 ${
-									errors.size ? "border-red-500" : "border-gray-300"
+									errors.GTIN ? "border-red-500" : "border-gray-300"
 								}`}
 							/>
-							{errors.size && (
-								<p className="text-sm text-red-500">{errors.size.message}</p>
+							{errors.GTIN && (
+								<p className="text-sm text-red-500">{errors.GTIN.message}</p>
 							)}
 						</div>
 					</div>

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const NewUserSchema = z.object({
-	email: z.string().email("Некорректный email"),
+	email: z.string().optional(),
 	username: z
 		.string()
 		.min(3, "Имя пользователя должно содержать не менее 3 символов"),

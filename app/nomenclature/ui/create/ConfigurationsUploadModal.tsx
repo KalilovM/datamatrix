@@ -21,10 +21,10 @@ export default function ConfigurationsUploadModal({
 	config,
 }: ConfigurationsUploadModalProps) {
 	const [pieceInPack, setPieceInPack] = useState<number>(
-		config ? config.value.pieceInPack : 1,
+		config ? config.value.pieceInPack : 0,
 	);
 	const [packInPallet, setPackInPallet] = useState<number>(
-		config ? config.value.packInPallet : 1,
+		config ? config.value.packInPallet : 0,
 	);
 
 	const handleSubmit = () => {
@@ -52,8 +52,8 @@ export default function ConfigurationsUploadModal({
 					{config ? "Редактировать конфигурацию" : "Добавить конфигурацию"}
 				</h2>
 				<div className="flex flex-col gap-4">
-					<div className="flex flex-row gap-4">
-						<div>
+					<div className="flex flex-row justify-between items-center gap-4">
+						<div className="w-full">
 							<label htmlFor="pack" className="block mb-1">
 								Штук в упаковке:
 							</label>
@@ -66,7 +66,7 @@ export default function ConfigurationsUploadModal({
 								required
 							/>
 						</div>
-						<div>
+						<div className="w-full">
 							<label htmlFor="pallet" className="block mb-1">
 								Упаковок в паллете:
 							</label>
@@ -84,7 +84,7 @@ export default function ConfigurationsUploadModal({
 						<button
 							type="button"
 							onClick={onClose}
-							className="bg-gray-400 px-4 py-2 rounded-md"
+							className="bg-gray-300 px-4 py-2 rounded-md"
 						>
 							Отмена
 						</button>

@@ -22,10 +22,10 @@ export default function ConfigurationsUploadModal({
 	config,
 }: ConfigurationsUploadModalProps) {
 	const [pieceInPack, setPieceInPack] = useState<number>(
-		config ? config.value.pieceInPack : 1,
+		config ? config.value.pieceInPack : 0,
 	);
 	const [packInPallet, setPackInPallet] = useState<number>(
-		config ? config.value.packInPallet : 1,
+		config ? config.value.packInPallet : 0,
 	);
 
 	const handleSubmit = () => {
@@ -85,7 +85,7 @@ export default function ConfigurationsUploadModal({
 						<button
 							type="button"
 							onClick={onClose}
-							className="bg-gray-400 px-4 py-2 rounded-md"
+							className="bg-gray-300 px-4 py-2 rounded-md"
 						>
 							Отмена
 						</button>

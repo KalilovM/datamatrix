@@ -10,6 +10,10 @@ import { toast } from "react-toastify";
 interface Nomenclature {
 	id: string;
 	name: string;
+	modelArticle: string;
+	codeCount: number;
+	color: string;
+	GTIN: string;
 }
 
 interface Props {
@@ -52,6 +56,15 @@ export default function NomenclatureRow({ nomenclature }: Props) {
 			<tr className="bg-white border-b border-gray-200 hover:bg-gray-50">
 				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
 					{nomenclature.name}
+				</td>
+				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+					{nomenclature.GTIN}
+				</td>
+				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+					{nomenclature.modelArticle}
+				</td>
+				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+					{nomenclature.color}
 				</td>
 				<td className="px-6 py-4 text-gray-700 whitespace-nowrap">
 					{nomenclature.codeCount}

@@ -44,12 +44,10 @@ export async function checkExistingCodes(
 	fileName: string,
 	ignoreNomenclatureId?: string,
 ): Promise<void> {
-	// Find any codes already existing in other nomenclatures.
 	const existingCodes = await client.code.findMany({
 		where: {
 			value: { in: codes },
 			...(ignoreNomenclatureId && {
-				// Exclude codes from the nomenclature we’re updating.
 				codePack: { nomenclatureId: { not: ignoreNomenclatureId } },
 			}),
 		},
@@ -59,7 +57,6 @@ export async function checkExistingCodes(
 		throw new Error(`Коды в файле ${fileName} уже существуют в БД`);
 	}
 
-	// Check for duplicate file names from other nomenclatures.
 	const existingCodePacks = await client.codePack.findMany({
 		where: {
 			name: fileName,
@@ -77,6 +74,7 @@ export async function checkExistingCodes(
 export async function processCodeFile(fileObj: {
 	fileName: string;
 	content: string;
+	size: string;
 }): Promise<ProcessedCodeFile> {
 	const codes = parseAndValidateCsvCodes(fileObj.content, fileObj.fileName);
 
@@ -92,5 +90,6 @@ export async function processCodeFile(fileObj: {
 		name: fileObj.fileName,
 		codes: { create: codeRecords },
 		content: fileObj.content,
+		size: Number.parseInt(fileObj.size, 10),
 	};
 }

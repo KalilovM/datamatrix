@@ -31,6 +31,15 @@ export default function NomenclatureTable({ nomenclatures }: Props) {
 								Название
 							</th>
 							<th scope="col" className="px-6 py-3">
+								GTIN
+							</th>
+							<th scope="col" className="px-6 py-3">
+								Модель
+							</th>
+							<th scope="col" className="px-6 py-3">
+								Цвет
+							</th>
+							<th scope="col" className="px-6 py-3">
 								Неиспользованные коды
 							</th>
 							<th scope="col" className="px-6 py-3 text-right">
@@ -48,7 +57,7 @@ export default function NomenclatureTable({ nomenclatures }: Props) {
 							))
 						) : (
 							<tr>
-								<td colSpan={3} className="text-center py-4 text-gray-500">
+								<td colSpan={6} className="text-center py-4 text-gray-500">
 									Нет доступных номенклатур
 								</td>
 							</tr>

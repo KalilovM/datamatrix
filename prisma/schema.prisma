@@ -73,7 +73,7 @@ model Nomenclature {
   name                 String
   modelArticle         String?
   color                String?
-  size                 String?
+  GTIN                 String?
   configurations       Configuration[]
   codePacks            CodePack[]
   company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -104,6 +104,7 @@ model CodePack {
   name           String       @unique
   content        String
   nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
+  size           Int?
   nomenclatureId String
   codes          Code[]
   used           Boolean      @default(false)
@@ -171,6 +172,7 @@ model Counteragent {
   id        String   @id @default(uuid())
   name      String
   inn       String?
+  kpp       String?
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId String
   createdAt DateTime @default(now())

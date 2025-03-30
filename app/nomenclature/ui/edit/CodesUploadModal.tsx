@@ -5,7 +5,6 @@ import type { Code } from "./CodeTable";
 
 interface CodesUploadModalProps {
 	onClose: () => void;
-	// Now onAdd receives an array of codes
 	onAdd: (codes: Code[]) => void;
 }
 
@@ -13,12 +12,15 @@ export default function CodesUploadModal({
 	onClose,
 	onAdd,
 }: CodesUploadModalProps) {
-	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [sizeInput, setSizeInput] = useState<string>("");
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const handleDrop = (e: DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
-		setSelectedFiles([...selectedFiles, ...Array.from(e.dataTransfer.files)]);
+		if (e.dataTransfer.files.length > 0) {
+			setSelectedFile(e.dataTransfer.files[0]);
+		}
 	};
 
 	const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -26,57 +28,60 @@ export default function CodesUploadModal({
 	};
 
 	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files) {
-			setSelectedFiles([...selectedFiles, ...Array.from(e.target.files)]);
+		if (e.target.files && e.target.files[0]) {
+			setSelectedFile(e.target.files[0]);
 		}
 	};
 
-	const handleRemoveFile = (index: number) => {
-		setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+	const handleRemoveFile = () => {
+		setSelectedFile(null);
 	};
 
 	const handleUpload = async () => {
-		if (selectedFiles.length === 0) {
+		if (!selectedFile) {
 			toast.error("Выберите CSV файл для загрузки.");
 			return;
 		}
 
-		const invalidFile = selectedFiles.find(
-			(file) => !file.name.toLowerCase().endsWith(".csv"),
-		);
-		if (invalidFile) {
-			toast.error(`Файл ${invalidFile.name} не является CSV.`);
+		if (!selectedFile.name.toLowerCase().endsWith(".csv")) {
+			toast.error(`Файл ${selectedFile.name} не является CSV.`);
 			return;
 		}
 
-		// Read each file using Promise.all
-		const readPromises = selectedFiles.map((file) => {
-			return new Promise<Code>((resolve, reject) => {
+		if (!sizeInput.trim()) {
+			toast.error("Введите размер.");
+			return;
+		}
+
+		try {
+			const content = await new Promise<string>((resolve, reject) => {
 				const reader = new FileReader();
 				reader.onload = (event) => {
-					const content = event.target?.result;
-					if (typeof content === "string") {
-						resolve({ fileName: file.name, content });
-						toast.success(`Файл ${file.name} загружен!`);
+					const result = event.target?.result;
+					if (typeof result === "string") {
+						resolve(result);
 					} else {
-						reject(new Error(`Невалидный контент в файле ${file.name}`));
+						reject(new Error("Ошибка чтения файла."));
 					}
 				};
 				reader.onerror = () => {
-					reject(new Error(`Ошибка чтения файла ${file.name}`));
+					reject(new Error("Ошибка чтения файла."));
 				};
-				reader.readAsText(file);
+				reader.readAsText(selectedFile);
 			});
-		});
 
-		try {
-			const newCodes = await Promise.all(readPromises);
-			onAdd(newCodes);
+			const code: Code = {
+				fileName: selectedFile.name,
+				content,
+				size: sizeInput,
+			};
+
+			onAdd([code]);
+			toast.success(`Файл ${selectedFile.name} загружен!`);
+			onClose();
 		} catch (error: any) {
 			toast.error(error.message);
 		}
-
-		onClose();
 	};
 
 	return (
@@ -101,41 +106,42 @@ export default function CodesUploadModal({
 						</p>
 						<input
 							type="file"
-							name="files"
+							name="file"
 							accept=".csv"
-							multiple
 							className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
 							onChange={handleFileChange}
 							ref={fileInputRef}
 						/>
 					</div>
 
-					{selectedFiles.length > 0 && (
-						<ul className="space-y-2">
-							{selectedFiles.map((file, index) => (
-								<li
-									key={file.name}
-									className="flex items-center justify-between rounded-lg border bg-gray-50 p-2"
-								>
-									<span className="text-sm text-gray-700">{file.name}</span>
-									<button
-										type="button"
-										onClick={() => handleRemoveFile(index)}
-										className="text-red-500 hover:text-red-700"
-									>
-										<BinIcon className="h-5 w-5" />
-									</button>
-								</li>
-							))}
-						</ul>
+					{selectedFile && (
+						<div className="flex items-center justify-between rounded-lg border bg-gray-50 p-2">
+							<span className="text-sm text-gray-700">{selectedFile.name}</span>
+							<button
+								type="button"
+								onClick={handleRemoveFile}
+								className="text-red-500 hover:text-red-700"
+							>
+								<BinIcon className="h-5 w-5" />
+							</button>
+						</div>
 					)}
+
+					<input
+						type="number"
+						name="size"
+						placeholder="Введите размер"
+						value={sizeInput}
+						onChange={(e) => setSizeInput(e.target.value)}
+						className="mt-4 w-full rounded-md px-4 py-2 bg-white border border-gray-300"
+					/>
 
 					<button
 						type="button"
-						disabled={selectedFiles.length === 0}
+						disabled={!selectedFile || !sizeInput.trim()}
 						onClick={handleUpload}
 						className={`mt-4 w-full rounded-md px-4 py-2 text-white ${
-							selectedFiles.length === 0
+							!selectedFile || !sizeInput.trim()
 								? "cursor-not-allowed bg-gray-400"
 								: "bg-blue-600 hover:bg-blue-700"
 						}`}

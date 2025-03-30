@@ -37,10 +37,19 @@ export async function GET(
 			name: true,
 			modelArticle: true,
 			color: true,
-			size: true,
+			GTIN: true,
 			configurations: true,
 			codePacks: {
-				include: { codes: true },
+				select: {
+					id: true,
+					name: true,
+					size: true,
+					codes: {
+						select: {
+							value: true,
+						},
+					},
+				},
 			},
 		},
 	});
@@ -54,7 +63,7 @@ export async function GET(
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
-		size: nomenclature.size || "",
+		GTIN: nomenclature.GTIN || "",
 		configurations: nomenclature.configurations.map((cfg) => ({
 			id: cfg.id,
 			label: `1-${cfg.pieceInPack}-${cfg.packInPallet}`,
@@ -66,6 +75,7 @@ export async function GET(
 		codes: nomenclature.codePacks.map((pack) => ({
 			id: pack.id,
 			fileName: pack.name,
+			size: pack.size,
 			content: codesToCsv(pack.codes.map((code) => code.value)),
 			codes: pack.codes.map((code) => code.value),
 		})),

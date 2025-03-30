@@ -30,6 +30,9 @@ export async function GET() {
 			select: {
 				id: true,
 				name: true,
+				GTIN: true,
+				color: true,
+				modelArticle: true,
 				codePacks: {
 					select: {
 						codes: {
@@ -52,6 +55,9 @@ export async function GET() {
 			select: {
 				id: true,
 				name: true,
+				GTIN: true,
+				color: true,
+				modelArticle: true,
 				codePacks: {
 					select: {
 						codes: {

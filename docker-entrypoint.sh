@@ -4,13 +4,7 @@ echo "Running Prisma generate..."
 npm run prisma:generate
 
 echo "Deploying Prisma migrations..."
-npm run prisma:push
-
-echo "Deploying Prisma migrations..."
-npm run prisma:deploy
-
-echo "Seeding the database..."
-npm run prisma:seed
+npx run prisma migrate "init" --create-only
 
 echo "Building the Next.js application..."
 npm run build

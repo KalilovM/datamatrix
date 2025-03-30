@@ -21,7 +21,7 @@ interface PrintingPreviewProps {
 
 const TEXT_FIELD_LABEL = {
 	name: "Имя",
-	modelArticle: "Модель/Артикул",
+	modelArticle: "Модель",
 	color: "Цвет",
 	size: "Размер",
 };

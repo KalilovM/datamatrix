@@ -17,7 +17,7 @@ const PrintCodes: React.FC<Props> = ({
 	printTemplate,
 	selectedNomenclature,
 }: Props) => {
-	const { printCodes: codes, shouldPrint, resetPrint } = usePrintStore();
+	const { printCodes: codes, size, shouldPrint, resetPrint } = usePrintStore();
 
 	// Trigger printing when the print flag is set
 	useEffect(() => {
@@ -39,7 +39,7 @@ const PrintCodes: React.FC<Props> = ({
 			case "COLOR":
 				return nomenclature?.color || "";
 			case "SIZE":
-				return nomenclature?.size || "";
+				return size || "";
 			default:
 				return "";
 		}
@@ -47,7 +47,7 @@ const PrintCodes: React.FC<Props> = ({
 
 	const fieldLabels = {
 		NAME: "Наименование",
-		MODEL_ARTICLE: "Модель/Артикул",
+		MODEL_ARTICLE: "Модель",
 		COLOR: "Цвет",
 		SIZE: "Размер",
 	};

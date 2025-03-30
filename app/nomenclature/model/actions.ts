@@ -39,6 +39,9 @@ export async function fetchNomenclatures() {
 			select: {
 				id: true,
 				name: true,
+				modelArticle: true,
+				color: true,
+				GTIN: true,
 				codePacks: {
 					select: {
 						codes: {
@@ -58,6 +61,9 @@ export async function fetchNomenclatures() {
 			select: {
 				id: true,
 				name: true,
+				modelArticle: true,
+				color: true,
+				GTIN: true,
 				codePacks: {
 					select: {
 						codes: {
@@ -73,6 +79,9 @@ export async function fetchNomenclatures() {
 	return nomenclatures.map((nomenclature) => ({
 		id: nomenclature.id,
 		name: nomenclature.name,
+		modelArticle: nomenclature.modelArticle || "",
+		color: nomenclature.color || "",
+		GTIN: nomenclature.GTIN || "",
 		codeCount: nomenclature.codePacks.reduce(
 			(total, codePack) => total + codePack.codes.length,
 			0,
@@ -101,7 +110,7 @@ export async function fetchNomenclatureById(
 			name: true,
 			modelArticle: true,
 			color: true,
-			size: true,
+			GTIN: true,
 			configurations: true,
 			codePacks: {
 				include: { codes: true },
@@ -116,7 +125,7 @@ export async function fetchNomenclatureById(
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
-		size: nomenclature.size || "",
+		GTIN: nomenclature.GTIN || "",
 		configurations: nomenclature.configurations.map((cfg) => ({
 			id: cfg.id,
 			label: `1-${cfg.pieceInPack}-${cfg.packInPallet}`,
@@ -137,7 +146,8 @@ export async function fetchNomenclatureById(
 }
 
 export async function createNomenclature(data: NomenclatureFormData) {
-	const { name, modelArticle, color, size, configurations, codes } = data;
+	const { name, modelArticle, color, GTIN, configurations, codes } = data;
+	console.log(codes);
 
 	// Get current user session.
 	const session = await getServerSession(authOptions);
@@ -204,7 +214,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 					name,
 					modelArticle,
 					color,
-					size,
+					GTIN,
 					companyId,
 					configurations: { create: configCreateData },
 					codePacks: { create: codePackCreateData },
@@ -224,7 +234,8 @@ export async function createNomenclature(data: NomenclatureFormData) {
 }
 
 export async function updateNomenclature(data: NomenclatureEditData) {
-	const { id, name, modelArticle, color, size, configurations, codes } = data;
+	const { id, name, modelArticle, color, GTIN, configurations, codes } = data;
+	console.log(codes, "CODES");
 
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
@@ -268,6 +279,7 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 
 					try {
 						// Process the file (which may re-parse the CSV internally).
+						console.log(fileObj, "FILEOBJ");
 						const codePackData = await processCodeFile(fileObj);
 						newCodePackData.push(codePackData);
 					} catch (err: unknown) {
@@ -286,7 +298,7 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 					name,
 					modelArticle,
 					color,
-					size,
+					GTIN,
 					companyId,
 					configurations: {
 						create: configurations
