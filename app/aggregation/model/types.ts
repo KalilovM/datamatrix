@@ -17,6 +17,7 @@ export interface NomenclatureOption {
 export interface PackPage {
 	packValues: string[];
 	uniqueCode: string | null;
+	size: string | null;
 }
 
 export interface PrintTemplate {

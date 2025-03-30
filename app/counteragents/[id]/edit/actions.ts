@@ -7,6 +7,7 @@ export async function getCounteragentById(id: string) {
 			id: true,
 			name: true,
 			inn: true,
+			kpp: true,
 		},
 	});
 }

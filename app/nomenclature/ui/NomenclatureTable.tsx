@@ -9,6 +9,7 @@ interface Props {
 }
 
 export default function NomenclatureTable({ nomenclatures }: Props) {
+	console.log(nomenclatures);
 	return (
 		<div className="table-layout">
 			{/* Table Header */}

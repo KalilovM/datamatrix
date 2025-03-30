@@ -22,6 +22,7 @@ export default async function Page({
 		id: counteragent.id,
 		name: counteragent.name,
 		inn: counteragent.inn,
+		kpp: counteragent.kpp,
 	};
 
 	return (

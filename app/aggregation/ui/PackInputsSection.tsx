@@ -11,11 +11,13 @@ export default function PackInputsSection() {
 	usePackGeneration();
 
 	const { pages, currentPage } = useAggregationPackStore();
-	const { triggerPrint, setPrintCodes } = usePrintStore();
+	const { triggerPrint, setPrintCodes, setSize } = usePrintStore();
 
 	const lastGeneratedCode = pages[currentPage]?.uniqueCode;
+	const printSize = pages[currentPage]?.size;
 	const handlePrint = () => {
 		setPrintCodes([lastGeneratedCode]);
+		setSize(printSize);
 		triggerPrint();
 	};
 

@@ -31,7 +31,16 @@ export async function getAggregatedCodes() {
 				select: { value: true },
 			},
 			nomenclature: {
-				select: { name: true, modelArticle: true, size: true, color: true },
+				select: {
+					name: true,
+					modelArticle: true,
+					color: true,
+					codePacks: {
+						select: {
+							size: true,
+						},
+					},
+				},
 			},
 			configuration: { select: { pieceInPack: true, packInPallet: true } },
 		},
@@ -42,7 +51,16 @@ export async function getAggregatedCodes() {
 		where: { nomenclature: { companyId } },
 		include: {
 			nomenclature: {
-				select: { name: true, modelArticle: true, size: true, color: true },
+				select: {
+					name: true,
+					modelArticle: true,
+					color: true,
+					codePacks: {
+						select: {
+							size: true,
+						},
+					},
+				},
 			},
 			configuration: { select: { pieceInPack: true, packInPallet: true } },
 		},
@@ -52,7 +70,9 @@ export async function getAggregatedCodes() {
 	const formattedPacks = packs.map((pack) => ({
 		name: pack.nomenclature.name,
 		modelArticle: pack.nomenclature.modelArticle,
-		size: pack.nomenclature.size,
+		size: pack.nomenclature.codePacks
+			.map((codePack) => codePack.size)
+			.join(", "),
 		color: pack.nomenclature.color,
 		generatedCode: pack.value,
 		configuration: `1-${pack.configuration.pieceInPack}-${
@@ -67,7 +87,9 @@ export async function getAggregatedCodes() {
 	const formattedPallets = pallets.map((pallet) => ({
 		name: pallet.nomenclature.name,
 		modelArticle: pallet.nomenclature.modelArticle,
-		size: pallet.nomenclature.size,
+		size: pallet.nomenclature.codePacks
+			.map((codePack) => codePack.size)
+			.join(", "),
 		color: pallet.nomenclature.color,
 		generatedCode: pallet.value,
 		configuration: `1-${pallet.configuration.pieceInPack}-${

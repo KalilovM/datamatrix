@@ -73,6 +73,9 @@ export async function GET() {
 	const result = nomenclatures.map((nomenclature) => ({
 		id: nomenclature.id,
 		name: nomenclature.name,
+		GTIN: nomenclature.GTIN,
+		color: nomenclature.color,
+		modelArticle: nomenclature.modelArticle,
 		codeCount: nomenclature.codePacks.reduce(
 			(total, codePack) => total + codePack.codes.length,
 			0,

@@ -17,7 +17,7 @@
 		"enabled": true
 	},
 	"files": {
-		"include": ["app/**/*.js", "app/**/*.ts", "app/**/*.tsx", "app/**/*.jsx"],
+		"include": ["**/*.js", "**/*.ts", "**/*.tsx", "**/*.jsx"],
 		"ignore": ["**/*.min.js"]
 	}
 }

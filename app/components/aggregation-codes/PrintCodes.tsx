@@ -108,13 +108,13 @@ const PrintCodes: React.FC<Props> = ({
 									className="w-full h-full flex flex-col items-start text-start centered"
 									style={{ marginBottom: "1mm" }}
 								>
-									<strong
+									<p
 										style={{
-											fontSize: "10px",
+											fontSize: "8px",
 										}}
 									>
 										{fieldLabels[field.fieldType] || field.fieldType}:
-									</strong>
+									</p>
 									<p
 										style={{
 											fontSize: `${field.fontSize}px`,

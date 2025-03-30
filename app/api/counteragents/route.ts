@@ -35,12 +35,14 @@ export async function POST(request: NextRequest) {
 
 	const name = formData.get("name") as string;
 	const inn = formData.get("inn") as string;
+	const kpp = formData.get("kpp") as string;
 
 	try {
 		await prisma.counteragent.create({
 			data: {
 				name,
 				inn,
+				kpp,
 				companyId: user.companyId,
 			},
 		});

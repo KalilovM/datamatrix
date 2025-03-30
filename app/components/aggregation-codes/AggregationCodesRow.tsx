@@ -13,11 +13,12 @@ export default function AggregationCodesRow({
 	aggregatedCodes: IAggregatedCode[];
 	defaultTemplate: PrintingTemplate | null | never[];
 }) {
-	const { triggerPrint, setPrintCodes } = usePrintStore();
+	const { triggerPrint, setPrintCodes, setSize } = usePrintStore();
 	const { setNomenclature } = useAggregationCodesStore();
 
 	const handlePrint = (nomenclature: IAggregatedCode) => {
 		setNomenclature(nomenclature);
+		setSize(nomenclature.size);
 		setPrintCodes([nomenclature.generatedCode]);
 		triggerPrint();
 	};

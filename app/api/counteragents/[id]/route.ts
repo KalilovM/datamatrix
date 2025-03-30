@@ -26,6 +26,7 @@ export async function PUT(
 	// Extract basic nomenclature fields.
 	const name = formData.get("name") as string;
 	const inn = formData.get("inn") as string;
+	const kpp = formData.get("kpp") as string;
 
 	try {
 		await prisma.counteragent.update({
@@ -35,6 +36,7 @@ export async function PUT(
 			data: {
 				name,
 				inn,
+				kpp,
 			},
 		});
 		return new Response("Контрагент обновлен!", {

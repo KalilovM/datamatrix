@@ -5,7 +5,6 @@ import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { BinIcon, EditIcon } from "@/shared/ui/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -46,6 +45,9 @@ export default function CounteragentRow({
 				</td>
 				<td className="px-6 py-4 text-gray-600">
 					{counteragent.inn || "Пусто"}
+				</td>
+				<td className="px-6 py-4 text-gray-600">
+					{counteragent.kpp || "Пусто"}
 				</td>
 				<td className="px-6 py-4 text-right flex items-center justify-end">
 					<Link

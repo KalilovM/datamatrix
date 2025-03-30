@@ -32,6 +32,9 @@ export default function CounteragentsTable({
 							<th scope="col" className="px-6 py-3">
 								ИНН
 							</th>
+							<th scope="col" className="px-6 py-3">
+								КПП
+							</th>
 							<th scope="col" className="px-6 py-3 text-right">
 								Действия
 							</th>
@@ -47,7 +50,7 @@ export default function CounteragentsTable({
 							))
 						) : (
 							<tr>
-								<td colSpan={3} className="text-center py-4 text-gray-500">
+								<td colSpan={4} className="text-center py-4 text-gray-500">
 									Нет доступных контрагентов
 								</td>
 							</tr>

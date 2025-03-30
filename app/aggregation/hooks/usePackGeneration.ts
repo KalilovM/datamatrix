@@ -19,9 +19,10 @@ export function usePackGeneration() {
 		setCurrentPage,
 		setUniqueCode,
 		setCodes,
+		setPrintSize,
 	} = useAggregationPackStore();
 
-	const { setPrintCodes, triggerPrint } = usePrintStore();
+	const { setPrintCodes, triggerPrint, setSize } = usePrintStore();
 
 	// When configuration changes, initialize pages
 	useEffect(() => {
@@ -30,6 +31,7 @@ export function usePackGeneration() {
 				{
 					packValues: Array(selectedConfiguration.pieceInPack).fill(""),
 					uniqueCode: null,
+					size: null,
 				},
 			]);
 			setCurrentPage(0);
@@ -56,9 +58,11 @@ export function usePackGeneration() {
 				{
 					onSuccess: (data) => {
 						setUniqueCode(currentPage, data.value);
+						setPrintSize(data.size);
 						toast.success("Уникальный код создан");
-						// Update the print store with the generated codes
+
 						setPrintCodes([data.value]);
+						setSize(data.size);
 						triggerPrint();
 
 						const newPage = {
@@ -88,6 +92,7 @@ export function usePackGeneration() {
 		setCurrentPage,
 		mutation,
 		setCodes,
+		setSize,
 		setPrintCodes,
 	]);
 }

@@ -38,7 +38,6 @@ export async function GET(request: Request) {
 					id: true,
 					name: true,
 					modelArticle: true,
-					size: true,
 					color: true,
 				},
 			});
@@ -52,7 +51,6 @@ export async function GET(request: Request) {
 				id: true,
 				name: true,
 				modelArticle: true,
-				size: true,
 				color: true,
 			},
 		});

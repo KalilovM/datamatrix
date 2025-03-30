@@ -1,15 +1,16 @@
 "use client";
 
-import type React from "react";
-import { useState, type FormEvent } from "react";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type React from "react";
+import { type FormEvent, useState } from "react";
+import { toast } from "react-toastify";
 
 interface CounteragentData {
 	id: string;
 	name: string;
 	inn: string;
+	kpp: string;
 }
 
 const CounteragentEditForm: React.FC<{ initialData: CounteragentData }> = ({
@@ -17,6 +18,7 @@ const CounteragentEditForm: React.FC<{ initialData: CounteragentData }> = ({
 }) => {
 	const [name, setName] = useState(initialData.name);
 	const [inn, setInn] = useState(initialData.inn);
+	const [kpp, setKpp] = useState(initialData.kpp);
 
 	const router = useRouter();
 
@@ -28,6 +30,7 @@ const CounteragentEditForm: React.FC<{ initialData: CounteragentData }> = ({
 		formData.append("id", initialData.id);
 		formData.append("name", name);
 		formData.append("inn", inn);
+		formData.append("kpp", initialData.kpp);
 
 		try {
 			const res = await fetch(`/api/counteragents/${initialData.id}`, {
@@ -94,6 +97,20 @@ const CounteragentEditForm: React.FC<{ initialData: CounteragentData }> = ({
 								type="text"
 								value={inn}
 								onChange={(e) => setInn(e.target.value)}
+								className="w-full rounded-lg border px-3 py-2 text-gray-700"
+							/>
+						</div>
+					</div>
+					<div className="flex flex-row w-full gap-4">
+						<div className="w-1/2 flex flex-col">
+							<label htmlFor="modelArticle" className="block">
+								КПП
+							</label>
+							<input
+								name="kpp"
+								type="text"
+								value={kpp}
+								onChange={(e) => setKpp(e.target.value)}
 								className="w-full rounded-lg border px-3 py-2 text-gray-700"
 							/>
 						</div>
