@@ -75,7 +75,7 @@ export async function GET(
 		codes: nomenclature.codePacks.map((pack) => ({
 			id: pack.id,
 			fileName: pack.name,
-			size: pack.size,
+			size: String(pack.size),
 			content: codesToCsv(pack.codes.map((code) => code.value)),
 			codes: pack.codes.map((code) => code.value),
 		})),

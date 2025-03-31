@@ -235,7 +235,6 @@ export async function createNomenclature(data: NomenclatureFormData) {
 
 export async function updateNomenclature(data: NomenclatureEditData) {
 	const { id, name, modelArticle, color, GTIN, configurations, codes } = data;
-	console.log(codes, "CODES");
 
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
@@ -279,7 +278,6 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 
 					try {
 						// Process the file (which may re-parse the CSV internally).
-						console.log(fileObj, "FILEOBJ");
 						const codePackData = await processCodeFile(fileObj);
 						newCodePackData.push(codePackData);
 					} catch (err: unknown) {

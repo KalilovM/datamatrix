@@ -59,6 +59,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	});
 
 	const onSubmit = (data: NomenclatureEditData) => {
+		console.log(data);
 		mutation.mutate({ ...data });
 	};
 
