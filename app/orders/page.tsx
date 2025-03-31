@@ -49,7 +49,7 @@ const Page = () => {
 									Дата заказа
 								</th>
 								<th scope="col" className="px-6 py-3">
-									ИНН
+									Контрагент
 								</th>
 								<th scope="col" className="px-6 py-3">
 									Заказано
