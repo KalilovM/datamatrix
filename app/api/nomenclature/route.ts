@@ -3,19 +3,21 @@ import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: Request) {
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
 		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
 	}
+
+	const url = new URL(req.url);
+	const name = url.searchParams.get("name") || undefined;
+	const modelArticle = url.searchParams.get("modelArticle") || undefined;
+	const color = url.searchParams.get("color") || undefined;
+	const GTIN = url.searchParams.get("gtin") || undefined;
+
 	const user = await prisma.user.findUnique({
-		where: {
-			id: session.user.id,
-		},
-		select: {
-			role: true,
-			companyId: true,
-		},
+		where: { id: session.user.id },
+		select: { role: true, companyId: true },
 	});
 	if (!user) {
 		return NextResponse.json(
@@ -23,52 +25,44 @@ export async function GET() {
 			{ status: 401 },
 		);
 	}
-	const { role, companyId } = user;
-	let nomenclatures;
-	if (role === "ADMIN") {
-		nomenclatures = await prisma.nomenclature.findMany({
-			select: {
-				id: true,
-				name: true,
-				GTIN: true,
-				color: true,
-				modelArticle: true,
-				codePacks: {
-					select: {
-						codes: {
-							where: { used: false },
-							select: { id: true },
-						},
-					},
-				},
-			},
-		});
-	} else {
-		if (!companyId) {
+
+	const where: any = {
+		name: name ? { contains: name, mode: "insensitive" } : undefined,
+		modelArticle: modelArticle
+			? { contains: modelArticle, mode: "insensitive" }
+			: undefined,
+		color: color ? { contains: color, mode: "insensitive" } : undefined,
+		GTIN: GTIN ? { contains: GTIN, mode: "insensitive" } : undefined,
+	};
+
+	if (user.role !== "ADMIN") {
+		if (!user.companyId) {
 			return NextResponse.json(
 				{ message: "Не установлен ID компании" },
 				{ status: 404 },
 			);
 		}
-		nomenclatures = await prisma.nomenclature.findMany({
-			where: { companyId },
-			select: {
-				id: true,
-				name: true,
-				GTIN: true,
-				color: true,
-				modelArticle: true,
-				codePacks: {
-					select: {
-						codes: {
-							where: { used: false },
-							select: { id: true },
-						},
+		where.companyId = user.companyId;
+	}
+
+	const nomenclatures = await prisma.nomenclature.findMany({
+		where,
+		select: {
+			id: true,
+			name: true,
+			GTIN: true,
+			color: true,
+			modelArticle: true,
+			codePacks: {
+				select: {
+					codes: {
+						where: { used: false },
+						select: { id: true },
 					},
 				},
 			},
-		});
-	}
+		},
+	});
 
 	const result = nomenclatures.map((nomenclature) => ({
 		id: nomenclature.id,

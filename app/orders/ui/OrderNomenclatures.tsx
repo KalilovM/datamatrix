@@ -85,11 +85,12 @@ export default function OrderNomenclatures() {
 									<Select
 										options={nomenclatures?.map((nomenclature) => ({
 											value: nomenclature.id,
-											label: nomenclature.name,
+											label: nomenclature.modelArticle,
 										}))}
 										onChange={(selectedOption) =>
 											handleNomenclatureChange(selectedOption, index)
 										}
+										placeholder="Номенклатура"
 										value={row.nomenclature}
 									/>
 								</td>

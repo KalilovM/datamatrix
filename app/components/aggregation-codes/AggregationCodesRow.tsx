@@ -15,6 +15,7 @@ export default function AggregationCodesRow({
 }) {
 	const { triggerPrint, setPrintCodes, setSize } = usePrintStore();
 	const { setNomenclature } = useAggregationCodesStore();
+	console.log(aggregatedCodes);
 
 	const handlePrint = (nomenclature: IAggregatedCode) => {
 		setNomenclature(nomenclature);
@@ -30,7 +31,7 @@ export default function AggregationCodesRow({
 				<thead className="text-xs text-gray-700 uppercase bg-gray-50">
 					<tr>
 						<th scope="col" className="px-6 py-3">
-							Наименование
+							Модель
 						</th>
 						<th scope="col" className="px-6 py-3">
 							Агрегированный код
@@ -61,7 +62,7 @@ export default function AggregationCodesRow({
 								scope="row"
 								className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
 							>
-								{code.name}
+								{code.modelArticle}
 							</th>
 							<td className="px-6 py-4">{code.generatedCode}</td>
 							<td className="px-6 py-4">{code.configuration}</td>

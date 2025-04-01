@@ -33,7 +33,7 @@ export async function GET(req: Request) {
 		where: { companyId: user.companyId },
 		select: {
 			id: true,
-			name: true,
+			modelArticle: true,
 		},
 	});
 	return NextResponse.json(nomenclatures);

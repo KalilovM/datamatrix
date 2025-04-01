@@ -58,7 +58,10 @@ const BarcodeComponent: React.FC<BarcodeComponentProps> = ({
 			{error ? (
 				<p style={{ color: "red" }}>{error}</p>
 			) : (
-				<canvas ref={canvasRef} />
+				<div>
+					<canvas ref={canvasRef} />
+					<p className="text-xs font-bold">{text.slice(0, 8)}</p>
+				</div>
 			)}
 		</div>
 	);

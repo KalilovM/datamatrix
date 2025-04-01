@@ -2,11 +2,20 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-export function useNomenclatures() {
+interface Filters {
+	name?: string;
+	modelArticle?: string;
+	color?: string;
+	gtin?: string;
+}
+
+export function useNomenclatures(filters: Filters = {}) {
+	const queryString = new URLSearchParams(filters).toString();
+
 	return useQuery({
-		queryKey: ["nomenclatures"],
+		queryKey: ["nomenclatures", filters],
 		queryFn: async () => {
-			const res = await fetch("/api/nomenclature");
+			const res = await fetch(`/api/nomenclature?${queryString}`);
 			if (!res.ok) throw new Error("Ошибка загрузки номенклатур");
 			return res.json();
 		},

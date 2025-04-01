@@ -2,18 +2,40 @@
 
 import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
+import { useState } from "react";
 import { useNomenclatures } from "./hooks/useNomenclatures";
 import NomenclatureTable from "./ui/NomenclatureTable";
 
 const Page = () => {
-	const { data: nomenclatures, isLoading, error } = useNomenclatures();
+	const [tempFilters, setTempFilters] = useState({
+		name: "",
+		modelArticle: "",
+		color: "",
+		gtin: "",
+	});
+	const [filters, setFilters] = useState(tempFilters); // actual applied filters
+
+	const { data: nomenclatures, isLoading, error } = useNomenclatures(filters);
+
+	const handleTempChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setTempFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+	};
+
+	const applyFilters = () => {
+		setFilters(tempFilters);
+	};
 
 	if (isLoading) return <Layout>Загрузка...</Layout>;
 	if (error || !nomenclatures) return <Layout>Ошибка загрузки данных</Layout>;
 
 	return (
 		<Layout>
-			<NomenclatureTable nomenclatures={nomenclatures} />
+			<NomenclatureTable
+				nomenclatures={nomenclatures}
+				filters={tempFilters}
+				handleFiltersChange={handleTempChange}
+				onApply={applyFilters}
+			/>
 		</Layout>
 	);
 };
