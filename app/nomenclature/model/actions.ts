@@ -258,66 +258,129 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 	const { companyId } = user;
 
 	try {
-		const updatedNomenclature = await prisma.$transaction(async (tx) => {
-			// Delete existing configurations and code packs for this nomenclature.
-			await tx.configuration.deleteMany({ where: { nomenclatureId: id } });
-			await tx.codePack.deleteMany({ where: { nomenclatureId: id } });
+		await prisma.nomenclature.update({
+			where: { id },
+			data: {
+				name,
+				modelArticle,
+				color,
+				GTIN,
+			},
+		});
 
-			// Prepare new code pack data.
-			const newCodePackData: ProcessedCodeFile[] = [];
-			if (codes) {
-				for (const fileObj of codes) {
-					// Parse codes from the CSV content.
-					const codesArray = parseAndValidateCsvCodes(
-						fileObj.content,
-						fileObj.fileName,
-					);
+		// === CONFIGURATIONS ===
+		const existingConfigurations = await prisma.configuration.findMany({
+			where: { nomenclatureId: id },
+		});
+		let incomingConfigIds: string[] = [];
+		if (configurations) {
+			incomingConfigIds = configurations
+				.filter((conf) => conf.id)
+				.map((conf) => conf.id);
+		}
 
-					// Use the transaction client and tell the helper to ignore codes from the current nomenclature.
-					await checkExistingCodes(tx, codesArray, fileObj.fileName, id);
+		const configsToDelete = existingConfigurations.filter(
+			(existing) => !incomingConfigIds.includes(existing.id),
+		);
 
-					try {
-						// Process the file (which may re-parse the CSV internally).
-						const codePackData = await processCodeFile(fileObj);
-						newCodePackData.push(codePackData);
-					} catch (err: unknown) {
-						console.error(`Ошибка обработки файла ${fileObj.fileName}:`, err);
-						if (err instanceof Error) {
-							throw new Error("Ошибка обработки файла");
-						}
-					}
+		for (const config of configsToDelete) {
+			await prisma.generatedCodePack.deleteMany({
+				where: { configurationId: config.id },
+			});
+			await prisma.configuration.delete({
+				where: { id: config.id },
+			});
+		}
+
+		// === CODE PACKS ===
+		const existingCodePacks = await prisma.codePack.findMany({
+			where: { nomenclatureId: id },
+		});
+
+		let incomingFileNames: string[] = [];
+		if (codes) {
+			incomingFileNames = codes
+				.filter((code) => code.fileName)
+				.map((code) => code.fileName);
+		}
+
+		const codePacksToDelete = existingCodePacks.filter(
+			(cp) => !incomingFileNames.includes(cp.name),
+		);
+
+		for (const pack of codePacksToDelete) {
+			await prisma.code.deleteMany({
+				where: { codePackId: pack.id },
+			});
+			await prisma.codePack.delete({
+				where: { id: pack.id },
+			});
+
+			await prisma.generatedCodePack.deleteMany({
+				where: { nomenclatureId: id },
+			});
+		}
+
+		// ✅ Sync updated & new configurations
+		for (const config of configurations) {
+			if (config.id) {
+				await prisma.configuration.update({
+					where: { id: config.id },
+					data: {
+						pieceInPack: config.value.pieceInPack,
+						packInPallet: config.value.packInPallet,
+					},
+				});
+			} else {
+				await prisma.configuration.create({
+					data: {
+						nomenclatureId: id,
+						basePiece: 1,
+						pieceInPack: config.value.pieceInPack,
+						packInPallet: config.value.packInPallet,
+					},
+				});
+			}
+		}
+
+		for (const code of codes) {
+			let newCodePackData: ProcessedCodeFile | null = null;
+			const codesArray = parseAndValidateCsvCodes(code.content, code.fileName);
+
+			await checkExistingCodes(prisma, codesArray, code.fileName, id);
+			try {
+				const codePackData = await processCodeFile(code);
+				newCodePackData = codePackData;
+			} catch (err: unknown) {
+				console.error(`Ошибка обработки файла ${code.fileName}:`, err);
+				if (err instanceof Error) {
+					throw new Error("Ошибка обработки файла");
 				}
 			}
 
-			// Update the nomenclature's top-level fields and recreate nested relations.
-			return await tx.nomenclature.update({
-				where: { id },
-				data: {
-					name,
-					modelArticle,
-					color,
-					GTIN,
-					companyId,
-					configurations: {
-						create: configurations
-							? configurations.map((cfg) => ({
-									pieceInPack: cfg.value.pieceInPack,
-									packInPallet: cfg.value.packInPallet,
-								}))
-							: [],
+			if (code.id) {
+				await prisma.codePack.update({
+					where: { id: code.id },
+					data: {
+						name: code.fileName,
+						content: code.content,
+						size: Number.parseInt(code.size ?? "0"),
 					},
-					codePacks: {
-						create: newCodePackData,
-					},
-				},
-				include: {
-					configurations: true,
-					codePacks: { include: { codes: true } },
-				},
-			});
-		});
-
-		return updatedNomenclature;
+				});
+			} else {
+				if (newCodePackData) {
+					await prisma.codePack.create({
+						data: {
+							nomenclatureId: id,
+							name: newCodePackData.name,
+							content: newCodePackData.content,
+							size: newCodePackData.size,
+							codes: newCodePackData.codes,
+						},
+					});
+				}
+			}
+		}
 	} catch (error: unknown) {
 		console.error("Ошибка обновления номенклатуры:", error);
 		throw new Error("Ошибка обновления номенклатуры");
