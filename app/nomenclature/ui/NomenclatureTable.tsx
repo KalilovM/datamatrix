@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterIcon } from "@/shared/ui/icons";
+import { CloseIcon, FilterIcon } from "@/shared/ui/icons";
 import Link from "next/link";
 import { useState } from "react";
 import type { Nomenclature } from "../model/types";
@@ -43,34 +43,97 @@ export default function NomenclatureTable({
 						</button>
 						{showFilters && (
 							<div className="px-2 py-3 bg-white rounded-md shadow-md border-gray-400 border absolute top-12 right-0 z-50 w-64 space-y-2">
-								<input
-									className="border px-3 py-2 rounded w-full"
-									name="name"
-									value={filters.name}
-									onChange={handleFiltersChange}
-									placeholder="Название"
-								/>
-								<input
-									className="border px-3 py-2 rounded w-full"
-									name="modelArticle"
-									value={filters.modelArticle}
-									onChange={handleFiltersChange}
-									placeholder="Модель"
-								/>
-								<input
-									className="border px-3 py-2 rounded w-full"
-									name="color"
-									value={filters.color}
-									onChange={handleFiltersChange}
-									placeholder="Цвет"
-								/>
-								<input
-									className="border px-3 py-2 rounded w-full"
-									name="gtin"
-									value={filters.gtin}
-									onChange={handleFiltersChange}
-									placeholder="GTIN"
-								/>
+								<div className="relative">
+									<input
+										className="border px-3 py-2 rounded w-full"
+										name="name"
+										value={filters.name}
+										onChange={handleFiltersChange}
+										placeholder="Название"
+									/>
+									{filters.name && (
+										<button
+											type="button"
+											className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+											onClick={() =>
+												handleFiltersChange({
+													target: { name: "name", value: "" },
+												} as React.ChangeEvent<HTMLInputElement>)
+											}
+										>
+											<CloseIcon />
+										</button>
+									)}
+								</div>
+								<div className="relative">
+									<input
+										className="border px-3 py-2 rounded w-full"
+										name="gtin"
+										value={filters.gtin}
+										onChange={handleFiltersChange}
+										placeholder="GTIN"
+									/>
+									{filters.gtin && (
+										<button
+											type="button"
+											className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+											onClick={() =>
+												handleFiltersChange({
+													target: { name: "gtin", value: "" },
+												} as React.ChangeEvent<HTMLInputElement>)
+											}
+										>
+											<CloseIcon />
+										</button>
+									)}
+								</div>
+
+								<div className="relative">
+									<input
+										className="border px-3 py-2 rounded w-full"
+										name="modelArticle"
+										value={filters.modelArticle}
+										onChange={handleFiltersChange}
+										placeholder="Модель"
+									/>
+									{filters.modelArticle && (
+										<button
+											type="button"
+											className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+											onClick={() =>
+												handleFiltersChange({
+													target: { name: "modelArticle", value: "" },
+												} as React.ChangeEvent<HTMLInputElement>)
+											}
+										>
+											<CloseIcon />
+										</button>
+									)}
+								</div>
+
+								<div className="relative">
+									<input
+										className="border px-3 py-2 rounded w-full"
+										name="color"
+										value={filters.color}
+										onChange={handleFiltersChange}
+										placeholder="Цвет"
+									/>
+									{filters.color && (
+										<button
+											type="button"
+											className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+											onClick={() =>
+												handleFiltersChange({
+													target: { name: "color", value: "" },
+												} as React.ChangeEvent<HTMLInputElement>)
+											}
+										>
+											<CloseIcon />
+										</button>
+									)}
+								</div>
+
 								<button
 									type="button"
 									onClick={() => {

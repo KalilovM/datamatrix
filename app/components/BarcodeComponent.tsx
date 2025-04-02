@@ -60,7 +60,7 @@ const BarcodeComponent: React.FC<BarcodeComponentProps> = ({
 			) : (
 				<div>
 					<canvas ref={canvasRef} />
-					<p className="text-xs font-bold">{text.slice(0, 8)}</p>
+					<p className="text-xs font-bold">{text.slice(-8)}</p>
 				</div>
 			)}
 		</div>
