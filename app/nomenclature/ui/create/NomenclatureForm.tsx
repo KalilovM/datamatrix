@@ -132,21 +132,6 @@ export default function NomenclatureForm() {
 								<p className="text-sm text-red-500">{errors.color.message}</p>
 							)}
 						</div>
-
-						{/* Размер */}
-						<div className="flex flex-col flex-1">
-							<label htmlFor="size">GTIN</label>
-							<input
-								{...register("GTIN")}
-								type="text"
-								className={`w-full rounded-lg border px-3 py-2 ${
-									errors.GTIN ? "border-red-500" : "border-gray-300"
-								}`}
-							/>
-							{errors.GTIN && (
-								<p className="text-sm text-red-500">{errors.GTIN.message}</p>
-							)}
-						</div>
 					</div>
 				</div>
 

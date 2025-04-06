@@ -75,6 +75,7 @@ export async function processCodeFile(fileObj: {
 	fileName: string;
 	content: string;
 	size: string;
+	GTIN: string;
 }): Promise<ProcessedCodeFile> {
 	const codes = parseAndValidateCsvCodes(fileObj.content, fileObj.fileName);
 
@@ -91,5 +92,6 @@ export async function processCodeFile(fileObj: {
 		codes: { create: codeRecords },
 		content: fileObj.content,
 		size: Number.parseInt(fileObj.size, 10),
+		GTIN: fileObj.GTIN,
 	};
 }

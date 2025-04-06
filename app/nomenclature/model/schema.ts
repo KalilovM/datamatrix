@@ -16,13 +16,13 @@ export const CodeSchema = z.object({
 	fileName: z.string().min(1, "Имя файла не может быть пустым"),
 	content: z.string().min(1, "Содержимое файла не может быть пустым"),
 	size: z.string().min(1, "Размер обязателен"),
+	GTIN: z.string().min(1, "GTIN обязателен"),
 });
 
 export const NomenclatureSchema = z.object({
 	name: z.string().min(3, "Наименование должно содержать не менее 3 символов"),
 	modelArticle: z.string().min(1, "Модель обязательна"),
 	color: z.string().min(1, "Цвет обязателен"),
-	GTIN: z.string().min(1, "GTIN обязателен"),
 	configurations: z.array(ConfigurationSchema).optional(),
 	codes: z.array(CodeSchema).optional(),
 });
@@ -50,6 +50,7 @@ export const CodeEditSchema = z.object({
 	content: z.string(),
 	codes: z.array(z.string()).optional(),
 	size: z.string().min(1, "Размер обязателен"),
+	GTIN: z.string().min(1, "GTIN обязателен"),
 });
 
 export const NomenclatureEditSchema = z.object({
@@ -57,7 +58,6 @@ export const NomenclatureEditSchema = z.object({
 	name: z.string().min(3, "Наименование должно содержать не менее 3 символов"),
 	modelArticle: z.string().min(1, "Модель обязательна"),
 	color: z.string().min(1, "Цвет обязателен"),
-	GTIN: z.string().min(1, "GTIN обязателен"),
 	configurations: z.array(ConfigurationEditSchema).optional(),
 	codes: z.array(CodeEditSchema).optional(),
 });

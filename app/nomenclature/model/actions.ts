@@ -146,7 +146,7 @@ export async function fetchNomenclatureById(
 }
 
 export async function createNomenclature(data: NomenclatureFormData) {
-	const { name, modelArticle, color, GTIN, configurations, codes } = data;
+	const { name, modelArticle, color, configurations, codes } = data;
 	console.log(codes);
 
 	// Get current user session.
@@ -214,7 +214,6 @@ export async function createNomenclature(data: NomenclatureFormData) {
 					name,
 					modelArticle,
 					color,
-					GTIN,
 					companyId,
 					configurations: { create: configCreateData },
 					codePacks: { create: codePackCreateData },

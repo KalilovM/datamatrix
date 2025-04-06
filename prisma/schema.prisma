@@ -73,7 +73,6 @@ model Nomenclature {
   name                 String
   modelArticle         String?
   color                String?
-  GTIN                 String?
   configurations       Configuration[]
   codePacks            CodePack[]
   company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -105,6 +104,7 @@ model CodePack {
   content        String
   nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
   size           Int?
+  GTIN           String?
   nomenclatureId String
   codes          Code[]
   used           Boolean      @default(false)

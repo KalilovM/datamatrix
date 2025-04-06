@@ -1,20 +1,50 @@
 import { BinIcon, CloseIcon, UploadIcon } from "@/shared/ui/icons";
-import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
+import {
+	type ChangeEvent,
+	type DragEvent,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { toast } from "react-toastify";
 import type { Code } from "./CodeTable";
 
 interface CodesUploadModalProps {
 	onClose: () => void;
 	onAdd: (codes: Code[]) => void;
+	codes: ParsedCode[];
+}
+
+interface ParsedCode {
+	fileName: string;
+	codes: string[];
+	size: number;
+	GTIN: string;
 }
 
 export default function CodesUploadModal({
 	onClose,
 	onAdd,
+	codes,
 }: CodesUploadModalProps) {
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [sizeInput, setSizeInput] = useState<string>("");
+	const [gtin, setGtin] = useState<string>("");
+	const [isGtinDisabled, setIsGtinDisabled] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		const existingCode = codes.find(
+			(code) => Number(code.size) === Number(sizeInput),
+		);
+		if (existingCode) {
+			setGtin(existingCode.GTIN);
+			setIsGtinDisabled(true);
+		} else {
+			setGtin("");
+			setIsGtinDisabled(false);
+		}
+	}, [sizeInput, codes]);
 
 	const handleDrop = (e: DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
@@ -74,6 +104,7 @@ export default function CodesUploadModal({
 				fileName: selectedFile.name,
 				content,
 				size: sizeInput,
+				GTIN: gtin,
 			};
 
 			onAdd([code]);
@@ -134,6 +165,17 @@ export default function CodesUploadModal({
 						value={sizeInput}
 						onChange={(e) => setSizeInput(e.target.value)}
 						className="mt-4 w-full rounded-md px-4 py-2 bg-white border border-gray-300"
+					/>
+					<input
+						type="string"
+						name="gtin"
+						placeholder="Введите GTIN"
+						value={gtin}
+						onChange={(e) => setGtin(e.target.value)}
+						disabled={isGtinDisabled}
+						className={`mt-4 w-full rounded-md px-4 py-2 border ${
+							isGtinDisabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+						} border-gray-300`}
 					/>
 
 					<button

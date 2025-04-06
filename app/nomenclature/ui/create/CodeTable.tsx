@@ -9,13 +9,14 @@ export interface Code {
 	fileName: string;
 	content: string;
 	size: number;
+	GTIN: string;
 }
 
-// New interface for parsed CSV files.
 interface ParsedCode {
 	fileName: string;
 	codes: string[];
 	size: number;
+	GTIN: string;
 }
 
 interface CodeTableProps {
@@ -35,7 +36,6 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const handleDelete = (fileName: string) => {
 		const updated = codes.filter((code) => code.fileName !== fileName);
 		onChange(updated);
-		// Also remove the file from our parsed state.
 		setCodesList((prev) => prev.filter((file) => file.fileName !== fileName));
 		toast.success("Файл удален");
 	};
@@ -49,7 +49,12 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 				.split(/\r?\n/)
 				.map((line) => line.trim())
 				.filter((line) => line.length > 0);
-			return { fileName: newCode.fileName, codes: lines, size: newCode.size };
+			return {
+				fileName: newCode.fileName,
+				codes: lines,
+				size: newCode.size,
+				GTIN: newCode.GTIN,
+			};
 		});
 		setCodesList((prev) => [...prev, ...parsed]);
 		setIsModalOpen(false);
@@ -92,6 +97,12 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 								>
 									Размер
 								</th>
+								<th
+									scope="col"
+									className="pl-6 pr-2 py-3 whitespace-nowrap w-0"
+								>
+									GTIN
+								</th>
 								<th scope="col" className="px-6 py-3 text-start">
 									Имя файла
 								</th>
@@ -110,7 +121,10 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 										<td className="pl-6 pr-2 py-4 font-medium whitespace-nowrap w-0">
 											{file.size}
 										</td>
-										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate max-w-xs">
+										<td className="pl-6 pr-2 py-4 font-medium whitespace-nowrap w-0">
+											{file.GTIN}
+										</td>
+										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate max-w-[150]">
 											{file.fileName}
 										</td>
 										<td className="px-6 py-4 text-right flex items-center justify-end gap-2">
@@ -134,7 +148,7 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 								))
 							) : (
 								<tr>
-									<td colSpan={3} className="text-center py-4 text-gray-500">
+									<td colSpan={4} className="text-center py-4 text-gray-500">
 										Нет кодов
 									</td>
 								</tr>
@@ -146,6 +160,7 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 
 			{isModalOpen && (
 				<CodesUploadModal
+					codes={codesList}
 					onClose={() => setIsModalOpen(false)}
 					onAdd={handleUpload}
 				/>

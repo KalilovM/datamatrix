@@ -32,7 +32,6 @@ export async function GET(req: Request) {
 			? { contains: modelArticle, mode: "insensitive" }
 			: undefined,
 		color: color ? { contains: color, mode: "insensitive" } : undefined,
-		GTIN: GTIN ? { contains: GTIN, mode: "insensitive" } : undefined,
 	};
 
 	if (user.role !== "ADMIN") {
@@ -50,11 +49,14 @@ export async function GET(req: Request) {
 		select: {
 			id: true,
 			name: true,
-			GTIN: true,
 			color: true,
 			modelArticle: true,
 			codePacks: {
+				where: {
+					GTIN: GTIN ? { contains: GTIN, mode: "insensitive" } : undefined,
+				},
 				select: {
+					GTIN: true,
 					codes: {
 						where: { used: false },
 						select: { id: true },
@@ -67,7 +69,7 @@ export async function GET(req: Request) {
 	const result = nomenclatures.map((nomenclature) => ({
 		id: nomenclature.id,
 		name: nomenclature.name,
-		GTIN: nomenclature.GTIN,
+		GTIN: nomenclature.codePacks.map((pack) => pack.GTIN),
 		color: nomenclature.color,
 		modelArticle: nomenclature.modelArticle,
 		codeCount: nomenclature.codePacks.reduce(
