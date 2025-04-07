@@ -1,3 +1,4 @@
+import { useGtinSizeStore } from "@/nomenclature/stores/sizegtinStore";
 import { BinIcon, CloseIcon, UploadIcon } from "@/shared/ui/icons";
 import {
 	type ChangeEvent,
@@ -27,6 +28,9 @@ export default function CodesUploadModal({
 	onAdd,
 	codes,
 }: CodesUploadModalProps) {
+	const DEBOUNCE_DELAY = 500;
+
+	const { gtinSize } = useGtinSizeStore();
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [sizeInput, setSizeInput] = useState<string>("");
 	const [gtin, setGtin] = useState<string>("");
@@ -34,17 +38,25 @@ export default function CodesUploadModal({
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
-		const existingCode = codes.find(
-			(code) => Number(code.size) === Number(sizeInput),
-		);
-		if (existingCode) {
-			setGtin(existingCode.GTIN);
-			setIsGtinDisabled(true);
-		} else {
-			setGtin("");
-			setIsGtinDisabled(false);
-		}
-	}, [sizeInput, codes]);
+		if (!sizeInput) return;
+
+		const handler = setTimeout(() => {
+			const existingSize = gtinSize.find(
+				(size) => Number(size.size) === Number(sizeInput),
+			);
+			if (existingSize) {
+				setGtin(existingSize.GTIN);
+				setIsGtinDisabled(true);
+			} else {
+				toast.error("Размер не найден в базе данных GTIN.");
+				setGtin("");
+				setSizeInput("");
+				setIsGtinDisabled(true);
+			}
+		}, DEBOUNCE_DELAY);
+
+		return () => clearTimeout(handler);
+	}, [gtinSize, sizeInput]);
 
 	const handleDrop = (e: DragEvent<HTMLDivElement>) => {
 		e.preventDefault();

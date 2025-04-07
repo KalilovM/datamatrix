@@ -16,6 +16,7 @@ import {
 import { useNomenclatureStore } from "../../model/store";
 import CodeTable from "./CodeTable";
 import ConfigurationTable from "./ConfigurationTable";
+import { SizeGtinTable } from "./SizeGtinTable";
 
 export default function NomenclatureForm() {
 	const { nomenclature, reset } = useNomenclatureStore();
@@ -59,7 +60,7 @@ export default function NomenclatureForm() {
 
 	return (
 		<form
-			className="flex flex-col w-full h-full gap-4"
+			className="flex flex-col w-full gap-4"
 			onSubmit={handleSubmit(onSubmit)}
 		>
 			<div className="table-layout h-auto">
@@ -137,7 +138,7 @@ export default function NomenclatureForm() {
 
 				{/* Tables for Configurations and Codes */}
 			</div>
-			<div className="flex flex-row w-full gap-4 h-full flex-1">
+			<div className="flex flex-row w-full gap-4 h-full flex-1 min-h-[400px] max-h-[400px]">
 				<Controller
 					control={control}
 					name="configurations"
@@ -146,14 +147,15 @@ export default function NomenclatureForm() {
 					)}
 				/>
 
-				<Controller
-					control={control}
-					name="codes"
-					render={({ field: { value, onChange } }) => (
-						<CodeTable value={value} onChange={onChange} />
-					)}
-				/>
+				<SizeGtinTable />
 			</div>
+			<Controller
+				control={control}
+				name="codes"
+				render={({ field: { value, onChange } }) => (
+					<CodeTable value={value} onChange={onChange} />
+				)}
+			/>
 		</form>
 	);
 }
