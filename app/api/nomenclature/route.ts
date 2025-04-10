@@ -44,6 +44,14 @@ export async function GET(req: Request) {
 		where.companyId = user.companyId;
 	}
 
+	if (GTIN) {
+		where.codePacks = {
+			some: {
+				GTIN: { contains: GTIN, mode: "insensitive" },
+			},
+		};
+	}
+
 	const nomenclatures = await prisma.nomenclature.findMany({
 		where,
 		select: {
@@ -52,9 +60,6 @@ export async function GET(req: Request) {
 			color: true,
 			modelArticle: true,
 			codePacks: {
-				where: {
-					GTIN: GTIN ? { contains: GTIN, mode: "insensitive" } : undefined,
-				},
 				select: {
 					GTIN: true,
 					size: true,
