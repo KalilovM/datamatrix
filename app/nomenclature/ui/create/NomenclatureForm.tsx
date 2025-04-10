@@ -1,11 +1,12 @@
 "use client";
 
 import { useConfigurationsStore } from "@/nomenclature/stores/configurationsStore";
+import { useGtinSizeStore } from "@/nomenclature/stores/sizegtinStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { createNomenclature } from "../../model/actions";
@@ -18,24 +19,39 @@ import CodeTable from "./CodeTable";
 import ConfigurationTable from "./ConfigurationTable";
 import { SizeGtinTable } from "./SizeGtinTable";
 
+type IGtinSize = {
+	id: string;
+	size: string;
+	GTIN: string;
+};
+
 export default function NomenclatureForm() {
 	const { nomenclature, reset } = useNomenclatureStore();
+	const { reset: resetSizes } = useGtinSizeStore();
 	const resetConfigurations = useConfigurationsStore((state) => state.reset);
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const {
 		register,
 		handleSubmit,
+		setValue,
 		formState: { errors },
 		control,
+		watch,
 	} = useForm<NomenclatureFormData>({
 		resolver: zodResolver(NomenclatureSchema),
+		defaultValues: {
+			codes: [],
+		},
 	});
+	const codes = watch("codes");
+
 	const mutation = useMutation({
 		mutationFn: createNomenclature,
 		onSuccess: (nom) => {
 			toast.success("Номенклатура сохранена!");
 			reset();
+			resetSizes();
 			queryClient.invalidateQueries({
 				queryKey: ["nomenclatures"],
 			});
@@ -54,8 +70,40 @@ export default function NomenclatureForm() {
 		resetConfigurations();
 	}, [resetConfigurations]);
 
+	console.log(errors);
+
 	const onSubmit = (data: NomenclatureFormData) => {
 		mutation.mutate({ ...data });
+	};
+
+	const handleSaveGtinSize = (
+		newGtinSize: IGtinSize,
+		oldGtin?: string,
+		oldSize?: number,
+	) => {
+		console.log(newGtinSize, oldGtin, oldSize);
+		console.log(codes);
+		if (codes && Array.isArray(codes)) {
+			const updatedCodes = codes.map((code) => {
+				if (code.GTIN === oldGtin && Number.parseInt(code.size) === oldSize) {
+					return {
+						...code,
+						GTIN: newGtinSize.GTIN,
+						size: String.toString(newGtinSize.size),
+					};
+				}
+				return code;
+			});
+
+			setValue("codes", updatedCodes);
+			const { updateGtinSize, addGtinSize } = useGtinSizeStore.getState();
+
+			if (oldGtin !== undefined && oldSize !== undefined) {
+				updateGtinSize(oldGtin, oldSize, newGtinSize);
+			} else {
+				addGtinSize(newGtinSize);
+			}
+		}
 	};
 
 	return (
@@ -147,7 +195,7 @@ export default function NomenclatureForm() {
 					)}
 				/>
 
-				<SizeGtinTable />
+				<SizeGtinTable onSaveGtinSize={handleSaveGtinSize} />
 			</div>
 			<Controller
 				control={control}

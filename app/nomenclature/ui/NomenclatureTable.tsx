@@ -157,9 +157,9 @@ export default function NomenclatureTable({
 			</div>
 
 			{/* Table Rows */}
-			<div className="table-rows-layout relative overflow-x-auto">
+			<div className="table-rows-layout relative w-full h-full">
 				<table className="w-full text-sm text-left text-gray-500">
-					<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+					<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200 w-full">
 						<tr>
 							<th scope="col" className="px-6 py-3">
 								Название
@@ -181,7 +181,7 @@ export default function NomenclatureTable({
 							</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody className="w-full">
 						{nomenclatures.length > 0 ? (
 							nomenclatures.map((nomenclature) => (
 								<NomenclatureRow

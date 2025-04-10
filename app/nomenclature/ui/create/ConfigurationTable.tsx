@@ -84,7 +84,7 @@ export default function ConfigurationTable({
 				</div>
 
 				{/* Table Rows */}
-				<div className="table-rows-layout relative overflow-x-auto">
+				<div className="table-rows-layout relative max-h-[325px] border border-gray-200 rounded-b-md">
 					<table className="w-full text-sm text-left text-gray-500">
 						<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
 							<tr>

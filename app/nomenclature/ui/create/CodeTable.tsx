@@ -28,9 +28,7 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const codes = value;
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-	// Use ParsedCode[] to store each file’s parsed codes.
 	const [codesList, setCodesList] = useState<ParsedCode[]>([]);
-	// This will hold the list of codes for the file being viewed.
 	const [codesView, setCodesView] = useState<string[]>([]);
 
 	const handleDelete = (fileName: string) => {
@@ -40,7 +38,6 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 		toast.success("Файл удален");
 	};
 
-	// When new code files are uploaded, we parse their CSV content.
 	const handleUpload = (newCodes: Code[]) => {
 		onChange([...codes, ...newCodes]);
 

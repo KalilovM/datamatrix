@@ -57,6 +57,7 @@ export async function GET(req: Request) {
 				},
 				select: {
 					GTIN: true,
+					size: true,
 					codes: {
 						where: { used: false },
 						select: { id: true },
@@ -70,6 +71,7 @@ export async function GET(req: Request) {
 		id: nomenclature.id,
 		name: nomenclature.name,
 		GTIN: nomenclature.codePacks.map((pack) => pack.GTIN),
+		size: nomenclature.codePacks.map((pack) => pack.size),
 		color: nomenclature.color,
 		modelArticle: nomenclature.modelArticle,
 		codeCount: nomenclature.codePacks.reduce(

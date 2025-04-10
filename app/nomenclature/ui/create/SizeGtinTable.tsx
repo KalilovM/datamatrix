@@ -4,18 +4,37 @@ import { BinIcon, EditIcon, PlusIcon } from "@/shared/ui/icons";
 import { useState } from "react";
 import SizeGtinUploadModal from "./SizeGtinUploadModal";
 
-export function SizeGtinTable() {
-	const { gtinSize, addGtinSize } = useGtinSizeStore();
+export function SizeGtinTable({
+	onSaveGtinSize,
+}: {
+	onSaveGtinSize: (
+		newGtinSize: IGtinSize,
+		oldGtin?: string,
+		oldSize?: number,
+	) => void;
+}) {
+	const { gtinSize } = useGtinSizeStore();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingGtinSize, setEditingGtinSize] = useState<IGtinSize | null>(
 		null,
 	);
 
-	const handleSave = (size: IGtinSize) => {
+	const handleSave = (size: IGtinSize, oldGtin?: string, oldSize?: number) => {
 		setEditingGtinSize(null);
 		setIsModalOpen(false);
-		addGtinSize(size);
+		onSaveGtinSize(size, oldGtin, oldSize);
 	};
+
+	const handleEdit = (row: IGtinSize) => {
+		setEditingGtinSize(row);
+		setIsModalOpen(true);
+	};
+
+	const handleClose = () => {
+		setEditingGtinSize(null);
+		setIsModalOpen(false);
+	};
+
 	return (
 		<div className="w-1/2">
 			<div className="table-layout">
@@ -35,9 +54,9 @@ export function SizeGtinTable() {
 				</div>
 
 				{/* Table Rows */}
-				<div className="table-rows-layout relative overflow-x-auto">
-					<table className="w-full text-sm text-left text-gray-500">
-						<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+				<div className="table-rows-layout relative max-h-[325px] border border-gray-200 rounded-b-md">
+					<table className="w-full text-sm text-left text-gray-500 table-fixed">
+						<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200 sticky top-0">
 							<tr>
 								<th scope="col" className="px-6 py-3">
 									Размер
@@ -66,7 +85,7 @@ export function SizeGtinTable() {
 										<td className="px-6 py-4 text-right flex items-center justify-end gap-2">
 											<button
 												type="button"
-												onClick={() => console.log("Edit", row.size)}
+												onClick={() => handleEdit(row)}
 												className="bg-blue-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer"
 											>
 												<EditIcon className="size-5" />
@@ -96,7 +115,7 @@ export function SizeGtinTable() {
 			{isModalOpen && (
 				<SizeGtinUploadModal
 					gtinSize={editingGtinSize}
-					onClose={() => setIsModalOpen(false)}
+					onClose={handleClose}
 					onSave={handleSave}
 				/>
 			)}

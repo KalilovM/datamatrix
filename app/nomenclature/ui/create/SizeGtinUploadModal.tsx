@@ -1,9 +1,13 @@
-import type { IGtinSize } from "@/nomenclature/stores/sizegtinStore";
+import {
+	type IGtinSize,
+	useGtinSizeStore,
+} from "@/nomenclature/stores/sizegtinStore";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 interface GtinSizeUploadModalProps {
 	onClose: () => void;
-	onSave: (gtinSize: IGtinSize) => void;
+	onSave: (newGtinSize: IGtinSize, oldGtin?: string, oldSize?: number) => void;
 	gtinSize?: IGtinSize | null;
 }
 
@@ -12,16 +16,38 @@ export default function SizeGtinUploadModal({
 	onSave,
 	gtinSize,
 }: GtinSizeUploadModalProps) {
+	const { gtinSize: gtinSizeList } = useGtinSizeStore();
 	const [size, setSize] = useState<number>(gtinSize ? gtinSize.size : 0);
 	const [gtin, setGtin] = useState<string>(gtinSize ? gtinSize.GTIN : "");
 
 	const handleSubmit = () => {
+		const trimmedGtin = gtin.trim();
+
+		if (!trimmedGtin || size <= 0) {
+			toast.error("Пожалуйста, заполните все поля корректно.");
+			return;
+		}
+
+		const isDuplicate = gtinSizeList.some((item) =>
+			gtinSize && item.GTIN === gtinSize.GTIN && item.size === gtinSize.size
+				? false
+				: item.GTIN === trimmedGtin || item.size === size,
+		);
+
+		if (isDuplicate) {
+			toast.error("Такая комбинация GTIN и размера уже существует.");
+			return;
+		}
+
 		const newGtinSize: IGtinSize = {
 			size,
-			GTIN: gtin,
+			GTIN: trimmedGtin,
 		};
 
-		onSave(newGtinSize);
+		onSave(newGtinSize, gtinSize?.GTIN, gtinSize?.size);
+
+		setSize(0);
+		setGtin("");
 		onClose();
 	};
 
@@ -52,7 +78,7 @@ export default function SizeGtinUploadModal({
 							</label>
 							<input
 								name="GTIN"
-								type="string"
+								type="text"
 								value={gtin}
 								onChange={(e) => setGtin(e.target.value)}
 								className="w-full border rounded-lg px-3 py-2"
@@ -71,7 +97,12 @@ export default function SizeGtinUploadModal({
 						<button
 							type="button"
 							onClick={handleSubmit}
-							className="bg-blue-500 px-4 py-2 text-white rounded-md"
+							disabled={!gtin.trim() || size <= 0}
+							className={`px-4 py-2 rounded-md text-white ${
+								!gtin.trim() || size <= 0
+									? "bg-blue-300 cursor-not-allowed"
+									: "bg-blue-500"
+							}`}
 						>
 							{gtinSize ? "Сохранить" : "Добавить"}
 						</button>
