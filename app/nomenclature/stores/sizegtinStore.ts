@@ -13,6 +13,7 @@ interface GtinSizeState {
 		oldSize: number,
 		newGtinSize: IGtinSize,
 	) => void;
+	setGtinSize: (gtinSize: IGtinSize[]) => void;
 	removeGtinSize: (gtin: string) => void;
 	reset: () => void;
 }
@@ -22,6 +23,10 @@ export const useGtinSizeStore = create<GtinSizeState>((set) => ({
 	addGtinSize: (gtinSize) =>
 		set((state) => ({
 			gtinSize: [...state.gtinSize, gtinSize],
+		})),
+	setGtinSize: (gtinSize) =>
+		set((state) => ({
+			gtinSize,
 		})),
 	updateGtinSize: (oldGtin, oldSize, updatedGtinSize) =>
 		set((state) => ({

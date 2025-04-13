@@ -233,7 +233,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 }
 
 export async function updateNomenclature(data: NomenclatureEditData) {
-	const { id, name, modelArticle, color, GTIN, configurations, codes } = data;
+	const { id, name, modelArticle, color, configurations, codes } = data;
 
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
@@ -263,7 +263,6 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 				name,
 				modelArticle,
 				color,
-				GTIN,
 			},
 		});
 
@@ -364,6 +363,7 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 						name: code.fileName,
 						content: code.content,
 						size: Number.parseInt(code.size ?? "0"),
+						GTIN: code.GTIN,
 					},
 				});
 			} else {
@@ -375,6 +375,7 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 							content: newCodePackData.content,
 							size: newCodePackData.size,
 							codes: newCodePackData.codes,
+							GTIN: newCodePackData.GTIN,
 						},
 					});
 				}

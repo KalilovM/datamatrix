@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { createNomenclature } from "../../model/actions";
@@ -26,7 +26,7 @@ type IGtinSize = {
 };
 
 export default function NomenclatureForm() {
-	const { nomenclature, reset } = useNomenclatureStore();
+	const { reset } = useNomenclatureStore();
 	const { reset: resetSizes } = useGtinSizeStore();
 	const resetConfigurations = useConfigurationsStore((state) => state.reset);
 	const queryClient = useQueryClient();
@@ -70,10 +70,14 @@ export default function NomenclatureForm() {
 		resetConfigurations();
 	}, [resetConfigurations]);
 
-	console.log(errors);
-
 	const onSubmit = (data: NomenclatureFormData) => {
 		mutation.mutate({ ...data });
+	};
+
+	const handleCancel = () => {
+		reset();
+		resetSizes();
+		router.push("/nomenclature");
 	};
 
 	const handleSaveGtinSize = (
@@ -81,15 +85,13 @@ export default function NomenclatureForm() {
 		oldGtin?: string,
 		oldSize?: number,
 	) => {
-		console.log(newGtinSize, oldGtin, oldSize);
-		console.log(codes);
 		if (codes && Array.isArray(codes)) {
 			const updatedCodes = codes.map((code) => {
 				if (code.GTIN === oldGtin && Number.parseInt(code.size) === oldSize) {
 					return {
 						...code,
 						GTIN: newGtinSize.GTIN,
-						size: String.toString(newGtinSize.size),
+						size: String(newGtinSize.size),
 					};
 				}
 				return code;
@@ -118,7 +120,7 @@ export default function NomenclatureForm() {
 						<button
 							type="button"
 							className="bg-neutral-500 px-2.5 py-1.5 text-white rounded-md cursor-pointer"
-							onClick={() => router.push("/nomenclature")}
+							onClick={handleCancel}
 						>
 							Отмена
 						</button>

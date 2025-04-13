@@ -1,5 +1,6 @@
 "use client";
 
+import { useGtinSizeStore } from "@/nomenclature/stores/sizegtinStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,13 @@ import {
 import { useNomenclatureStore } from "../../model/store";
 import CodeTable from "./CodeTable";
 import ConfigurationTable from "./ConfigurationTable";
+import { SizeGtinTable } from "./SizeGtinTable";
+
+type IGtinSize = {
+	id: string;
+	size: string;
+	GTIN: string;
+};
 
 interface Props {
 	nomenclature: NomenclatureEditData;
@@ -24,6 +32,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 		null,
 	);
 	const { setNomenclature } = useNomenclatureStore();
+	const { setGtinSize, reset: resetSizes } = useGtinSizeStore();
 	const { reset } = useNomenclatureStore();
 	const router = useRouter();
 	const {
@@ -32,24 +41,43 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 		reset: resetForm,
 		formState: { errors },
 		control,
+		setValue,
+		watch,
 	} = useForm<NomenclatureEditData>({
 		resolver: zodResolver(NomenclatureEditSchema),
 		defaultValues: initialData || undefined,
 	});
 
+	const codes = watch("codes");
+
 	useEffect(() => {
 		if (nomenclature) {
+			const uniqueMap = new Map<string, { GTIN: string; size: number }>();
+
+			for (const code of nomenclature.codes ?? []) {
+				const key = `${code.GTIN}-${code.size}`;
+				if (!uniqueMap.has(key)) {
+					uniqueMap.set(key, {
+						GTIN: code.GTIN,
+						size: Number(code.size),
+					});
+				}
+			}
+
+			setGtinSize(Array.from(uniqueMap.values()));
+
 			setInitialData(nomenclature);
 			setNomenclature(nomenclature);
-
 			resetForm(nomenclature);
 		}
-	}, [nomenclature, resetForm]);
+	}, [nomenclature, resetForm, setGtinSize, setNomenclature]);
+
 	const mutation = useMutation({
 		mutationFn: updateNomenclature,
 		onSuccess: () => {
 			toast.success("Номенклатура сохранена!");
 			reset();
+			resetSizes();
 			router.push("/nomenclature");
 		},
 		onError: (error) => {
@@ -59,8 +87,42 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	});
 
 	const onSubmit = (data: NomenclatureEditData) => {
-		console.log(data);
 		mutation.mutate({ ...data });
+	};
+
+	const handleSaveGtinSize = (
+		newGtinSize: IGtinSize,
+		oldGtin?: string,
+		oldSize?: number,
+	) => {
+		if (codes && Array.isArray(codes)) {
+			const updatedCodes = codes.map((code) => {
+				if (code.GTIN === oldGtin && Number.parseInt(code.size) === oldSize) {
+					return {
+						...code,
+						GTIN: newGtinSize.GTIN,
+						size: String(newGtinSize.size),
+					};
+				}
+				return code;
+			});
+			setValue("codes", updatedCodes);
+			console.log("Old codes:", codes);
+			console.log("Updated codes:", updatedCodes);
+			const { updateGtinSize, addGtinSize } = useGtinSizeStore.getState();
+
+			if (oldGtin !== undefined && oldSize !== undefined) {
+				updateGtinSize(oldGtin, oldSize, newGtinSize);
+			} else {
+				addGtinSize(newGtinSize);
+			}
+		}
+	};
+
+	const handleCancel = () => {
+		reset();
+		resetSizes();
+		router.push("/nomenclature");
 	};
 
 	return (
@@ -79,7 +141,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 						<button
 							type="button"
 							className="bg-neutral-500 px-2.5 py-1.5 text-white rounded-md cursor-pointer"
-							onClick={() => router.push("/nomenclature")}
+							onClick={handleCancel}
 						>
 							Отмена
 						</button>
@@ -142,27 +204,12 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 								<p className="text-sm text-red-500">{errors.color.message}</p>
 							)}
 						</div>
-
-						{/* Размер */}
-						<div className="flex flex-col flex-1">
-							<label htmlFor="size">GTIN</label>
-							<input
-								{...register("GTIN")}
-								type="text"
-								className={`w-full rounded-lg border px-3 py-2 ${
-									errors.GTIN ? "border-red-500" : "border-gray-300"
-								}`}
-							/>
-							{errors.GTIN && (
-								<p className="text-sm text-red-500">{errors.GTIN.message}</p>
-							)}
-						</div>
 					</div>
 				</div>
 
 				{/* Tables for Configurations and Codes */}
 			</div>
-			<div className="flex flex-row w-full gap-4 h-full flex-1">
+			<div className="flex flex-row w-full gap-4 h-full flex-1 min-h-[400px] max-h-[400px]">
 				<Controller
 					control={control}
 					name="configurations"
@@ -170,15 +217,15 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 						<ConfigurationTable value={value} onChange={onChange} />
 					)}
 				/>
-
-				<Controller
-					control={control}
-					name="codes"
-					render={({ field: { value, onChange } }) => (
-						<CodeTable value={value} onChange={onChange} />
-					)}
-				/>
+				<SizeGtinTable onSaveGtinSize={handleSaveGtinSize} />
 			</div>
+			<Controller
+				control={control}
+				name="codes"
+				render={({ field: { value, onChange } }) => (
+					<CodeTable value={value} onChange={onChange} />
+				)}
+			/>
 		</form>
 	);
 }

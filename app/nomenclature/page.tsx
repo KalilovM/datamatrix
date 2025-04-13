@@ -4,6 +4,7 @@ import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import { useState } from "react";
 import { useNomenclatures } from "./hooks/useNomenclatures";
+import { useGtinSizeStore } from "./stores/sizegtinStore";
 import NomenclatureTable from "./ui/NomenclatureTable";
 
 const Page = () => {

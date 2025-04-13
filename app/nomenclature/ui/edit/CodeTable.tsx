@@ -62,7 +62,7 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	};
 
 	return (
-		<div className="w-1/2">
+		<div className="w-full min-h-[400px] max-h-[550px]">
 			<div className="table-layout">
 				{/* Table Header */}
 				<div className="table-header flex justify-between items-center">
