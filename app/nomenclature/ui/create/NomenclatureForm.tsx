@@ -27,7 +27,7 @@ type IGtinSize = {
 
 export default function NomenclatureForm() {
 	const { reset } = useNomenclatureStore();
-	const { reset: resetSizes } = useGtinSizeStore();
+	const { reset: resetSizes, gtinSize } = useGtinSizeStore();
 	const resetConfigurations = useConfigurationsStore((state) => state.reset);
 	const queryClient = useQueryClient();
 	const router = useRouter();
@@ -71,9 +71,13 @@ export default function NomenclatureForm() {
 	}, [resetConfigurations]);
 
 	const onSubmit = (data: NomenclatureFormData) => {
-		mutation.mutate({ ...data });
+		const payloadWithGtinSize = {
+			...data,
+			gtinSize,
+		};
+		console.log(payloadWithGtinSize);
+		mutation.mutate(payloadWithGtinSize);
 	};
-
 	const handleCancel = () => {
 		reset();
 		resetSizes();

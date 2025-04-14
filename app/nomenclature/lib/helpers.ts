@@ -91,7 +91,5 @@ export async function processCodeFile(fileObj: {
 		name: fileObj.fileName,
 		codes: { create: codeRecords },
 		content: fileObj.content,
-		size: Number.parseInt(fileObj.size, 10),
-		GTIN: fileObj.GTIN,
 	};
 }

@@ -13,6 +13,4 @@ export interface ProcessedCodeFile {
 			formattedValue: string;
 		}[];
 	};
-	size: number;
-	GTIN: string;
 }

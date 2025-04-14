@@ -82,6 +82,7 @@ model Nomenclature {
   generatedCodePacks   GeneratedCodePack[]
   generatedCodePallets GeneratedCodePallet[]
   orderNomenclature    OrderNomenclature[]
+  sizeGtin             SizeGtin[]
 }
 
 model Code {
@@ -96,6 +97,8 @@ model Code {
   orderId             Int?
   generatedCodePack   GeneratedCodePack? @relation(fields: [generatedCodePackId], references: [id], onDelete: SetNull)
   generatedCodePackId String?
+  sizeGtin            SizeGtin?          @relation(fields: [sizeGtinId], references: [id])
+  sizeGtinId          String?
 }
 
 model CodePack {
@@ -103,12 +106,24 @@ model CodePack {
   name           String       @unique
   content        String
   nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
-  size           Int?
-  GTIN           String?
   nomenclatureId String
+  sizeGtin       SizeGtin?    @relation(fields: [sizeGtinId], references: [id], onDelete: SetNull)
+  sizeGtinId     String?
   codes          Code[]
   used           Boolean      @default(false)
   createdAt      DateTime     @default(now())
+}
+
+model SizeGtin {
+  id             String       @id @default(uuid())
+  size           Int
+  gtin           String       @unique
+  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id], onDelete: Cascade)
+  nomenclatureId String
+  codePacks      CodePack[]
+  codes          Code[]
+
+  @@unique([size, gtin])
 }
 
 model Configuration {

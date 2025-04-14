@@ -44,10 +44,13 @@ export async function GET(req: Request) {
 		where.companyId = user.companyId;
 	}
 
+	// Add GTIN filter inside a nested relation query
 	if (GTIN) {
 		where.codePacks = {
 			some: {
-				GTIN: { contains: GTIN, mode: "insensitive" },
+				sizeGtin: {
+					gtin: { contains: GTIN, mode: "insensitive" },
+				},
 			},
 		};
 	}
@@ -59,26 +62,32 @@ export async function GET(req: Request) {
 			name: true,
 			color: true,
 			modelArticle: true,
+			sizeGtin: true,
 			codePacks: {
 				select: {
-					GTIN: true,
-					size: true,
 					codes: {
 						where: { used: false },
 						select: { id: true },
+					},
+					sizeGtin: {
+						select: {
+							size: true,
+							gtin: true,
+						},
 					},
 				},
 			},
 		},
 	});
 
+	// Restructure GTIN and size based on sizeGtin
 	const result = nomenclatures.map((nomenclature) => ({
 		id: nomenclature.id,
 		name: nomenclature.name,
-		GTIN: nomenclature.codePacks.map((pack) => pack.GTIN),
-		size: nomenclature.codePacks.map((pack) => pack.size),
 		color: nomenclature.color,
 		modelArticle: nomenclature.modelArticle,
+		size: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.size),
+		GTIN: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.gtin),
 		codeCount: nomenclature.codePacks.reduce(
 			(total, codePack) => total + codePack.codes.length,
 			0,

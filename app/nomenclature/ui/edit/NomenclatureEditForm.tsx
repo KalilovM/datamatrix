@@ -32,7 +32,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 		null,
 	);
 	const { setNomenclature } = useNomenclatureStore();
-	const { setGtinSize, reset: resetSizes } = useGtinSizeStore();
+	const { setGtinSize, reset: resetSizes, gtinSize } = useGtinSizeStore();
 	const { reset } = useNomenclatureStore();
 	const router = useRouter();
 	const {
@@ -52,19 +52,8 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 
 	useEffect(() => {
 		if (nomenclature) {
-			const uniqueMap = new Map<string, { GTIN: string; size: number }>();
-
-			for (const code of nomenclature.codes ?? []) {
-				const key = `${code.GTIN}-${code.size}`;
-				if (!uniqueMap.has(key)) {
-					uniqueMap.set(key, {
-						GTIN: code.GTIN,
-						size: Number(code.size),
-					});
-				}
-			}
-
-			setGtinSize(Array.from(uniqueMap.values()));
+			console.log(nomenclature);
+			setGtinSize(nomenclature.sizeGtin);
 
 			setInitialData(nomenclature);
 			setNomenclature(nomenclature);
@@ -87,7 +76,11 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	});
 
 	const onSubmit = (data: NomenclatureEditData) => {
-		mutation.mutate({ ...data });
+		const payload = {
+			...data,
+			gtinSize,
+		};
+		mutation.mutate(payload);
 	};
 
 	const handleSaveGtinSize = (

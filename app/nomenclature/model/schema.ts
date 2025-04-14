@@ -25,6 +25,15 @@ export const NomenclatureSchema = z.object({
 	color: z.string().min(1, "Цвет обязателен"),
 	configurations: z.array(ConfigurationSchema).optional(),
 	codes: z.array(CodeSchema).optional(),
+	gtinSize: z
+		.array(
+			z.object({
+				id: z.string().optional(),
+				GTIN: z.string(),
+				size: z.number(),
+			}),
+		)
+		.optional(),
 });
 
 export type NomenclatureFormData = z.infer<typeof NomenclatureSchema>;
@@ -60,6 +69,15 @@ export const NomenclatureEditSchema = z.object({
 	color: z.string().min(1, "Цвет обязателен"),
 	configurations: z.array(ConfigurationEditSchema).optional(),
 	codes: z.array(CodeEditSchema).optional(),
+	gtinSize: z
+		.array(
+			z.object({
+				id: z.string().optional(),
+				GTIN: z.string(),
+				size: z.number(),
+			}),
+		)
+		.optional(),
 });
 
 export type NomenclatureEditData = z.infer<typeof NomenclatureEditSchema>;

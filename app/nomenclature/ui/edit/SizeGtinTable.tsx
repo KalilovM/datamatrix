@@ -13,7 +13,7 @@ export function SizeGtinTable({
 		oldSize?: number,
 	) => void;
 }) {
-	const { gtinSize } = useGtinSizeStore();
+	const { gtinSize, removeGtinSize } = useGtinSizeStore();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingGtinSize, setEditingGtinSize] = useState<IGtinSize | null>(
 		null,
@@ -28,6 +28,12 @@ export function SizeGtinTable({
 	const handleEdit = (row: IGtinSize) => {
 		setEditingGtinSize(row);
 		setIsModalOpen(true);
+	};
+
+	const handleDelete = (row: IGtinSize) => {
+		setEditingGtinSize(null);
+		setIsModalOpen(false);
+		removeGtinSize(row.GTIN);
 	};
 
 	const handleClose = () => {
@@ -92,7 +98,7 @@ export function SizeGtinTable({
 											</button>
 											<button
 												type="button"
-												onClick={() => console.log("Delete", row.size)}
+												onClick={() => handleDelete(row)}
 												className="bg-red-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer"
 											>
 												<BinIcon className="size-5" />

@@ -73,7 +73,7 @@ export default function AggregationSelectors({
 			</div>
 			<div className="flex flex-row w-full rounded-lg border border-blue-300 bg-white px-8 py-3 gap-4">
 				<div className="w-1/2 flex flex-col">
-					<label htmlFor="nomenclatures">Номенклатура</label>
+					<label htmlFor="nomenclatures">Модель</label>
 					<Select
 						name="nomenclatures"
 						options={nomenclatureOptions}
