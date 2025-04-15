@@ -38,7 +38,7 @@ export function SizeGtinTable({
 	const handleDelete = (row: IGtinSize) => {
 		setEditingGtinSize(null);
 		setIsModalOpen(false);
-		removeGtinSize(row);
+		removeGtinSize(row.GTIN);
 	};
 
 	return (

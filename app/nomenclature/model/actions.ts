@@ -191,26 +191,29 @@ export async function createNomenclature(data: NomenclatureFormData) {
 			for (const { GTIN, size } of gtinSize || []) {
 				const parsedSize = Number.parseInt(size);
 				if (Number.isNaN(parsedSize)) continue;
-
-				let existing = await tx.sizeGtin.findUnique({
+				const existing = await tx.sizeGtin.findUnique({
 					where: {
-						size_gtin: { size: parsedSize, gtin: GTIN },
+						gtin: GTIN,
+					},
+				});
+				console.log(existing);
+
+				if (existing) {
+					throw new Error(
+						`GTIN ${GTIN} и ${parsedSize} размер уже используются.`,
+					);
+				}
+
+				const created = await tx.sizeGtin.create({
+					data: {
+						gtin: GTIN,
+						size: parsedSize,
+						nomenclatureId: createdNomenclature.id,
 					},
 				});
 
-				if (!existing) {
-					existing = await tx.sizeGtin.create({
-						data: {
-							gtin: GTIN,
-							size: parsedSize,
-							nomenclatureId: createdNomenclature.id,
-						},
-					});
-				}
-
-				sizeGtinMap.set(GTIN, existing);
+				sizeGtinMap.set(GTIN, created);
 			}
-
 			// Step 4: Prepare code packs
 			const codePackCreateData: ProcessedCodeFile[] = [];
 
@@ -268,8 +271,10 @@ export async function createNomenclature(data: NomenclatureFormData) {
 
 		return newNomenclature;
 	} catch (error: unknown) {
-		console.error("Ошибка создания номенклатуры:", error);
-		throw new Error("Ошибка создания номенклатуры");
+		if (error instanceof Error) {
+			throw error;
+		}
+		throw new Error("Ошибка при создании номенклатуры");
 	}
 }
 
