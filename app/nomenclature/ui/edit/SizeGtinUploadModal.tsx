@@ -17,13 +17,13 @@ export default function SizeGtinUploadModal({
 	gtinSize,
 }: GtinSizeUploadModalProps) {
 	const { gtinSize: gtinSizeList } = useGtinSizeStore();
-	const [size, setSize] = useState<number>(gtinSize ? gtinSize.size : 0);
+	const [size, setSize] = useState<string>(gtinSize ? gtinSize.size : "");
 	const [gtin, setGtin] = useState<string>(gtinSize ? gtinSize.GTIN : "");
 
 	const handleSubmit = () => {
 		const trimmedGtin = gtin.trim();
 
-		if (!trimmedGtin || size <= 0) {
+		if (!trimmedGtin || Number.parseInt(size) <= 0) {
 			toast.error("Пожалуйста, заполните все поля корректно.");
 			return;
 		}
@@ -31,7 +31,7 @@ export default function SizeGtinUploadModal({
 		const isDuplicate = gtinSizeList.some((item) =>
 			gtinSize && item.GTIN === gtinSize.GTIN && item.size === gtinSize.size
 				? false
-				: item.GTIN === trimmedGtin || item.size === size,
+				: item.GTIN === trimmedGtin || item.size === Number.parseInt(size),
 		);
 
 		if (isDuplicate) {
@@ -40,13 +40,13 @@ export default function SizeGtinUploadModal({
 		}
 
 		const newGtinSize: IGtinSize = {
-			size,
+			size: Number.parseInt(size),
 			GTIN: trimmedGtin,
 		};
 
 		onSave(newGtinSize, gtinSize?.GTIN, gtinSize?.size);
 
-		setSize(0);
+		setSize("");
 		setGtin("");
 		onClose();
 	};

@@ -28,7 +28,7 @@ export default function CodesUploadModal({
 	onAdd,
 	codes,
 }: CodesUploadModalProps) {
-	const DEBOUNCE_DELAY = 500;
+	const DEBOUNCE_DELAY = 2000;
 
 	const { gtinSize } = useGtinSizeStore();
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);

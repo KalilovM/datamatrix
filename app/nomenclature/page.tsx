@@ -2,8 +2,9 @@
 
 import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNomenclatures } from "./hooks/useNomenclatures";
+import { useGtinSizeStore } from "./stores/sizegtinStore";
 import NomenclatureTable from "./ui/NomenclatureTable";
 
 const Page = () => {
@@ -14,6 +15,10 @@ const Page = () => {
 		gtin: "",
 	});
 	const [filters, setFilters] = useState(tempFilters); // actual applied filters
+	const { reset: resetSizeGtin } = useGtinSizeStore();
+	useEffect(() => {
+		resetSizeGtin();
+	}, []);
 
 	const { data: nomenclatures, isLoading, error } = useNomenclatures(filters);
 
