@@ -8,7 +8,7 @@ import {
 import type { ProcessedCodeFile } from "./types";
 
 export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
-	if (!gtinSize || gtinSize.length === 0 || !gtinSize.GTIN) {
+	if (!gtinSize || gtinSize.length === 0) {
 		return;
 	}
 	const existingSizeGtin = await prisma.sizeGtin.findMany({
@@ -39,6 +39,8 @@ export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
 
 	for (const item of toUpdate) {
 		if (item.id) {
+			console.log("UPDATING");
+
 			const existing = existingSizeGtin.find((sg) => sg.id === item.id);
 			if (!existing) continue;
 
@@ -73,6 +75,7 @@ export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
 			}
 		} else {
 			try {
+				console.log("CREATING");
 				await prisma.sizeGtin.create({
 					data: {
 						size: item.size,

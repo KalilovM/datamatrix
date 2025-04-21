@@ -278,6 +278,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 export async function updateNomenclature(data: NomenclatureEditData) {
 	const { id, name, modelArticle, color, configurations, codes, gtinSize } =
 		data;
+	console.log(data);
 
 	const session = await getServerSession(authOptions);
 	if (!session?.user) throw new Error("Не авторизован");
