@@ -37,7 +37,7 @@ export async function GET() {
 					name: true,
 					modelArticle: true,
 					color: true,
-					codePacks: {
+					sizeGtin: {
 						select: {
 							size: true,
 						},
@@ -57,7 +57,7 @@ export async function GET() {
 					name: true,
 					modelArticle: true,
 					color: true,
-					codePacks: {
+					sizeGtin: {
 						select: {
 							size: true,
 						},
@@ -72,9 +72,7 @@ export async function GET() {
 	const formattedPacks = packs.map((pack) => ({
 		name: pack.nomenclature.name,
 		modelArticle: pack.nomenclature.modelArticle,
-		size: pack.nomenclature.codePacks
-			.map((codePack) => codePack.size)
-			.join(", "),
+		size: pack.nomenclature.sizeGtin.map((size) => size.size).join(", "),
 		color: pack.nomenclature.color,
 		generatedCode: pack.value,
 		configuration: `1-${pack.configuration.pieceInPack}-${
@@ -89,9 +87,7 @@ export async function GET() {
 	const formattedPallets = pallets.map((pallet) => ({
 		name: pallet.nomenclature.name,
 		modelArticle: pallet.nomenclature.modelArticle,
-		size: pallet.nomenclature.codePacks
-			.map((codePack) => codePack.size)
-			.join(", "),
+		size: pallet.nomenclature.sizeGtin.map((size) => size.size).join(", "),
 		color: pallet.nomenclature.color,
 		generatedCode: pallet.value,
 		configuration: `1-${pallet.configuration.pieceInPack}-${

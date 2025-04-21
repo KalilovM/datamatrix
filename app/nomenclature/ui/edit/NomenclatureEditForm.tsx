@@ -80,6 +80,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 			...data,
 			gtinSize,
 		};
+		console.log(payload);
 		mutation.mutate(payload);
 	};
 

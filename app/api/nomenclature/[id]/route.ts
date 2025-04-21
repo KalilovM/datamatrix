@@ -49,6 +49,7 @@ export async function GET(
 					},
 					sizeGtin: {
 						select: {
+							id: true,
 							gtin: true,
 							size: true,
 						},
@@ -57,6 +58,7 @@ export async function GET(
 			},
 			sizeGtin: {
 				select: {
+					id: true,
 					size: true,
 					gtin: true,
 				},
@@ -77,6 +79,7 @@ export async function GET(
 		size: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.size),
 		sizeGtin:
 			nomenclature.sizeGtin.map((sizeGtin) => ({
+				id: sizeGtin.id,
 				size: sizeGtin.size,
 				GTIN: sizeGtin.gtin,
 			})) ?? [],
@@ -93,6 +96,7 @@ export async function GET(
 			fileName: pack.name,
 			size: String(pack.sizeGtin?.size ?? ""),
 			GTIN: String(pack.sizeGtin?.gtin ?? ""),
+			sizeGtin: pack.sizeGtin?.id,
 			content: codesToCsv(pack.codes.map((code) => code.value)),
 			codes: pack.codes.map((code) => code.value),
 		})),

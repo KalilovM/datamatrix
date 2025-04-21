@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 export interface IGtinSize {
+	id: string | null;
 	GTIN: string;
 	size: number;
 }
@@ -30,11 +31,16 @@ export const useGtinSizeStore = create<GtinSizeState>((set) => ({
 		})),
 	updateGtinSize: (oldGtin, oldSize, updatedGtinSize) =>
 		set((state) => ({
-			gtinSize: state.gtinSize.map((entry) =>
-				entry.GTIN === oldGtin && entry.size === oldSize
-					? updatedGtinSize
-					: entry,
-			),
+			gtinSize: state.gtinSize.map((entry) => {
+				if (entry.GTIN === oldGtin && entry.size === oldSize) {
+					return {
+						...entry,
+						...updatedGtinSize,
+						id: updatedGtinSize.id ?? entry.id,
+					};
+				}
+				return entry;
+			}),
 		})),
 	removeGtinSize: (gtin) =>
 		set((state) => ({

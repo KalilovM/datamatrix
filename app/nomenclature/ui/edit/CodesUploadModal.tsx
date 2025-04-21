@@ -1,5 +1,7 @@
+import { useGtinSizeStore } from "@/nomenclature/stores/sizegtinStore";
 import { BinIcon, CloseIcon, UploadIcon } from "@/shared/ui/icons";
 import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "react-toastify";
 import type { Code } from "./CodeTable";
 
@@ -12,8 +14,13 @@ export default function CodesUploadModal({
 	onClose,
 	onAdd,
 }: CodesUploadModalProps) {
+	const DEBOUNCE_DELAY = 500;
+
+	const { gtinSize } = useGtinSizeStore();
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [sizeInput, setSizeInput] = useState<string>("");
+	const [gtin, setGtin] = useState<string>("");
+	const [isGtinDisabled, setIsGtinDisabled] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const handleDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -22,6 +29,27 @@ export default function CodesUploadModal({
 			setSelectedFile(e.dataTransfer.files[0]);
 		}
 	};
+
+	useEffect(() => {
+		if (!sizeInput) return;
+
+		const handler = setTimeout(() => {
+			const existingSize = gtinSize.find(
+				(size) => Number(size.size) === Number(sizeInput),
+			);
+			if (existingSize) {
+				setGtin(existingSize.GTIN);
+				setIsGtinDisabled(true);
+			} else {
+				toast.error("Размер не найден в базе данных GTIN.");
+				setGtin("");
+				setSizeInput("");
+				setIsGtinDisabled(true);
+			}
+		}, DEBOUNCE_DELAY);
+
+		return () => clearTimeout(handler);
+	}, [gtinSize, sizeInput]);
 
 	const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
@@ -74,6 +102,7 @@ export default function CodesUploadModal({
 				fileName: selectedFile.name,
 				content,
 				size: sizeInput,
+				GTIN: gtin,
 			};
 
 			onAdd([code]);
@@ -134,6 +163,18 @@ export default function CodesUploadModal({
 						value={sizeInput}
 						onChange={(e) => setSizeInput(e.target.value)}
 						className="mt-4 w-full rounded-md px-4 py-2 bg-white border border-gray-300"
+					/>
+
+					<input
+						type="string"
+						name="gtin"
+						placeholder="Введите GTIN"
+						value={gtin}
+						onChange={(e) => setGtin(e.target.value)}
+						disabled={isGtinDisabled}
+						className={`mt-4 w-full rounded-md px-4 py-2 border ${
+							isGtinDisabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+						} border-gray-300`}
 					/>
 
 					<button

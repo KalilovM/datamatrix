@@ -48,11 +48,14 @@ export async function POST(req: Request) {
 		where: {
 			id: { in: codePackIds },
 		},
+		include: {
+			sizeGtin: true,
+		},
 	});
 
 	const sizes = codePacks
-		.map((pack) => pack.size)
-		.filter((size): size is number => size !== null)
+		.map((pack) => pack.sizeGtin?.size)
+		.filter((size): size is number => size !== undefined && size !== null)
 		.join(", ");
 
 	return new Response(JSON.stringify({ value: uniqueCode, size: sizes }), {

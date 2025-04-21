@@ -55,6 +55,7 @@ export const ConfigurationEditSchema = z.object({
 
 export const CodeEditSchema = z.object({
 	id: z.string().optional(),
+	sizeGtin: z.string().optional(),
 	fileName: z.string().min(1, "Имя файла не может быть пустым"),
 	content: z.string(),
 	codes: z.array(z.string()).optional(),

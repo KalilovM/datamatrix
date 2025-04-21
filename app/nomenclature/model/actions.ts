@@ -10,6 +10,7 @@ import {
 	processCodeFile,
 } from "../lib/helpers";
 import type { ProcessedCodeFile } from "../model/types";
+import { syncCodePacks, syncConfigurations, syncSizeGtin } from "./helpers";
 import type { NomenclatureEditData, NomenclatureFormData } from "./schema";
 
 export async function fetchNomenclatures() {
@@ -281,219 +282,23 @@ export async function createNomenclature(data: NomenclatureFormData) {
 export async function updateNomenclature(data: NomenclatureEditData) {
 	const { id, name, modelArticle, color, configurations, codes, gtinSize } =
 		data;
+	console.log(data);
 
 	const session = await getServerSession(authOptions);
-	if (!session?.user) {
-		return [];
-	}
+	if (!session?.user) throw new Error("Не авторизован");
+
 	const user = await prisma.user.findUnique({
-		where: {
-			id: session.user.id,
-		},
-		select: {
-			role: true,
-			companyId: true,
-		},
+		where: { id: session.user.id },
+		select: { role: true, companyId: true },
 	});
-	if (!user) {
-		throw new Error("Пользователь не найден");
-	}
-	if (!user?.companyId) {
-		throw new Error("Не установлен ID компании");
-	}
-	const { companyId } = user;
+	if (!user?.companyId) throw new Error("Не установлен ID компании");
 
-	// === SIZE GTIN ===
-	const existingSizeGtin = await prisma.sizeGtin.findMany({
-		where: { nomenclatureId: id },
-		select: { id: true, size: true, gtin: true },
+	await prisma.nomenclature.update({
+		where: { id },
+		data: { name, modelArticle, color },
 	});
 
-	const incomingGtinMap = new Map<string, { size: number; gtin: string }>();
-	for (const { size, GTIN } of gtinSize || []) {
-		const parsedSize = Number.parseInt(size);
-		if (!Number.isNaN(parsedSize)) {
-			incomingGtinMap.set(`${parsedSize}_${GTIN}`, {
-				size: parsedSize,
-				gtin: GTIN,
-			});
-		}
-	}
-
-	// Identify SizeGtin entries to delete
-	const toDelete = existingSizeGtin.filter(
-		(existing) => !incomingGtinMap.has(`${existing.size}_${existing.gtin}`),
-	);
-
-	// Identify SizeGtin entries to create
-	const toCreate: { size: number; gtin: string }[] = [];
-	for (const [key, { size, gtin }] of incomingGtinMap) {
-		const exists = existingSizeGtin.find(
-			(sg) => sg.size === size && sg.gtin === gtin,
-		);
-		if (!exists) {
-			toCreate.push({ size, gtin });
-		}
-	}
-
-	// Delete removed SizeGtin records and all linked CodePacks and Codes
-	for (const sg of toDelete) {
-		// Get related codePacks to delete their codes
-		const linkedCodePacks = await prisma.codePack.findMany({
-			where: { sizeGtinId: sg.id },
-			select: { id: true },
-		});
-
-		const codePackIds = linkedCodePacks.map((cp) => cp.id);
-
-		// Delete codes first
-		await prisma.code.deleteMany({
-			where: { codePackId: { in: codePackIds } },
-		});
-
-		// Delete codePacks
-		await prisma.codePack.deleteMany({
-			where: { id: { in: codePackIds } },
-		});
-
-		// Delete the SizeGtin entry itself
-		await prisma.sizeGtin.delete({ where: { id: sg.id } });
-	}
-
-	// Create new SizeGtin entries
-	for (const item of toCreate) {
-		await prisma.sizeGtin.create({
-			data: {
-				size: item.size,
-				gtin: item.gtin,
-				nomenclatureId: id,
-			},
-		});
-	}
-
-	try {
-		await prisma.nomenclature.update({
-			where: { id },
-			data: {
-				name,
-				modelArticle,
-				color,
-			},
-		});
-
-		// === CONFIGURATIONS ===
-		const existingConfigurations = await prisma.configuration.findMany({
-			where: { nomenclatureId: id },
-		});
-		let incomingConfigIds: string[] = [];
-		if (configurations) {
-			incomingConfigIds = configurations
-				.filter((conf) => conf.id)
-				.map((conf) => conf.id);
-		}
-
-		const configsToDelete = existingConfigurations.filter(
-			(existing) => !incomingConfigIds.includes(existing.id),
-		);
-
-		for (const config of configsToDelete) {
-			await prisma.generatedCodePack.deleteMany({
-				where: { configurationId: config.id },
-			});
-			await prisma.configuration.delete({
-				where: { id: config.id },
-			});
-		}
-
-		// === CODE PACKS ===
-		const existingCodePacks = await prisma.codePack.findMany({
-			where: { nomenclatureId: id },
-		});
-
-		let incomingFileNames: string[] = [];
-		if (codes) {
-			incomingFileNames = codes
-				.filter((code) => code.fileName)
-				.map((code) => code.fileName);
-		}
-
-		const codePacksToDelete = existingCodePacks.filter(
-			(cp) => !incomingFileNames.includes(cp.name),
-		);
-
-		for (const pack of codePacksToDelete) {
-			await prisma.code.deleteMany({
-				where: { codePackId: pack.id },
-			});
-			await prisma.codePack.delete({
-				where: { id: pack.id },
-			});
-
-			await prisma.generatedCodePack.deleteMany({
-				where: { nomenclatureId: id },
-			});
-		}
-
-		// ✅ Sync updated & new configurations
-		for (const config of configurations) {
-			if (config.id) {
-				await prisma.configuration.update({
-					where: { id: config.id },
-					data: {
-						pieceInPack: config.value.pieceInPack,
-						packInPallet: config.value.packInPallet,
-					},
-				});
-			} else {
-				await prisma.configuration.create({
-					data: {
-						nomenclatureId: id,
-						basePiece: 1,
-						pieceInPack: config.value.pieceInPack,
-						packInPallet: config.value.packInPallet,
-					},
-				});
-			}
-		}
-
-		for (const code of codes) {
-			let newCodePackData: ProcessedCodeFile | null = null;
-			const codesArray = parseAndValidateCsvCodes(code.content, code.fileName);
-
-			await checkExistingCodes(prisma, codesArray, code.fileName, id);
-			try {
-				const codePackData = await processCodeFile(code);
-				newCodePackData = codePackData;
-			} catch (err: unknown) {
-				console.error(`Ошибка обработки файла ${code.fileName}:`, err);
-				if (err instanceof Error) {
-					throw new Error("Ошибка обработки файла");
-				}
-			}
-
-			if (code.id) {
-				await prisma.codePack.update({
-					where: { id: code.id },
-					data: {
-						name: code.fileName,
-						content: code.content,
-					},
-				});
-			} else {
-				if (newCodePackData) {
-					await prisma.codePack.create({
-						data: {
-							nomenclatureId: id,
-							name: newCodePackData.name,
-							content: newCodePackData.content,
-							codes: newCodePackData.codes,
-						},
-					});
-				}
-			}
-		}
-	} catch (error: unknown) {
-		console.error("Ошибка обновления номенклатуры:", error);
-		throw new Error("Ошибка обновления номенклатуры");
-	}
+	await syncSizeGtin(id, gtinSize);
+	await syncConfigurations(id, configurations);
+	await syncCodePacks(id, codes);
 }
