@@ -63,14 +63,19 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 
 	const mutation = useMutation({
 		mutationFn: updateNomenclature,
-		onSuccess: () => {
+		onSuccess: (response) => {
+			if (!response.success) {
+				toast.error(response.error || "Произошла ошибка");
+				return;
+			}
+
 			toast.success("Номенклатура сохранена!");
-			// reset();
-			// resetSizes();
-			// router.push("/nomenclature");
+			reset();
+			resetSizes();
+			router.push("/nomenclature");
 		},
-		onError: (error) => {
-			toast.error(error.message || "Произошла ошибка");
+		onError: () => {
+			toast.error("Произошла ошибка при выполнении запроса");
 		},
 	});
 

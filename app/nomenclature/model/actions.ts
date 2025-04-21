@@ -276,25 +276,37 @@ export async function createNomenclature(data: NomenclatureFormData) {
 }
 
 export async function updateNomenclature(data: NomenclatureEditData) {
-	const { id, name, modelArticle, color, configurations, codes, gtinSize } =
-		data;
-	console.log(data);
+	try {
+		const { id, name, modelArticle, color, configurations, codes, gtinSize } =
+			data;
 
-	const session = await getServerSession(authOptions);
-	if (!session?.user) throw new Error("Не авторизован");
+		const session = await getServerSession(authOptions);
+		if (!session?.user) {
+			return { success: false, error: "Не авторизован" };
+		}
 
-	const user = await prisma.user.findUnique({
-		where: { id: session.user.id },
-		select: { role: true, companyId: true },
-	});
-	if (!user?.companyId) throw new Error("Не установлен ID компании");
+		const user = await prisma.user.findUnique({
+			where: { id: session.user.id },
+			select: { role: true, companyId: true },
+		});
+		if (!user?.companyId) {
+			return { success: false, error: "Не установлен ID компании" };
+		}
 
-	await prisma.nomenclature.update({
-		where: { id },
-		data: { name, modelArticle, color },
-	});
+		await prisma.nomenclature.update({
+			where: { id },
+			data: { name, modelArticle, color },
+		});
 
-	await syncSizeGtin(id, gtinSize);
-	await syncConfigurations(id, configurations);
-	await syncCodePacks(id, codes);
+		await syncSizeGtin(id, gtinSize);
+		await syncConfigurations(id, configurations);
+		await syncCodePacks(id, codes);
+
+		return { success: true };
+	} catch (error) {
+		if (error instanceof Error) {
+			return { success: false, error: error.message };
+		}
+		return { success: false, error: "Неизвестная ошибка сервера" };
+	}
 }
