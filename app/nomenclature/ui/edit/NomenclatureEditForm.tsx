@@ -70,7 +70,6 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 			router.push("/nomenclature");
 		},
 		onError: (error) => {
-			console.error(error.message);
 			toast.error(error.message || "Произошла ошибка");
 		},
 	});

@@ -61,8 +61,6 @@ export default function NomenclatureForm() {
 			router.push(`/nomenclature/${nom.id}/edit`);
 		},
 		onError: (error) => {
-			console.error(error);
-			console.error(error.message);
 			toast.error(error.message || "Произошла ошибка");
 		},
 	});

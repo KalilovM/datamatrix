@@ -8,7 +8,6 @@ import {
 import type { ProcessedCodeFile } from "./types";
 
 export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
-	console.log(gtinSize);
 	const existingSizeGtin = await prisma.sizeGtin.findMany({
 		where: { nomenclatureId },
 		select: { id: true, size: true, gtin: true },
