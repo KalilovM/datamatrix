@@ -48,23 +48,23 @@ export default function NomenclatureForm() {
 
 	const mutation = useMutation({
 		mutationFn: createNomenclature,
-		onSuccess: (nom) => {
+		onSuccess: (response) => {
+			if (!response.success) {
+				toast.error(response.error || "Произошла ошибка");
+				return;
+			}
+
 			toast.success("Номенклатура сохранена!");
 			reset();
 			resetSizes();
-			queryClient.invalidateQueries({
-				queryKey: ["nomenclatures"],
-			});
-			queryClient.invalidateQueries({
-				queryKey: ["nomenclaturesOptions"],
-			});
-			router.push(`/nomenclature/${nom.id}/edit`);
+			queryClient.invalidateQueries({ queryKey: ["nomenclatures"] });
+			queryClient.invalidateQueries({ queryKey: ["nomenclaturesOptions"] });
+			router.push(`/nomenclature/${response.data.id}/edit`);
 		},
-		onError: (error) => {
-			toast.error(error.message || "Произошла ошибка");
+		onError: () => {
+			toast.error("Произошла ошибка при выполнении запроса");
 		},
 	});
-
 	useEffect(() => {
 		resetConfigurations();
 	}, [resetConfigurations]);
@@ -74,7 +74,6 @@ export default function NomenclatureForm() {
 			...data,
 			gtinSize,
 		};
-		console.log(payloadWithGtinSize);
 		mutation.mutate(payloadWithGtinSize);
 	};
 	const handleCancel = () => {

@@ -158,8 +158,9 @@ export async function createNomenclature(data: NomenclatureFormData) {
 		where: { id: session.user.id },
 		select: { role: true, companyId: true },
 	});
-	if (!user) throw new Error("Пользователь не найден");
-	if (!user.companyId) throw new Error("Не установлен ID компании");
+	if (!user) return { success: false, error: "Пользователь не найден" };
+	if (!user.companyId)
+		return { success: false, error: "Не установлен ID компании" };
 
 	const { companyId } = user;
 
@@ -197,7 +198,6 @@ export async function createNomenclature(data: NomenclatureFormData) {
 						gtin: GTIN,
 					},
 				});
-				console.log(existing);
 
 				if (existing) {
 					throw new Error(
@@ -228,15 +228,12 @@ export async function createNomenclature(data: NomenclatureFormData) {
 
 					try {
 						const codePackData = await processCodeFile(fileObj);
-						console.log(fileObj);
 						const gtinMatch = Array.from(sizeGtinMap.keys()).find((gtin) =>
 							fileObj.GTIN.includes(gtin),
 						);
-						console.log(gtinMatch);
 
 						if (gtinMatch) {
 							const sizeGtin = sizeGtinMap.get(gtinMatch);
-							console.log(sizeGtin);
 							if (sizeGtin) {
 								(codePackData as any).sizeGtinId = sizeGtin.id;
 							}
@@ -246,7 +243,6 @@ export async function createNomenclature(data: NomenclatureFormData) {
 
 						codePackCreateData.push(codePackData);
 					} catch (err: unknown) {
-						console.error(`Ошибка обработки файла ${fileObj.fileName}:`, err);
 						if (err instanceof Error) {
 							throw new Error("Ошибка обработки файла");
 						}
@@ -270,19 +266,18 @@ export async function createNomenclature(data: NomenclatureFormData) {
 			});
 		});
 
-		return newNomenclature;
+		return { success: true, data: newNomenclature };
 	} catch (error: unknown) {
 		if (error instanceof Error) {
-			throw error;
+			return { success: false, error: error.message };
 		}
-		throw new Error("Ошибка при создании номенклатуры");
+		return { success: false, error: "Неизвестная ошибка сервера" };
 	}
 }
 
 export async function updateNomenclature(data: NomenclatureEditData) {
 	const { id, name, modelArticle, color, configurations, codes, gtinSize } =
 		data;
-	console.log(data);
 
 	const session = await getServerSession(authOptions);
 	if (!session?.user) throw new Error("Не авторизован");
