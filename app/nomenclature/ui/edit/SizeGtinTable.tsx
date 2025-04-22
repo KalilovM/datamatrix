@@ -1,5 +1,6 @@
 import { useGtinSizeStore } from "@/nomenclature/stores/sizegtinStore";
 import type { IGtinSize } from "@/nomenclature/stores/sizegtinStore";
+import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { BinIcon, EditIcon, PlusIcon } from "@/shared/ui/icons";
 import { useState } from "react";
 import SizeGtinUploadModal from "./SizeGtinUploadModal";
@@ -15,6 +16,8 @@ export function SizeGtinTable({
 }) {
 	const { gtinSize, removeGtinSize } = useGtinSizeStore();
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [deleteGtinSize, setDeleteGtinSize] = useState<IGtinSize | null>(null);
 	const [editingGtinSize, setEditingGtinSize] = useState<IGtinSize | null>(
 		null,
 	);
@@ -30,10 +33,15 @@ export function SizeGtinTable({
 		setIsModalOpen(true);
 	};
 
-	const handleDelete = (row: IGtinSize) => {
+	const handleConfirmDelete = (row: IGtinSize) => {
 		setEditingGtinSize(null);
 		setIsModalOpen(false);
 		removeGtinSize(row.GTIN);
+	};
+
+	const handleDelete = (row: IGtinSize) => {
+		setDeleteGtinSize(row);
+		setIsDeleteModalOpen(true);
 	};
 
 	const handleClose = () => {
@@ -123,6 +131,23 @@ export function SizeGtinTable({
 					gtinSize={editingGtinSize}
 					onClose={handleClose}
 					onSave={handleSave}
+				/>
+			)}
+			{isDeleteModalOpen && (
+				<ConfirmModal
+					isOpen={isDeleteModalOpen}
+					onCancel={() => setIsDeleteModalOpen(false)}
+					onConfirm={() => {
+						if (deleteGtinSize) {
+							handleConfirmDelete({
+								GTIN: deleteGtinSize.GTIN,
+								size: deleteGtinSize.size,
+							} as IGtinSize);
+						}
+						setIsDeleteModalOpen(false);
+					}}
+					title="Удалить размер"
+					message={`Вы уверены, что хотите удалить размер ${deleteGtinSize.size} с GTIN ${deleteGtinSize.GTIN}?`}
 				/>
 			)}
 		</div>

@@ -2,6 +2,7 @@
 
 import { useNomenclatureStore } from "@/nomenclature/model/store";
 import { usePrintStore } from "@/shared/store/printStore";
+import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { BinIcon, EyeIcon, PrintIcon, UploadIcon } from "@/shared/ui/icons";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -24,6 +25,8 @@ interface CodeTableProps {
 export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const codes = value;
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [deleteFileName, setDeleteFileName] = useState<string | null>(null);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 	const [codesView, setCodesView] = useState<string[]>([]);
 
@@ -32,10 +35,15 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	// And we read the printTemplate from the nomenclature store.
 	const { printTemplate } = useNomenclatureStore();
 
-	const handleDelete = (fileName: string) => {
+	const handleConfirmDelete = (fileName: string) => {
 		const updated = codes.filter((code) => code.fileName !== fileName);
 		onChange(updated);
 		toast.success("Файл удален");
+	};
+
+	const handleDelete = (fileName: string) => {
+		setIsDeleteModalOpen(true);
+		setDeleteFileName(fileName);
 	};
 
 	const handlePrint = (fileName: string) => {
@@ -160,6 +168,22 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 					onAdd={handleUpload}
 				/>
 			)}
+
+			{isDeleteModalOpen && (
+				<ConfirmModal
+					isOpen={isDeleteModalOpen}
+					onCancel={() => setIsDeleteModalOpen(false)}
+					onConfirm={() => {
+						if (deleteFileName) {
+							handleConfirmDelete(deleteFileName);
+						}
+						setIsDeleteModalOpen(false);
+					}}
+					title="Удалить файл?"
+					message={`Вы уверены, что хотите удалить файл ${deleteFileName}?`}
+				/>
+			)}
+
 			<CodeViewModal
 				codes={codesView}
 				isOpen={isViewModalOpen}

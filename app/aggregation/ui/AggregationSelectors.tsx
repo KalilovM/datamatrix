@@ -81,7 +81,7 @@ export default function AggregationSelectors({
 						value={
 							selectedNomenclature
 								? {
-										label: selectedNomenclature.name,
+										label: selectedNomenclature.modelArticle,
 										value: selectedNomenclature,
 									}
 								: null

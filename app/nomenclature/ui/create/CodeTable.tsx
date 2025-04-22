@@ -1,3 +1,4 @@
+import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { BinIcon, UploadIcon } from "@/shared/ui/icons";
 import { EyeIcon } from "@/shared/ui/icons";
 import { useState } from "react";
@@ -27,15 +28,22 @@ interface CodeTableProps {
 export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const codes = value;
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [deleteFileName, setDeleteFileName] = useState<string | null>(null);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 	const [codesList, setCodesList] = useState<ParsedCode[]>([]);
 	const [codesView, setCodesView] = useState<string[]>([]);
 
-	const handleDelete = (fileName: string) => {
+	const handleConfirmDelete = (fileName: string) => {
 		const updated = codes.filter((code) => code.fileName !== fileName);
 		onChange(updated);
 		setCodesList((prev) => prev.filter((file) => file.fileName !== fileName));
 		toast.success("Файл удален");
+	};
+
+	const handleDelete = (fileName: string) => {
+		setIsDeleteModalOpen(true);
+		setDeleteFileName(fileName);
 	};
 
 	const handleUpload = (newCodes: Code[]) => {
@@ -160,6 +168,21 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 					codes={codesList}
 					onClose={() => setIsModalOpen(false)}
 					onAdd={handleUpload}
+				/>
+			)}
+
+			{isDeleteModalOpen && (
+				<ConfirmModal
+					isOpen={isDeleteModalOpen}
+					onCancel={() => setIsDeleteModalOpen(false)}
+					onConfirm={() => {
+						if (deleteFileName) {
+							handleConfirmDelete(deleteFileName);
+						}
+						setIsDeleteModalOpen(false);
+					}}
+					title="Удалить файл?"
+					message={`Вы уверены, что хотите удалить файл ${deleteFileName}?`}
 				/>
 			)}
 			<CodeViewModal

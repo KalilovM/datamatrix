@@ -1,4 +1,5 @@
 import { useConfigurationsStore } from "@/nomenclature/stores/configurationsStore";
+import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { BinIcon, EditIcon, PlusIcon } from "@/shared/ui/icons";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -21,6 +22,7 @@ export default function ConfigurationTable({
 		removeConfiguration,
 	} = useConfigurationsStore();
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [editingConfig, setEditingConfig] =
 		useState<ConfigurationOption | null>(null);
 
@@ -34,13 +36,18 @@ export default function ConfigurationTable({
 		setIsModalOpen(true);
 	};
 
-	const handleDelete = (label: string) => {
+	const handleDeleteConfirm = (label: string) => {
 		removeConfiguration(label);
 		const updatedConfigurations = configurations.filter(
 			(c) => c.label !== label,
 		);
 		onChange(updatedConfigurations);
 		toast.success("Конфигурация удалена");
+	};
+
+	const handleDelete = (label: string) => {
+		setEditingConfig(configurations.find((c) => c.label === label) || null);
+		setIsDeleteModalOpen(true);
 	};
 
 	const handleSave = (config: ConfigurationOption) => {
@@ -141,6 +148,20 @@ export default function ConfigurationTable({
 					config={editingConfig}
 					onClose={() => setIsModalOpen(false)}
 					onSave={handleSave}
+				/>
+			)}
+			{isDeleteModalOpen && (
+				<ConfirmModal
+					isOpen={isDeleteModalOpen}
+					onCancel={() => setIsDeleteModalOpen(false)}
+					onConfirm={() => {
+						if (editingConfig) {
+							handleDeleteConfirm(editingConfig.label);
+						}
+						setIsDeleteModalOpen(false);
+					}}
+					title="Удаление конфигурации"
+					message={`Конфигурация "${editingConfig?.label}" будет удалена.`}
 				/>
 			)}
 		</div>

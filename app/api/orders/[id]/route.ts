@@ -58,6 +58,7 @@ export async function GET(
 					nomenclature: {
 						select: {
 							name: true,
+							modelArticle: true,
 							id: true,
 						},
 					},
@@ -69,6 +70,7 @@ export async function GET(
 					nomenclature: {
 						select: {
 							name: true,
+							modelArticle: true,
 							id: true,
 						},
 					},
@@ -97,6 +99,7 @@ export async function GET(
 					nomenclature: {
 						select: {
 							name: true,
+							modelArticle: true,
 							id: true,
 						},
 					},
@@ -107,7 +110,7 @@ export async function GET(
 
 	const linked = linkedCodes.map((code) => ({
 		generatedCode: convertToFlatCodeFormat(code.value),
-		nomenclature: code.codePack.nomenclature.name,
+		nomenclature: code.codePack.nomenclature.modelArticle,
 		codes: [code.value],
 	}));
 
@@ -120,13 +123,13 @@ export async function GET(
 		id: pack.id,
 		codes: pack.codes.map((code) => code.value),
 		generatedCode: pack.value,
-		nomenclature: pack.nomenclature.name,
+		nomenclature: pack.nomenclature.modelArticle,
 	}));
 
 	const initialRows = order.orderNomenclature.map((row) => ({
 		id: row.id,
 		nomenclature: {
-			label: row.nomenclature.name,
+			label: row.nomenclature.modelArticle,
 			value: row.nomenclature.id,
 		},
 		numberOfOrders: row.quantity,

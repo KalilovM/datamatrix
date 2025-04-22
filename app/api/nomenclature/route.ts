@@ -87,7 +87,9 @@ export async function GET(req: Request) {
 		color: nomenclature.color,
 		modelArticle: nomenclature.modelArticle,
 		size: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.size),
-		GTIN: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.gtin),
+		GTIN: nomenclature.sizeGtin.map(
+			(sizeGtin) => `${sizeGtin.size} - ${sizeGtin.gtin}`,
+		),
 		codeCount: nomenclature.codePacks.reduce(
 			(total, codePack) => total + codePack.codes.length,
 			0,

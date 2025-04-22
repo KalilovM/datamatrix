@@ -30,6 +30,7 @@ export async function POST(req: Request) {
 						nomenclature: {
 							select: {
 								name: true,
+								modelArticle: true,
 							},
 						},
 					},
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
 		const result = {
 			id: code.id,
 			code: code.value,
-			nomenclature: code.codePack.nomenclature.name,
+			nomenclature: code.codePack.nomenclature.modelArticle,
 		};
 
 		return NextResponse.json(result);
