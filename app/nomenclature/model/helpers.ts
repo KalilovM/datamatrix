@@ -34,7 +34,6 @@ export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
 	const toDelete = existingSizeGtin.filter(
 		(existing) => ![...incomingMap.values()].some((i) => i.id === existing.id),
 	);
-	console.log(toDelete);
 
 	const toUpdate = incomingMap.values();
 
@@ -52,7 +51,6 @@ export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
 				// ✅ Check manually for GTIN+size duplicate in other records
 				const duplicate = await prisma.sizeGtin.findFirst({
 					where: {
-						nomenclatureId,
 						gtin: item.gtin,
 						size: item.size,
 						NOT: { id: item.id },
