@@ -12,7 +12,7 @@ export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
 		return;
 	}
 	const existingSizeGtin = await prisma.sizeGtin.findMany({
-		where: { gtin: gtinSize.GTIN },
+		where: { nomenclatureId },
 		select: { id: true, size: true, gtin: true },
 	});
 
@@ -34,6 +34,7 @@ export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
 	const toDelete = existingSizeGtin.filter(
 		(existing) => ![...incomingMap.values()].some((i) => i.id === existing.id),
 	);
+	console.log(toDelete);
 
 	const toUpdate = incomingMap.values();
 
