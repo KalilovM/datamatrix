@@ -15,6 +15,7 @@ export interface Code {
 	id: string;
 	codes: string[];
 	size: number;
+	createdAt: string;
 }
 
 interface CodeTableProps {
@@ -99,6 +100,9 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 								<th scope="col" className="px-6 py-3 text-start">
 									Имя файла
 								</th>
+								<th scope="col" className="px-6 py-3 text-start">
+									Дата загрузки
+								</th>
 								<th scope="col" className="px-6 py-3 text-right">
 									Действия
 								</th>
@@ -114,8 +118,15 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 										<td className="pl-6 pr-2 py-4 font-medium whitespace-nowrap w-0">
 											{file.size}
 										</td>
-										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate max-w-xs">
+										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate max-w-[100px]">
 											{file.fileName}
+										</td>
+										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate">
+											{new Date(file.createdAt).toLocaleDateString("ru-RU", {
+												year: "numeric",
+												month: "2-digit",
+												day: "2-digit",
+											})}
 										</td>
 										<td className="px-6 py-4 text-right flex items-center justify-end gap-2">
 											<button

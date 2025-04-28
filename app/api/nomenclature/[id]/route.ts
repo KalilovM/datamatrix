@@ -54,6 +54,7 @@ export async function GET(
 							size: true,
 						},
 					},
+					createdAt: true,
 				},
 			},
 			sizeGtin: {
@@ -98,6 +99,7 @@ export async function GET(
 			GTIN: String(pack.sizeGtin?.gtin ?? ""),
 			sizeGtin: pack.sizeGtin?.id,
 			content: codesToCsv(pack.codes.map((code) => code.value)),
+			createdAt: pack.createdAt,
 			codes: pack.codes.map((code) => code.value),
 		})),
 	};
