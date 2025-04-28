@@ -103,6 +103,9 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 								<th scope="col" className="px-6 py-3 text-start">
 									Дата загрузки
 								</th>
+								<th scope="col" className="px-6 py-3 text-start">
+									кол-во
+								</th>
 								<th scope="col" className="px-6 py-3 text-right">
 									Действия
 								</th>
@@ -122,11 +125,18 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 											{file.fileName}
 										</td>
 										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate">
-											{new Date(file.createdAt).toLocaleDateString("ru-RU", {
-												year: "numeric",
-												month: "2-digit",
-												day: "2-digit",
-											})}
+											{new Date(file.createdAt)
+												.toLocaleDateString("ru-RU", {
+													year: "numeric",
+													month: "2-digit",
+													day: "2-digit",
+													hour: "2-digit",
+													minute: "2-digit",
+												})
+												.replace(",", "")}
+										</td>
+										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate">
+											{file.codes.length}
 										</td>
 										<td className="px-6 py-4 text-right flex items-center justify-end gap-2">
 											<button
