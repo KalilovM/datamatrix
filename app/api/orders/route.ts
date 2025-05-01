@@ -2,7 +2,6 @@ import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { convertToSpecialCodeFormat } from "./validate-code/route";
 
 export async function GET(req: Request) {
 	const session = await getServerSession(authOptions);
@@ -104,9 +103,7 @@ export async function POST(req: Request) {
 
 	const generatedCodePacks = allCodePacks.filter(isUUID);
 
-	const codes = allCodePacks
-		.filter((code: string) => !isUUID(code))
-		.map(convertToSpecialCodeFormat);
+	const codes = allCodePacks.filter((code: string) => !isUUID(code));
 	if (!counteragentId || !generatedCodePacks || !rows) {
 		return NextResponse.json(
 			{ message: "Не переданы обязательные параметры" },
@@ -121,6 +118,9 @@ export async function POST(req: Request) {
 			counteragentId,
 			generatedCodePacks: {
 				connect: generatedCodePacks.map((code: string) => ({ value: code })),
+			},
+			code: {
+				connect: codes.map((code: string) => ({ value: code })),
 			},
 		},
 	});

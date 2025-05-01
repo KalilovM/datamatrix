@@ -2,13 +2,6 @@ import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { convertToSpecialCodeFormat } from "../validate-code/route";
-
-function convertToFlatCodeFormat(input) {
-	return input
-		.replace(/^�/, "") // remove the leading �
-		.replace(/\x1D/g, ""); // remove all ASCII GS characters
-}
 
 export async function DELETE(
 	req: Request,
@@ -109,7 +102,7 @@ export async function GET(
 	});
 
 	const linked = linkedCodes.map((code) => ({
-		generatedCode: convertToFlatCodeFormat(code.value),
+		generatedCode: code.value,
 		nomenclature: code.codePack.nomenclature.modelArticle,
 		codes: [code.value],
 	}));
@@ -190,9 +183,7 @@ export async function PUT(
 		/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
 	const generatedCodePacks = allCodePacks.filter(isUUID);
-	const codes = allCodePacks
-		.filter((code: string) => !isUUID(code))
-		.map(convertToSpecialCodeFormat);
+	const codes = allCodePacks.filter((code: string) => !isUUID(code));
 
 	// Verify order belongs to the user's company
 	const existingOrder = await prisma.order.findUnique({

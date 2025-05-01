@@ -1,25 +1,17 @@
 import { prisma } from "@/shared/lib/prisma";
 import { NextResponse } from "next/server";
 
-export function convertToSpecialCodeFormat(input: string): string {
-	return input
-		.replace(/^/, "�")
-		.replace(/91EE10/, "\x1d91EE10")
-		.replace(/92/, "\x1d92");
-}
-
 export async function POST(req: Request) {
 	try {
 		const { code: codeData } = await req.json();
+		console.log(codeData);
 		if (!codeData) {
 			return NextResponse.json({ error: "Введите код!" }, { status: 400 });
 		}
 
-		const formattedCode = convertToSpecialCodeFormat(codeData);
-
 		const code = await prisma.code.findUnique({
 			where: {
-				value: formattedCode,
+				value: codeData,
 				used: false,
 			},
 			select: {
