@@ -3,6 +3,11 @@ import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+function normalizeScannerInput(raw: string): string {
+	const GS = String.fromCharCode(29); // ASCII 29
+	return `�${raw.split(GS).join("\x1D")}`; // insert raw ASCII 29 back
+}
+
 export async function GET(req: Request) {
 	const session = await getServerSession(authOptions);
 
@@ -111,18 +116,25 @@ export async function POST(req: Request) {
 		);
 	}
 
+	const orderData: Parameters<typeof prisma.order.create>[0]["data"] = {
+		companyId: user.companyId,
+		counteragentId,
+		generatedCodePacks: {
+			connect: generatedCodePacks.map((code: string) => ({ value: code })),
+		},
+	};
+
+	if (codes.length > 0) {
+		orderData.code = {
+			connect: codes.map((code: string) => ({
+				value: normalizeScannerInput(code),
+			})),
+		};
+	}
+
 	// Create order
 	const order = await prisma.order.create({
-		data: {
-			companyId: user.companyId,
-			counteragentId,
-			generatedCodePacks: {
-				connect: generatedCodePacks.map((code: string) => ({ value: code })),
-			},
-			code: {
-				connect: codes.map((code: string) => ({ value: code })),
-			},
-		},
+		data: orderData,
 	});
 
 	// Generate order ID
@@ -150,7 +162,7 @@ export async function POST(req: Request) {
 	await prisma.code.updateMany({
 		where: {
 			value: {
-				in: codes,
+				in: codes.map((code: string) => normalizeScannerInput(code)),
 			},
 		},
 		data: {

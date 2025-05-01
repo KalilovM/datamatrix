@@ -1,17 +1,23 @@
 import { prisma } from "@/shared/lib/prisma";
 import { NextResponse } from "next/server";
 
+function normalizeScannerInput(raw: string): string {
+	const GS = String.fromCharCode(29); // ASCII 29
+	return `�${raw.split(GS).join("\x1D")}`; // insert raw ASCII 29 back
+}
+
 export async function POST(req: Request) {
 	try {
 		const { code: codeData } = await req.json();
-		console.log(codeData);
+		const formattedCode = normalizeScannerInput(codeData);
 		if (!codeData) {
 			return NextResponse.json({ error: "Введите код!" }, { status: 400 });
 		}
+		console.log(formattedCode);
 
 		const code = await prisma.code.findUnique({
 			where: {
-				value: codeData,
+				value: formattedCode,
 				used: false,
 			},
 			select: {
@@ -49,3 +55,6 @@ export async function POST(req: Request) {
 		return NextResponse.json({ error: "Ошибка сервера!" }, { status: 500 });
 	}
 }
+
+// 0104700010816467215VXjvWb6rgBr91EE1192OUO6SdTwJiWSSp4Y1TUONxHbz49qx8iGhBshq1yxvSM=
+// 0104700010816467215VXjvWb6rgBr91EE1192OUO6SdTwJiWSSp4Y1TUONxHbz49qx8iGhBshq1yxvSM=

@@ -15,7 +15,6 @@ export default function PackInput({ index, value }: PackInputProps) {
 	const [inputValue, setInputValue] = useState(value);
 	const [isScanned, setIsScanned] = useState(false);
 	const inputRef = useRef<HTMLInputElement | null>(null);
-	const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const checkCodeMutation = useCheckCode();
 
 	useEffect(() => {
@@ -26,11 +25,7 @@ export default function PackInput({ index, value }: PackInputProps) {
 		const newValue = e.target.value;
 		setInputValue(newValue);
 		updatePackValue(index, newValue);
-
-		if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-		debounceTimerRef.current = setTimeout(() => {
-			validateCode(newValue);
-		}, 500);
+		validateCode(newValue);
 	};
 
 	const validateCode = (code: string) => {

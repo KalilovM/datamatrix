@@ -3,6 +3,11 @@ import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+function normalizeScannerInput(raw: string): string {
+	const GS = String.fromCharCode(29); // ASCII 29
+	return `�${raw.split(GS).join("\x1D")}`; // insert raw ASCII 29 back
+}
+
 export async function DELETE(
 	req: Request,
 	{ params }: { params: Promise<{ id: string }> },
@@ -210,14 +215,26 @@ export async function PUT(
 	});
 
 	// Re-attach updated data
+
+	const orderData: Parameters<typeof prisma.order.create>[0]["data"] = {
+		companyId: user.companyId,
+		counteragentId,
+		generatedCodePacks: {
+			connect: generatedCodePacks.map((code: string) => ({ value: code })),
+		},
+	};
+
+	if (codes.length > 0) {
+		orderData.code = {
+			connect: codes.map((code: string) => ({
+				value: normalizeScannerInput(code),
+			})),
+		};
+	}
+
 	await prisma.order.update({
 		where: { id: orderId },
-		data: {
-			counteragentId,
-			generatedCodePacks: {
-				connect: generatedCodePacks.map((code: string) => ({ value: code })),
-			},
-		},
+		data: orderData,
 	});
 
 	if (rows.length > 0) {
@@ -233,7 +250,7 @@ export async function PUT(
 
 	await prisma.code.updateMany({
 		where: {
-			value: { in: codes },
+			value: { in: codes.map((code: string) => normalizeScannerInput(code)) },
 		},
 		data: {
 			used: true,
