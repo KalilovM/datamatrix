@@ -23,6 +23,14 @@ interface CodeTableProps {
 	onChange: (value: Code[]) => void; // callback to update codes
 }
 
+function parseCodeFileContent(content: string): string[] {
+	// Normalize line endings and split on line breaks
+	return content
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.filter((line) => line.length > 0);
+}
+
 export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const codes = value;
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,6 +38,7 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const [deleteFileName, setDeleteFileName] = useState<string | null>(null);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 	const [codesView, setCodesView] = useState<string[]>([]);
+	console.log(codes);
 
 	// We still use the print store to set codes and trigger printing.
 	const { setPrintCodes, setSize, triggerPrint } = usePrintStore();
@@ -125,18 +134,23 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 											{file.fileName}
 										</td>
 										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate">
-											{new Date(file.createdAt)
-												.toLocaleDateString("ru-RU", {
-													year: "numeric",
-													month: "2-digit",
-													day: "2-digit",
-													hour: "2-digit",
-													minute: "2-digit",
-												})
-												.replace(",", "")}
+											{file.createdAt
+												? new Date(file.createdAt)
+														.toLocaleDateString("ru-RU", {
+															year: "numeric",
+															month: "2-digit",
+															day: "2-digit",
+															hour: "2-digit",
+															minute: "2-digit",
+														})
+														.replace(",", "")
+												: ""}
+											{file.createdAt}
 										</td>
 										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate">
-											{file.codes.length}
+											{file.content
+												? parseCodeFileContent(file.content).length
+												: ""}
 										</td>
 										<td className="px-6 py-4 text-right flex items-center justify-end gap-2">
 											<button

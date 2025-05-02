@@ -72,9 +72,9 @@ export default function ConfigurationTable({
 				</div>
 
 				{/* Table Rows */}
-				<div className="table-rows-layout relative overflow-x-auto">
-					<table className="w-full text-sm text-left text-gray-500">
-						<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+				<div className="table-rows-layout relative max-h-[325px] border border-gray-200 rounded-b-md">
+					<table className="w-full text-sm text-left text-gray-500 table-fixed">
+						<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200 sticky top-0">
 							<tr>
 								<th scope="col" className="px-6 py-3">
 									Конфигурация
