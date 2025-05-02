@@ -23,14 +23,6 @@ interface CodeTableProps {
 	onChange: (value: Code[]) => void; // callback to update codes
 }
 
-function parseCodeFileContent(content: string): string[] {
-	// Normalize line endings and split on line breaks
-	return content
-		.split(/\r?\n/)
-		.map((line) => line.trim())
-		.filter((line) => line.length > 0);
-}
-
 export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const codes = value;
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -145,12 +137,9 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 														})
 														.replace(",", "")
 												: ""}
-											{file.createdAt}
 										</td>
 										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate">
-											{file.content
-												? parseCodeFileContent(file.content).length
-												: ""}
+											{file.codes ? file.codes.length : ""}
 										</td>
 										<td className="px-6 py-4 text-right flex items-center justify-end gap-2">
 											<button
