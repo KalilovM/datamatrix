@@ -20,14 +20,14 @@ export default function OrderCreationForm({
 	counteragentOptions,
 	selectedCounteragent,
 }: {
-	orderData: { id: number; showId: string };
+	orderData: { id: number; showId: string; counteragent: string };
 	counteragentOptions: ICounteragentOption[];
 	selectedCounteragent: IinitialCounteragent;
 }) {
 	const { getCodesRawData } = useOrderStore();
 	const [activeTab, setActiveTab] = useState(1);
 
-	const handleDownloadCSV = () => {
+	const handleDownloadCSV = async () => {
 		const codes = getCodesRawData();
 		if (codes.length === 0) {
 			alert("Нет кодов для скачивания!");
@@ -39,8 +39,39 @@ export default function OrderCreationForm({
 			{ header: false },
 		);
 
-		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-		saveAs(blob, `${orderData.showId}.csv`);
+		const today = new Date();
+		const day = String(today.getDate()).padStart(2, "0");
+		const month = String(today.getMonth() + 1).padStart(2, "0");
+		const year = today.getFullYear();
+		const formattedDate = `${day}.${month}.${year}`;
+
+		const filename = `${orderData.showId}-${selectedCounteragent.label}-от-${formattedDate}.csv`;
+
+		// Use File System Access API if available
+		if ("showSaveFilePicker" in window) {
+			try {
+				const fileHandle = await window.showSaveFilePicker({
+					suggestedName: filename,
+					types: [
+						{
+							description: "CSV file",
+							accept: { "text/csv": [".csv"] },
+						},
+					],
+				});
+				const writable = await fileHandle.createWritable();
+				await writable.write(
+					new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+				);
+				await writable.close();
+				return;
+			} catch (err) {
+				console.log("File save cancelled or failed", err);
+			}
+		}
+
+		// Fallback for unsupported browsers
+		// saveAs(new Blob([csv], { type: "text/csv;charset=utf-8;" }), filename);
 	};
 
 	return (
