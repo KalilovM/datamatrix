@@ -127,6 +127,7 @@ export async function GET(
 	const initialRows = order.orderNomenclature.map((row) => ({
 		id: row.id,
 		nomenclature: {
+			id: row.nomenclature.id,
 			label: row.nomenclature.modelArticle,
 			value: row.nomenclature.id,
 		},

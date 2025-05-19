@@ -3,6 +3,7 @@ import { create } from "zustand";
 interface IRow {
 	id?: number;
 	nomenclature: {
+		id: string;
 		label: string;
 		value: string;
 	} | null;
@@ -43,9 +44,9 @@ export const useOrderNomenclatureStore = create<IOrderNomenclatureStore>(
 		updatePreparedOrders: (codes) => {
 			set((state) => {
 				const newRows = state.rows.map((row) => {
-					if (row.nomenclature) {
+					if (row.nomenclature?.value) {
 						const numberOfPreparedOrders = codes
-							.filter((code) => code.nomenclature === row.nomenclature.label)
+							.filter((code) => code.nomenclature === row.nomenclature!.value)
 							.reduce((total, code) => total + code.codes.length, 0);
 						return { ...row, numberOfPreparedOrders };
 					}

@@ -69,7 +69,7 @@ export default function OrderCreationSelectors({
 				addCodes({
 					generatedCode: aggregatedCode,
 					codes: [data.code],
-					nomenclature: data.nomenclature,
+					nomenclature: data.nomenclature.id,
 				});
 				setGeneratedCode("");
 				setTimeout(() => {
@@ -92,7 +92,7 @@ export default function OrderCreationSelectors({
 					addCodes({
 						generatedCode: aggregatedCode,
 						codes: data.linkedCodes.map((code: string) => code.value),
-						nomenclature: data.nomenclature,
+						nomenclature: data.nomenclature.id,
 					});
 					setGeneratedCode("");
 
@@ -107,6 +107,7 @@ export default function OrderCreationSelectors({
 	};
 
 	useEffect(() => {
+		console.log(codes);
 		updatePreparedOrders(codes);
 	}, [codes, updatePreparedOrders]);
 

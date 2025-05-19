@@ -13,7 +13,6 @@ export async function POST(req: Request) {
 		if (!codeData) {
 			return NextResponse.json({ error: "Введите код!" }, { status: 400 });
 		}
-		console.log(formattedCode);
 
 		const code = await prisma.code.findUnique({
 			where: {
@@ -27,6 +26,7 @@ export async function POST(req: Request) {
 					select: {
 						nomenclature: {
 							select: {
+								id: true,
 								name: true,
 								modelArticle: true,
 							},
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 		const result = {
 			id: code.id,
 			code: code.value,
-			nomenclature: code.codePack.nomenclature.modelArticle,
+			nomenclature: code.codePack.nomenclature,
 		};
 
 		return NextResponse.json(result);
@@ -55,6 +55,3 @@ export async function POST(req: Request) {
 		return NextResponse.json({ error: "Ошибка сервера!" }, { status: 500 });
 	}
 }
-
-// 0104700010816467215VXjvWb6rgBr91EE1192OUO6SdTwJiWSSp4Y1TUONxHbz49qx8iGhBshq1yxvSM=
-// 0104700010816467215VXjvWb6rgBr91EE1192OUO6SdTwJiWSSp4Y1TUONxHbz49qx8iGhBshq1yxvSM=

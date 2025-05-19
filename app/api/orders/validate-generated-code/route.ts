@@ -35,8 +35,7 @@ export async function POST(req: Request) {
 			: codePallet?.generatedCodePacks.flatMap((pack) => pack.codes) || [];
 
 		const nomenclature =
-			codePack?.nomenclature.modelArticle ||
-			codePallet?.generatedCodePacks[0].nomenclature.modelArticle;
+			codePack?.nomenclature || codePallet?.generatedCodePacks[0].nomenclature;
 
 		return NextResponse.json({ linkedCodes, nomenclature });
 	} catch (error) {

@@ -58,7 +58,7 @@ export async function GET(req: Request) {
 	const nomenclatures = await prisma.nomenclature.findMany({
 		where,
 		orderBy: {
-			name: "asc",
+			modelArticle: "asc",
 		},
 		select: {
 			id: true,

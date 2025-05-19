@@ -39,8 +39,10 @@ export default function OrderNomenclatures() {
 	}, [codes, updatePreparedOrders]);
 
 	const handleNomenclatureChange = (selectedOption, index) => {
+		console.log(selectedOption);
+		console.log(codes);
 		const numberOfPreparedOrders = codes
-			.filter((code) => code.nomenclature === selectedOption.label)
+			.filter((code) => code.nomenclature === selectedOption.value)
 			.reduce((total, code) => total + code.codes.length, 0);
 
 		updateRow(index, {
