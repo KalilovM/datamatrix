@@ -28,11 +28,11 @@
 }
 
 @utility table-header {
-    @apply flex flex-row rounded-t-lg border-b border-neutral-300 bg-white px-6 py-4 justify-between items-center;
+    @apply flex flex-row rounded-t-lg border-b border-neutral-300 bg-white px-4 py-2 justify-between items-center;
 }
 
 @utility table-header-title {
-    @apply text-xl font-bold leading-9;
+    @apply text-xl font-bold leading-7;
 }
 
 @utility table-rows-layout {

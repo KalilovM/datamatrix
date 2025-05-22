@@ -42,7 +42,7 @@ export default function AggregationSelectors({
 	}, [fetchedConfigurations, setConfigurations]);
 
 	const nomenclatureOptions = options.map((nom) => ({
-		label: nom.modelArticle || "Без имени",
+		label: `${nom.modelArticle} - ${nom.color}` || "Без имени",
 		value: nom,
 	}));
 

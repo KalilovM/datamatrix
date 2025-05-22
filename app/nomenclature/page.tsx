@@ -4,18 +4,14 @@ import { withRole } from "@/shared/configs/withRole";
 import Layout from "@/shared/ui/Layout";
 import { useEffect, useState } from "react";
 import { useNomenclatures } from "./hooks/useNomenclatures";
+import { useNomenclatureFilterStore } from "./stores/nomenclatureFilterStore";
 import { useGtinSizeStore } from "./stores/sizegtinStore";
 import NomenclatureTable from "./ui/NomenclatureTable";
 
 const Page = () => {
-	const [tempFilters, setTempFilters] = useState({
-		name: "",
-		modelArticle: "",
-		color: "",
-		gtin: "",
-	});
-	const [filters, setFilters] = useState(tempFilters); // actual applied filters
+	const { filters, setFilters } = useNomenclatureFilterStore();
 	const { reset: resetSizeGtin } = useGtinSizeStore();
+
 	useEffect(() => {
 		resetSizeGtin();
 	}, []);
@@ -26,10 +22,6 @@ const Page = () => {
 		setTempFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 	};
 
-	const applyFilters = () => {
-		setFilters(tempFilters);
-	};
-
 	if (isLoading) return <Layout>Загрузка...</Layout>;
 	if (error || !nomenclatures) return <Layout>Ошибка загрузки данных</Layout>;
 
@@ -37,9 +29,8 @@ const Page = () => {
 		<Layout>
 			<NomenclatureTable
 				nomenclatures={nomenclatures}
-				filters={tempFilters}
-				handleFiltersChange={handleTempChange}
-				onApply={applyFilters}
+				filters={filters}
+				onApply={(newFilters) => setFilters(newFilters)}
 			/>
 		</Layout>
 	);

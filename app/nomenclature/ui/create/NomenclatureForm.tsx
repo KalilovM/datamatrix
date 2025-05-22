@@ -128,7 +128,7 @@ export default function NomenclatureForm() {
 						</button>
 						<button
 							type="submit"
-							className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md cursor-pointer"
+							className="bg-blue-500 px-2 py-1 text-white rounded-md cursor-pointer"
 							disabled={mutation.isPending}
 						>
 							{mutation.isPending ? "Сохранение..." : "Сохранить"}
@@ -143,7 +143,7 @@ export default function NomenclatureForm() {
 						<input
 							{...register("name")}
 							type="text"
-							className={`w-full rounded-lg border px-3 py-2 ${
+							className={`w-full rounded-lg border px-2 py-1 ${
 								errors.name ? "border-red-500" : "border-gray-300"
 							}`}
 						/>
@@ -160,7 +160,7 @@ export default function NomenclatureForm() {
 							<input
 								{...register("modelArticle")}
 								type="text"
-								className={`w-full rounded-lg border px-3 py-2 ${
+								className={`w-full rounded-lg border px-2 py-1 ${
 									errors.modelArticle ? "border-red-500" : "border-gray-300"
 								}`}
 							/>
@@ -177,7 +177,7 @@ export default function NomenclatureForm() {
 							<input
 								{...register("color")}
 								type="text"
-								className={`w-full rounded-lg border px-3 py-2 ${
+								className={`w-full rounded-lg border px-2 py-1 ${
 									errors.color ? "border-red-500" : "border-gray-300"
 								}`}
 							/>
@@ -190,7 +190,7 @@ export default function NomenclatureForm() {
 
 				{/* Tables for Configurations and Codes */}
 			</div>
-			<div className="flex flex-row w-full gap-4 h-full flex-1 min-h-[400px] max-h-[400px]">
+			<div className="flex flex-row w-full gap-4 h-full flex-1 min-h-[300px] max-h-[300px]">
 				<Controller
 					control={control}
 					name="configurations"

@@ -68,7 +68,10 @@ export default function AggregationCodesRow({
 							<td className="px-6 py-4">{code.configuration}</td>
 							<td className="px-6 py-4">{code.type}</td>
 							<td className="px-6 py-4">
-								{new Date(code.createdAt).toLocaleDateString()}
+								{new Date(code.createdAt).toLocaleString("ru-RU", {
+									dateStyle: "medium",
+									timeStyle: "short",
+								})}
 							</td>
 							<td className="px-6 py-4 text-right">
 								<button
