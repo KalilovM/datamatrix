@@ -3,8 +3,8 @@ import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET() {
-	const session = await getServerSession(authOptions);
+export async function GET(req: Request) {
+        const session = await getServerSession(authOptions);
 	if (!session?.user) {
 		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
 	}
@@ -23,14 +23,32 @@ export async function GET() {
 			{ status: 401 },
 		);
 	}
-	const { companyId } = user;
-	if (!companyId) return NextResponse.json([]);
+        const url = new URL(req.url);
+        const name = url.searchParams.get("name") || undefined;
+        const modelArticle = url.searchParams.get("modelArticle") || undefined;
+        const color = url.searchParams.get("color") || undefined;
+        const generatedCode = url.searchParams.get("generatedCode") || undefined;
 
-	const packs = await prisma.generatedCodePack.findMany({
-		where: { nomenclature: { companyId } },
-		include: {
-			codes: {
-				select: { value: true },
+        const { companyId } = user;
+        if (!companyId) return NextResponse.json([]);
+
+        const packs = await prisma.generatedCodePack.findMany({
+                where: {
+                        value: generatedCode
+                                ? { contains: generatedCode, mode: "insensitive" }
+                                : undefined,
+                        nomenclature: {
+                                companyId,
+                                name: name ? { contains: name, mode: "insensitive" } : undefined,
+                                modelArticle: modelArticle
+                                        ? { contains: modelArticle, mode: "insensitive" }
+                                        : undefined,
+                                color: color ? { contains: color, mode: "insensitive" } : undefined,
+                        },
+                },
+                include: {
+                        codes: {
+                                select: { value: true },
 			},
 			nomenclature: {
 				select: {
@@ -49,11 +67,23 @@ export async function GET() {
 	});
 
 	// Fetch pallets
-	const pallets = await prisma.generatedCodePallet.findMany({
-		where: { nomenclature: { companyId } },
-		include: {
-			nomenclature: {
-				select: {
+        const pallets = await prisma.generatedCodePallet.findMany({
+                where: {
+                        value: generatedCode
+                                ? { contains: generatedCode, mode: "insensitive" }
+                                : undefined,
+                        nomenclature: {
+                                companyId,
+                                name: name ? { contains: name, mode: "insensitive" } : undefined,
+                                modelArticle: modelArticle
+                                        ? { contains: modelArticle, mode: "insensitive" }
+                                        : undefined,
+                                color: color ? { contains: color, mode: "insensitive" } : undefined,
+                        },
+                },
+                include: {
+                        nomenclature: {
+                                select: {
 					name: true,
 					modelArticle: true,
 					color: true,
