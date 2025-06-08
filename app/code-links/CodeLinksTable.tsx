@@ -1,28 +1,63 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
-const Select = dynamic(() => import("react-select"), { ssr: false });
-
-function CodeLinksTable() {
-	return (
-		<div className="w-full gap-4 flex flex-col print:hidden">
-			<div className="flex items-center justify-between">
-				<h1 className="leading-6 text-xl font-bold">Датаматрикс Коды</h1>
-			</div>
-			<div className="flex flex-row w-full rounded-lg border border-blue-300 bg-white px-8 py-3 gap-4">
-				<div className="w-1/2 flex flex-col">
-					<label htmlFor="nomenclatures">Модель</label>
-					<input
-						type="text"
-						name="code"
-						placeholder="Введите датаматрикс код"
-						className="border border-gray-300 rounded-lg px-3 py-2"
-					/>
-				</div>
-			</div>
-		</div>
-	);
+interface Props {
+  onLinkedCodes: (codes: string[]) => void;
 }
 
-export default CodeLinksTable;
+export default function CodeLinksTable({ onLinkedCodes }: Props) {
+  const [inputCode, setInputCode] = useState("");
+
+  useEffect(() => {
+    if (!inputCode) {
+      onLinkedCodes([]);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        const response = await fetch("/api/code-links", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: inputCode }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          toast.error(data.error);
+          onLinkedCodes([]);
+        } else {
+          onLinkedCodes(
+            data.generatedCodePack.codes.map((c: { value: string }) => c.value),
+          );
+        }
+      } catch {
+        toast.error("Ошибка сервера. Попробуйте позже.");
+        onLinkedCodes([]);
+      }
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [inputCode, onLinkedCodes]);
+
+  return (
+    <div className="w-full gap-4 flex flex-col print:hidden">
+      <div className="flex items-center justify-between">
+        <h1 className="leading-6 text-xl font-bold">Датаматрикс Коды</h1>
+      </div>
+      <div className="flex flex-row w-full rounded-lg border border-blue-300 bg-white px-8 py-3 gap-4">
+        <div className="w-1/2 flex flex-col">
+          <label htmlFor="code">Код</label>
+          <input
+            id="code"
+            type="text"
+            name="code"
+            placeholder="Вставьте код"
+            value={inputCode}
+            onChange={(e) => setInputCode(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
