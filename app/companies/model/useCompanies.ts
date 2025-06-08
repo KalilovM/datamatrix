@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Company } from "@prisma/client";
-import { User } from "@/app/users/definitions";
+import { User } from "../../../users/definitions";
 
 
 async function fetchCompanies(): Promise<Company[]> {

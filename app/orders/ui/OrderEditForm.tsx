@@ -1,6 +1,6 @@
 "use client";
 
-import type { ICounteragentOption } from "@/orders/create/defenitions";
+import type { ICounteragentOption } from "@/orders/create/definitions";
 import { useOrderStore } from "@/orders/stores/useOrderStore";
 import { saveAs } from "file-saver";
 import Papa from "papaparse";

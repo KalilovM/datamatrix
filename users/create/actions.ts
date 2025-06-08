@@ -2,7 +2,7 @@
 
 import { prisma } from "@/shared/lib/prisma";
 import { redirect } from "next/navigation";
-import { FormState, NewUserSchema } from "./defenitions";
+import { FormState, NewUserSchema } from "./definitions";
 import { Role } from "@prisma/client";
 
 export async function getCompanies() {

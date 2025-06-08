@@ -2,7 +2,7 @@
 
 import { useAggregationCodesStore } from "@/aggregation-codes/store/aggregationCodesStore";
 import { useAggregationSelectionStore } from "@/aggregation/store/aggregationSelectionStore";
-import type { IAggregatedCode } from "@/app/aggregation-codes/defenitions";
+import type { IAggregatedCode } from "@/app/aggregation-codes/definitions";
 import { usePrintStore } from "@/shared/store/printStore";
 import type { PrintingTemplate } from "@prisma/client";
 import { PrintIcon } from "../Icons";

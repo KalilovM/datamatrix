@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import PackInput from "../../app/aggregation/components/PackInput";
 import PaginationControls from "../../app/aggregation/components/PaginationControls";
 import { toast } from "react-toastify";
-import { Configuration } from "./defenitions";
+import { Configuration } from "./definitions";
 
 //TODO: use state manager to reduce the code complexity
 

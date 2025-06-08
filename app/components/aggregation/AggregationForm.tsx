@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from "react";
 import AggregationSelectors from "../../app/aggregation/components/AggregationSelectors";
 import PackInputsSection from "./PackInputsSection";
-import { NomenclatureOption, Configuration } from "./defenitions";
+import { NomenclatureOption, Configuration } from "./definitions";
 
 interface AggregationFormProps {
   options: NomenclatureOption[] | null;

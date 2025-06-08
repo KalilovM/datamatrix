@@ -1,6 +1,6 @@
 "use client";
 
-import type { ICounteragentOption } from "@/orders/create/defenitions";
+import type { ICounteragentOption } from "@/orders/create/definitions";
 import { useState } from "react";
 import OrderCodesList from "./OrderCodesList";
 import OrderCreationSelectors from "./OrderCreationSelectors";
