@@ -50,6 +50,7 @@ export default function OrderTableRow({ order }: { order: IOrder }) {
 				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
 					{order.showId}
 				</td>
+				<td className="px-6 py-4 text-black">{order.modelArticle}</td>
 				<td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
 					{new Date(order.createdAt).toLocaleDateString("ru-RU")}
 				</td>

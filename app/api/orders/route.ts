@@ -46,6 +46,12 @@ export async function GET(req: Request) {
 				select: {
 					quantity: true,
 					preparedQuantity: true,
+					nomenclature: {
+						select: {
+							modelArticle: true,
+							color: true,
+						},
+					},
 				},
 			},
 		},
@@ -66,6 +72,9 @@ export async function GET(req: Request) {
 			id: order.id,
 			showId: order.showId,
 			createdAt: order.createdAt,
+			modelArticle: order.orderNomenclature.length
+				? `${order.orderNomenclature[0].nomenclature.modelArticle ?? ""} - ${order.orderNomenclature[0].nomenclature.color ?? ""}`
+				: "",
 			counteragent: order.counteragent,
 			totalQuantity,
 			totalPrepared,

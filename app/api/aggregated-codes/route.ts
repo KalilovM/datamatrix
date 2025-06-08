@@ -71,7 +71,7 @@ export async function GET() {
 	// Format packs
 	const formattedPacks = packs.map((pack) => ({
 		name: pack.nomenclature.name,
-		modelArticle: pack.nomenclature.modelArticle,
+		modelArticle: `${pack.nomenclature.modelArticle}-${pack.nomenclature.color}`,
 		size: pack.nomenclature.sizeGtin.map((size) => size.size).join(", "),
 		color: pack.nomenclature.color,
 		generatedCode: pack.value,
@@ -86,7 +86,7 @@ export async function GET() {
 	// Format pallets
 	const formattedPallets = pallets.map((pallet) => ({
 		name: pallet.nomenclature.name,
-		modelArticle: pallet.nomenclature.modelArticle,
+		modelArticle: `${pallet.nomenclature.modelArticle}-${pallet.nomenclature.color}`,
 		size: pallet.nomenclature.sizeGtin.map((size) => size.size).join(", "),
 		color: pallet.nomenclature.color,
 		generatedCode: pallet.value,

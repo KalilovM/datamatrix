@@ -69,8 +69,11 @@ export default function AggregationCodesRow({
 							<td className="px-6 py-4">{code.type}</td>
 							<td className="px-6 py-4">
 								{new Date(code.createdAt).toLocaleString("ru-RU", {
-									dateStyle: "medium",
-									timeStyle: "short",
+									day: "2-digit",
+									month: "2-digit",
+									year: "numeric",
+									hour: "2-digit",
+									minute: "2-digit",
 								})}
 							</td>
 							<td className="px-6 py-4 text-right">

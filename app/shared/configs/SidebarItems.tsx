@@ -34,4 +34,9 @@ export const sidebarItems: Array<{
 		href: "/print-templates",
 		icon: <PrintIcon />,
 	},
+	{
+		name: "Датаматрикс коды",
+		href: "/code-links",
+		icon: <PrintIcon />,
+	},
 ];
