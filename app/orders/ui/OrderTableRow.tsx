@@ -1,6 +1,6 @@
 "use client";
 
-import type { IOrder } from "@/orders/defenitions";
+import type { IOrder } from "@/orders/definitions";
 import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";

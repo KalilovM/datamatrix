@@ -1,4 +1,4 @@
-import type { IAggregatedCode } from "@/app/aggregation-codes/defenitions";
+import type { IAggregatedCode } from "@/app/aggregation-codes/definitions";
 import { useEffect, useState } from "react";
 import { FilterIcon, SearchIcon } from "../Icons";
 import AggregationCodesRow from "./AggregationCodesRow";

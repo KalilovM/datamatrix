@@ -1,6 +1,6 @@
 "use client";
 
-import { IPrintTemplate } from "@/app/print-templates/defenitions";
+import { IPrintTemplate } from "@/app/print-templates/definitions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 

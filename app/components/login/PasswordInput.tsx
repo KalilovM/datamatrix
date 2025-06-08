@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EyeIcon, EyeSlashIcon } from "@/components/Icons";
-import { FormState } from "@/app/login/defenitions";
+import { FormState } from "@/app/login/definitions";
 
 export default function PasswordInput({ state }: { state: FormState }) {
   const [showPassword, setShowPassword] = useState(false);

@@ -1,6 +1,6 @@
 "use server";
 
-import { IPrintTemplate } from "@/app/print-templates/defenitions";
+import { IPrintTemplate } from "@/app/print-templates/definitions";
 import PrintTemplateRow from "./PrintTemplateRow";
 import Link from "next/link";
 

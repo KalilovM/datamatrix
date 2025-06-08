@@ -1,4 +1,4 @@
-import type { ICounteragentOption } from "@/orders/create/defenitions";
+import type { ICounteragentOption } from "@/orders/create/definitions";
 import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
 import { useOrderStore } from "@/orders/stores/useOrderStore";
 import dynamic from "next/dynamic";

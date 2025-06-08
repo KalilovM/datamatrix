@@ -3,7 +3,7 @@
 import { prisma } from "@/shared/lib/prisma";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
-import { FormState, UpdateUserSchema } from "./defenitions";
+import { FormState, UpdateUserSchema } from "./definitions";
 
 export async function updateUser(
   state: FormState,
