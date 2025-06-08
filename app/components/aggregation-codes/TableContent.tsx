@@ -1,19 +1,21 @@
-import type { IAggregatedCode } from "@/app/aggregation-codes/definitions";
+import type { IAggregatedCode, Filters } from "@/app/aggregation-codes/definitions";
 import { useEffect, useState } from "react";
-import { FilterIcon, SearchIcon } from "../Icons";
+import { FilterIcon, SearchIcon, CloseIcon } from "../Icons";
 import AggregationCodesRow from "./AggregationCodesRow";
 
-interface ITableContentProps {
-	aggregatedCodes: IAggregatedCode[];
+interface Props {
+        aggregatedCodes: IAggregatedCode[];
+        filters: Filters;
+        onApply: (filters: Filters) => void;
 }
 
-export default function TableContent({ aggregatedCodes }: ITableContentProps) {
-	const [tempFilters, setTempFilters] = useState({});
-	const [showFilters, setShowFilters] = useState(false);
+export default function TableContent({ aggregatedCodes, filters, onApply }: Props) {
+        const [tempFilters, setTempFilters] = useState(filters);
+        const [showFilters, setShowFilters] = useState(false);
 
-	useEffect(() => {
-		setTempFilters({}); // keep in sync when global filters change externally
-	}, []);
+        useEffect(() => {
+                setTempFilters(filters); // keep in sync when global filters change externally
+        }, [filters]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setTempFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -42,7 +44,7 @@ export default function TableContent({ aggregatedCodes }: ITableContentProps) {
 							<div className="px-2 py-3 bg-white rounded-md shadow-md border-gray-400 border absolute top-12 right-0 z-50 w-64 space-y-2">
 								{[
 									{ key: "name", label: "Название" },
-									{ key: "gtin", label: "GTIN" },
+									{ key: "generatedCode", label: "Код" },
 									{ key: "modelArticle", label: "Модель" },
 									{ key: "color", label: "Цвет" },
 								].map(({ key, label }) => (
