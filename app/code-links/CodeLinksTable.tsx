@@ -16,6 +16,8 @@ export default function CodeLinksTable({ onLinkedCodes, onNomenclature }: Props)
   useEffect(() => {
     if (!inputCode) {
       onLinkedCodes([]);
+      onNomenclature(null);
+      setModelArticle("");
       return;
     }
     const timeout = setTimeout(async () => {
