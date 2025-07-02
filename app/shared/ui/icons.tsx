@@ -428,3 +428,25 @@ export const AggregatedCodesIcon = ({
 		></path>
 	</svg>
 );
+
+export const CodeLinksIcon = ({
+	fill = "none",
+	stroke = "currentColor",
+	strokeWidth = "1.5",
+	className = "size-6",
+}: IconProps) => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		fill={fill}
+		stroke={stroke}
+		strokeWidth={strokeWidth}
+		className={className}
+		viewBox="0 0 24 24"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0-3.75-3.75M17.25 21 21 17.25"
+		></path>
+	</svg>
+);

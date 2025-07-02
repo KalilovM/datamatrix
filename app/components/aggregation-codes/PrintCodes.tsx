@@ -21,6 +21,12 @@ const PrintCodes: React.FC<Props> = ({
 
 	// Trigger printing when the print flag is set
 	useEffect(() => {
+		console.log("PrintCodes useEffect triggered", {
+			shouldPrint,
+			codes,
+			printTemplate,
+			selectedNomenclature,
+		});
 		if (shouldPrint) {
 			window.print();
 			resetPrint();

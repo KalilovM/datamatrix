@@ -1,6 +1,7 @@
 import {
 	AggregatedCodesIcon,
 	AggregationIcon,
+	CodeLinksIcon,
 	CompanyIcon,
 	DisaggregationIcon,
 	NomenclatureIcon,
@@ -27,16 +28,16 @@ export const sidebarItems: Array<{
 		href: "/disaggregation",
 		icon: <DisaggregationIcon />,
 	},
+	{
+		name: "Датаматрикс коды",
+		href: "/code-links",
+		icon: <CodeLinksIcon />,
+	},
 	{ name: "Контрагенты", href: "/counteragents", icon: <AggregationIcon /> },
 	{ name: "Заказы", href: "/orders", icon: <OrderIcon /> },
 	{
 		name: "Шаблоны печати",
 		href: "/print-templates",
-		icon: <PrintIcon />,
-	},
-	{
-		name: "Датаматрикс коды",
-		href: "/code-links",
 		icon: <PrintIcon />,
 	},
 ];
