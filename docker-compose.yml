@@ -35,14 +35,31 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:3000/api
     command: npm start
 
+  # Nginx container
   nginx:
+    container_name: nginx
     image: nginx:latest
+    restart: unless-stopped
+    env_file: .env
     ports:
-      - "80:80"
-    volumes:
-      - ./nginx.dev.conf:/etc/nginx/conf.d/default.conf
+      - 80:80
+      - 443:443
     depends_on:
       - app
+    volumes:
+      - ./nginx/secure/:/etc/nginx/templates/
+      - /etc/localtime:/etc/localtime:ro
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+      - ./nginx/99-autoreload.sh:/docker-entrypoint.d/99-autoreload.sh  # Script to autoreload Nginx when certs are renewed
+
+  # Certbot container for automatic renewal
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   postgres_data:
