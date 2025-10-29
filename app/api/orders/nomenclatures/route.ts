@@ -34,6 +34,7 @@ export async function GET(req: Request) {
 		select: {
 			id: true,
 			modelArticle: true,
+			color: true
 		},
 	});
 	return NextResponse.json(nomenclatures);

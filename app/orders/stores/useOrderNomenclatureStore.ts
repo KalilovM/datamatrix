@@ -6,6 +6,7 @@ interface IRow {
 		id: string;
 		label: string;
 		value: string;
+		color: string;
 	} | null;
 	numberOfOrders: number;
 	numberOfPreparedOrders: number;

@@ -51,6 +51,22 @@ export default function OrderNomenclatures() {
 		});
 	};
 
+	  const options = (nomenclatures ?? [])
+		.slice() // copy to avoid mutating original
+		.sort((a, b) =>
+		(a.modelArticle ?? "").toString().toLowerCase() >
+		(b.modelArticle ?? "").toString().toLowerCase()
+			? 1
+			: -1
+		)
+		.map((n) => ({
+			value: n.id,
+			// label used for searching & keyboard selection
+			label: `${n.modelArticle} - ${n.color ?? ""}`,
+			// keep raw metadata for rendering
+			meta: n,
+    }));
+
 	const totalOrdered = rows.reduce(
 		(sum, row) => sum + Number(row.numberOfOrders || 0),
 		0,
@@ -85,15 +101,30 @@ export default function OrderNomenclatures() {
 							<tr key={index}>
 								<td className="px-6 py-3">
 									<Select
-										options={nomenclatures?.map((nomenclature) => ({
-											value: nomenclature.id,
-											label: nomenclature.modelArticle,
-										}))}
+										options={options}
 										onChange={(selectedOption) =>
 											handleNomenclatureChange(selectedOption, index)
 										}
 										placeholder="Номенклатура"
 										value={row.nomenclature}
+										formatOptionLabel={(option) => {
+												const color = option?.color ?? "";
+												return (
+													<div className="flex items-center gap-2">
+													<div
+														style={{
+														width: 12,
+														height: 12,
+														borderRadius: 3,
+														border: "1px solid rgba(0,0,0,0.12)",
+														background: color || "transparent",
+														}}
+														aria-hidden
+													/>
+													<span>{option.label}</span>
+													</div>
+												);
+											}}
 									/>
 								</td>
 								<td className="px-6 py-3">
