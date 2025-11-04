@@ -42,7 +42,7 @@ export default function OrderNomenclatures() {
 		console.log(selectedOption);
 		console.log(codes);
 		const numberOfPreparedOrders = codes
-			.filter((code) => code.nomenclature === selectedOption.value)
+			.filter((code) => code.nomenclature === selectedOption.meta.modelArticle)
 			.reduce((total, code) => total + code.codes.length, 0);
 
 		updateRow(index, {
@@ -77,9 +77,9 @@ export default function OrderNomenclatures() {
 	);
 
 	return (
-		<div className="flex flex-col w-full gap-4 h-full">
-			<div className="relative overflow-x-auto shadow-md sm:rounded-lg h-full w-full bg-white border border-blue-300">
-				<table className="w-full table-auto text-sm text-left text-gray-500">
+		<div className="flex flex-col w-full h-full gap-4">
+			<div className="relative w-full h-full overflow-x-auto bg-white border border-blue-300 shadow-md sm:rounded-lg">
+				<table className="w-full text-sm text-left text-gray-500 table-auto">
 					<thead className="text-xs text-gray-700 uppercase bg-gray-50">
 						<tr>
 							<th scope="col" className="px-6 py-3">
@@ -134,7 +134,7 @@ export default function OrderNomenclatures() {
 										onChange={(e) =>
 											updateRow(index, { numberOfOrders: e.target.value })
 										}
-										className="border rounded px-2 py-1 w-full"
+										className="w-full px-2 py-1 border rounded"
 									/>
 								</td>
 								<td className="px-6 py-3">{row.numberOfPreparedOrders}</td>
@@ -150,10 +150,10 @@ export default function OrderNomenclatures() {
 							</tr>
 						))}
 						<tr>
-							<td colSpan={4} className="w-full text-center py-4">
+							<td colSpan={4} className="w-full py-4 text-center">
 								<button
 									onClick={handleAddRow}
-									className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+									className="px-4 py-2 text-white bg-blue-600 rounded-lg"
 								>
 									Добавить
 								</button>

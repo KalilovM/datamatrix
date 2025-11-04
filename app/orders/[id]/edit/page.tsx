@@ -21,7 +21,6 @@ const Page = () => {
 	const { setRows } = useOrderNomenclatureStore();
 
 	useEffect(() => {
-		console.log(data);
 		if (!data) return;
 		setRows(data.initialRows);
 		setCodes(data.initialCodes);

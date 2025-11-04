@@ -29,6 +29,16 @@ export async function GET(req: Request) {
 			{ status: 400 },
 		);
 	}
+	if (user.role === "ADMIN") {
+		const nomenclatures = await prisma.nomenclature.findMany({
+			select: {
+				id: true,
+				modelArticle: true,
+				color: true
+			},
+		});
+		return NextResponse.json(nomenclatures);
+	}
 	const nomenclatures = await prisma.nomenclature.findMany({
 		where: { companyId: user.companyId },
 		select: {

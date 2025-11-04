@@ -6,7 +6,11 @@ interface IRow {
 		id: string;
 		label: string;
 		value: string;
-		color: string;
+		meta: {
+			id: string,
+			color: string,
+			modelArticle: string,
+		}
 	} | null;
 	numberOfOrders: number;
 	numberOfPreparedOrders: number;
@@ -44,10 +48,12 @@ export const useOrderNomenclatureStore = create<IOrderNomenclatureStore>(
 		resetRows: () => set({ rows: [] }),
 		updatePreparedOrders: (codes) => {
 			set((state) => {
+				console.log("hello", state.rows)
+				console.log("hello2", codes)
 				const newRows = state.rows.map((row) => {
 					if (row.nomenclature?.value) {
 						const numberOfPreparedOrders = codes
-							.filter((code) => code.nomenclature === row.nomenclature!.value)
+							.filter((code) => code.nomenclature === row.nomenclature!.meta.modelArticle)
 							.reduce((total, code) => total + code.codes.length, 0);
 						return { ...row, numberOfPreparedOrders };
 					}

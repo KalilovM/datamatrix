@@ -11,7 +11,7 @@ const OrderGeneratedCodesList = () => {
 	const totalCodes = codes.reduce((sum, code) => sum + code.codes.length, 0);
 
 	return (
-		<div className="relative overflow-x-auto shadow-md sm:rounded-lg h-full w-1/2 bg-white border border-blue-300">
+		<div className="relative w-1/2 h-full overflow-x-auto bg-white border border-blue-300 shadow-md sm:rounded-lg">
 			<table className="w-full text-sm text-left text-gray-500">
 				<thead className="text-xs text-gray-700 uppercase bg-gray-50">
 					<tr>

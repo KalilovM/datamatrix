@@ -29,6 +29,15 @@ export async function GET() {
 			{ status: 400 },
 		);
 	}
+	if (user.role === "ADMIN") {
+		const res = await prisma.counteragent.findMany({
+			select: {
+				id: true,
+				name: true,
+			}
+		})
+		return NextResponse.json(res)
+	}
 
 	const res = await prisma.counteragent.findMany({
 		where: {

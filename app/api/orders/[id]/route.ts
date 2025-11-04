@@ -69,6 +69,7 @@ export async function GET(
 						select: {
 							name: true,
 							modelArticle: true,
+							color: true,
 							id: true,
 						},
 					},
@@ -127,9 +128,13 @@ export async function GET(
 	const initialRows = order.orderNomenclature.map((row) => ({
 		id: row.id,
 		nomenclature: {
-			id: row.nomenclature.id,
-			label: row.nomenclature.modelArticle,
+			label: `${row.nomenclature.modelArticle} - ${row.nomenclature.color}`,
 			value: row.nomenclature.id,
+			meta: {
+				id: row.nomenclature.id,
+				color: row.nomenclature.color,
+				modelArticle: row.nomenclature.modelArticle,
+			}
 		},
 		numberOfOrders: row.quantity,
 		numberOfPreparedOrders: row.preparedQuantity,

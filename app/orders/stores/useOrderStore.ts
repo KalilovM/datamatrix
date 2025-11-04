@@ -24,6 +24,7 @@ export const useOrderStore = create<IOrderStore>((set, get) => ({
 	selectedCode: null,
 	setCodes: (codes: ICodes[]) => {
 		set({ codes });
+		console.log(codes)
 	},
 	setSelectedCode: (code: string | null) => {
 		set({ selectedCode: code });
