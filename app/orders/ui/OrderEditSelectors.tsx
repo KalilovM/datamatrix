@@ -1,11 +1,11 @@
-import type { ICounteragentOption } from "@/orders/create/definitions";
-import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
-import { useOrderStore } from "@/orders/stores/useOrderStore";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import type { ICounteragentOption } from "@/orders/create/definitions";
+import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
+import { useOrderStore } from "@/orders/stores/useOrderStore";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -35,7 +35,8 @@ export default function OrderEditSelectors({
 			value: option.id,
 		})),
 	);
-	const { reset, addCodes, codes, getGeneratedCodes } = useOrderStore();
+	const { reset, addCodes, codes, getGeneratedCodes, isCodeExists } =
+		useOrderStore();
 	const { rows, resetRows, updatePreparedOrders } = useOrderNomenclatureStore();
 	const [generatedCode, setGeneratedCode] = useState("");
 	const [selectedCounteragent, setSelectedCounteragent] = useState<{
@@ -70,6 +71,8 @@ export default function OrderEditSelectors({
 			const data = await response.json();
 			if (!response.ok) {
 				toast.error(data.error);
+			} else if (isCodeExists(aggregatedCode)) {
+				toast.error("Код уже загружен!");
 			} else {
 				toast.success("Код успешно загружен!");
 				addCodes({
@@ -93,9 +96,11 @@ export default function OrderEditSelectors({
 				const data = await response.json();
 				if (!response.ok) {
 					toast.error(data.error);
+				} else if (isCodeExists(aggregatedCode)) {
+					toast.error("Код уже загружен!");
 				} else {
 					toast.success("Коды успешно загружены!");
-					console.log(data, "data")
+					console.log(data, "data");
 					addCodes({
 						generatedCode: aggregatedCode,
 						codes: data.linkedCodes.map((code: string) => code.value),

@@ -5,10 +5,10 @@ if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
-if ! [ -x "$(command -v docker compose)" ]; then
+docker compose version >/dev/null 2>&1 || {
     echo 'Error: docker compose is not installed.' >&2
     exit 1
-fi
+}
 
 domains=(${APP_DOMAIN:-example.com})
 rsa_key_size=4096

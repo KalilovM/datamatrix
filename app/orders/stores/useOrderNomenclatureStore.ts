@@ -48,8 +48,6 @@ export const useOrderNomenclatureStore = create<IOrderNomenclatureStore>(
 		resetRows: () => set({ rows: [] }),
 		updatePreparedOrders: (codes) => {
 			set((state) => {
-				console.log("hello", state.rows)
-				console.log("hello2", codes)
 				const newRows = state.rows.map((row) => {
 					if (row.nomenclature?.value) {
 						const numberOfPreparedOrders = codes

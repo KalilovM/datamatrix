@@ -1,11 +1,11 @@
-import type { ICounteragentOption } from "@/orders/create/definitions";
-import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
-import { useOrderStore } from "@/orders/stores/useOrderStore";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import type { ICounteragentOption } from "@/orders/create/definitions";
+import { useOrderNomenclatureStore } from "@/orders/stores/useOrderNomenclatureStore";
+import { useOrderStore } from "@/orders/stores/useOrderStore";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -29,7 +29,8 @@ export default function OrderCreationSelectors({
 			value: option.id,
 		})),
 	);
-	const { reset, addCodes, codes, getGeneratedCodes } = useOrderStore();
+	const { reset, addCodes, codes, getGeneratedCodes, isCodeExists } =
+		useOrderStore();
 	const { rows, resetRows, updatePreparedOrders } = useOrderNomenclatureStore();
 	const [generatedCode, setGeneratedCode] = useState("");
 	const [selectedCounteragent, setSelectedCounteragent] = useState<{
@@ -64,7 +65,11 @@ export default function OrderCreationSelectors({
 			const data = await response.json();
 			if (!response.ok) {
 				toast.error(data.error);
+			} else if (isCodeExists(aggregatedCode)) {
+				toast.error("Код уже загружен!");
 			} else {
+				console.log(isCodeExists(aggregatedCode));
+				console.log(aggregatedCode);
 				toast.success("Код успешно загружен!");
 				addCodes({
 					generatedCode: aggregatedCode,
@@ -87,7 +92,11 @@ export default function OrderCreationSelectors({
 				const data = await response.json();
 				if (!response.ok) {
 					toast.error(data.error);
+				} else if (isCodeExists(aggregatedCode)) {
+					toast.error("Код уже загружен!");
 				} else {
+					console.log(isCodeExists(aggregatedCode));
+					console.log(aggregatedCode);
 					toast.success("Коды успешно загружены!");
 					addCodes({
 						generatedCode: aggregatedCode,
@@ -168,13 +177,13 @@ export default function OrderCreationSelectors({
 	};
 
 	return (
-		<div className="gap-4 flex flex-col">
+		<div className="flex flex-col gap-4">
 			<div className="flex items-center justify-between">
-				<h1 className="leading-6 text-xl font-bold">Новый Заказ</h1>
+				<h1 className="text-xl font-bold leading-6">Новый Заказ</h1>
 				<div className="flex items-center justify-center gap-2">
 					<Link
 						href="/orders"
-						className="bg-gray-500 text-white px-4 py-2 rounded-md self-start"
+						className="self-start px-4 py-2 text-white bg-gray-500 rounded-md"
 					>
 						Отмена
 					</Link>
@@ -187,10 +196,10 @@ export default function OrderCreationSelectors({
 					</button>
 				</div>
 			</div>
-			<div className="flex flex-col w-full rounded-lg border border-blue-300 bg-white px-8 py-3 justify-between items-center gap-4">
+			<div className="flex flex-col items-center justify-between w-full gap-4 px-8 py-3 bg-white border border-blue-300 rounded-lg">
 				<div className="flex flex-row w-full gap-4">
 					{activeTab === 1 && (
-						<div className="w-1/2 flex flex-col">
+						<div className="flex flex-col w-1/2">
 							<label htmlFor="nomenclature" className="block">
 								Контрагент
 							</label>
@@ -207,7 +216,7 @@ export default function OrderCreationSelectors({
 						</div>
 					)}
 					{activeTab === 2 && (
-						<div className="w-1/2 flex flex-col">
+						<div className="flex flex-col w-1/2">
 							<label htmlFor="configuration" className="block">
 								Отсканируйте код
 							</label>
