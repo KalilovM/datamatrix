@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/app/shared/lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 
 /**
  * Health Check Endpoint
