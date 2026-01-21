@@ -1,6 +1,9 @@
-import CounteragentEditForm from "@/components/counteragents/CounteagentEditForm";
+import CounteragentEditForm from "@/components/counteragents/CounteragentEditForm";
 import Layout from "@/shared/ui/Layout";
 import { getCounteragentById } from "./actions";
+
+// Force dynamic rendering - don't prerender at build time
+export const dynamic = "force-dynamic";
 
 export default async function Page({
 	params,
