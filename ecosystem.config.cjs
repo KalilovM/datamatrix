@@ -81,7 +81,7 @@ module.exports = {
       repo: "git@github.com:your-username/datamatrix.git",
       path: "/var/www/datamatrix",
       "pre-deploy-local": "",
-      "post-deploy": "npm ci && npm run prod:build && pm2 reload ecosystem.config.cjs --env production",
+      "post-deploy": "npm ci && export $(cat /etc/datamatrix/.env | xargs) && npm run prod:build && pm2 reload ecosystem.config.cjs --env production",
       "pre-setup": "",
     },
   },

@@ -3,6 +3,10 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
+	// Ensure we use the correct base URL in production
+	...(process.env.NEXTAUTH_URL && {
+		url: process.env.NEXTAUTH_URL
+	}),
 	providers: [
 		CredentialsProvider({
 			name: "Credentials",
@@ -59,8 +63,20 @@ export const authOptions: NextAuthOptions = {
 			session.user.email = token.email as string;
 			return session;
 		},
-		async redirect({ baseUrl }) {
-			return `${baseUrl}/companies`;
+		async redirect({ url, baseUrl }) {
+			// Use NEXTAUTH_URL if available, otherwise fall back to baseUrl
+			const redirectBaseUrl = process.env.NEXTAUTH_URL || baseUrl;
+
+			// If url is relative, prepend baseUrl
+			if (url.startsWith("/")) {
+				return `${redirectBaseUrl}${url}`;
+			}
+			// If url already starts with baseUrl, return it
+			if (url.startsWith(redirectBaseUrl)) {
+				return url;
+			}
+			// Default redirect to companies page
+			return `${redirectBaseUrl}/companies`;
 		},
 	},
 	session: { strategy: "jwt" },
