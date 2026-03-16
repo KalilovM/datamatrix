@@ -81,6 +81,12 @@ check_requirements() {
 }
 
 load_env() {
+    # Normalize potential CRLF line endings (common when edited from Windows)
+    if grep -q $'\r' "$ENV_FILE"; then
+        log_warn "Detected CRLF in $ENV_FILE, normalizing to LF"
+        sed -i 's/\r$//' "$ENV_FILE"
+    fi
+
     set -a
     # shellcheck disable=SC1090
     source "$ENV_FILE"
