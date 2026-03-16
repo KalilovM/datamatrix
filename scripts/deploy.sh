@@ -71,6 +71,13 @@ check_requirements() {
         log_error "PM2 not found. Install with: npm install -g pm2"
         exit 1
     fi
+
+    local owner
+    owner="$(stat -c '%U' "$APP_DIR" 2>/dev/null || echo unknown)"
+    if [ "$owner" != "$(whoami)" ]; then
+        log_warn "${APP_DIR} owner is '$owner' (current user: $(whoami))."
+        log_warn "If deploy fails, run as root: chown -R $(whoami):$(whoami) $APP_DIR"
+    fi
 }
 
 load_env() {
@@ -101,6 +108,9 @@ backup_current() {
 pull_latest() {
     log_info "Pulling latest code..."
     cd "$APP_DIR"
+
+    # Mark repository as safe for current user to avoid 'dubious ownership' blocks
+    git config --global --add safe.directory "$APP_DIR" || true
 
     # Stash any local changes
     git stash --quiet || true
