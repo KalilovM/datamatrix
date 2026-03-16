@@ -1,16 +1,21 @@
 "use client";
 
 import type {
-	NomenclatureOption,
 	PrintTemplate,
 } from "@/aggregation/model/types";
 import { usePrintStore } from "@/shared/store/printStore";
 import { useEffect } from "react";
 import BarcodeComponent from "../BarcodeComponent";
 
+type PrintableNomenclature = {
+	name?: string | null;
+	modelArticle?: string | null;
+	color?: string | null;
+};
+
 interface Props {
-	printTemplate: PrintTemplate;
-	selectedNomenclature: NomenclatureOption | null;
+	printTemplate: PrintTemplate | null | undefined;
+	selectedNomenclature: PrintableNomenclature | null;
 }
 
 const PrintCodes: React.FC<Props> = ({
@@ -27,8 +32,12 @@ const PrintCodes: React.FC<Props> = ({
 		}
 	}, [shouldPrint, resetPrint]);
 
+	if (!printTemplate) {
+		return null;
+	}
+
 	const getFieldValue = (
-		nomenclature: NomenclatureOption,
+		nomenclature: PrintableNomenclature,
 		fieldType: string,
 	) => {
 		switch (fieldType) {

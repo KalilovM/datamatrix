@@ -11,6 +11,11 @@ import type { NextConfig } from "next";
  */
 
 const nextConfig: NextConfig = {
+  // Bypass ESLint during build (requested)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // React strict mode for development best practices
   reactStrictMode: true,
 
