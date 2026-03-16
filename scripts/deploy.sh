@@ -87,6 +87,30 @@ load_env() {
     set +a
 }
 
+check_database_connection() {
+    log_info "Checking database connection from DATABASE_URL..."
+    load_env
+
+    if [ -z "${DATABASE_URL:-}" ]; then
+        log_error "DATABASE_URL is empty in $ENV_FILE"
+        exit 1
+    fi
+
+    if ! command -v psql &> /dev/null; then
+        log_warn "psql is not installed; skipping preflight DB connectivity check"
+        return 0
+    fi
+
+    if ! psql "$DATABASE_URL" -c "SELECT 1;" >/dev/null 2>&1; then
+        log_error "Failed to connect to PostgreSQL using DATABASE_URL from $ENV_FILE"
+        log_error "If password contains special URL characters, URL-encode it in DATABASE_URL"
+        log_error "Then retry deployment"
+        exit 1
+    fi
+
+    log_info "Database connection check passed"
+}
+
 backup_current() {
     log_info "Creating backup..."
 
@@ -242,6 +266,7 @@ main() {
     backup_current
     pull_latest
     install_dependencies
+    check_database_connection
     run_migrations
     build_app
     copy_static_files
