@@ -71,10 +71,10 @@ export default function OrderNomenclatures() {
 	const options: NomenclatureOption[] = (nomenclatures ?? [])
 		.slice() // copy to avoid mutating original
 		.sort((a, b) =>
-		(a.modelArticle ?? "").toString().toLowerCase() >
-		(b.modelArticle ?? "").toString().toLowerCase()
-			? 1
-			: -1
+			(a.modelArticle ?? "").toString().toLowerCase() >
+				(b.modelArticle ?? "").toString().toLowerCase()
+				? 1
+				: -1
 		)
 		.map((n) => ({
 			id: n.id,
@@ -83,7 +83,7 @@ export default function OrderNomenclatures() {
 			label: `${n.modelArticle} - ${n.color ?? ""}`,
 			// keep raw metadata for rendering
 			meta: n,
-    }));
+		}));
 
 	const totalOrdered = rows.reduce(
 		(sum, row) => sum + Number(row.numberOfOrders || 0),
@@ -126,23 +126,23 @@ export default function OrderNomenclatures() {
 										placeholder="Номенклатура"
 										value={row.nomenclature as NomenclatureOption | null}
 										formatOptionLabel={(option) => {
-												const color = option.meta?.color ?? "";
-												return (
-													<div className="flex items-center gap-2">
+											const color = option.meta?.color ?? "";
+											return (
+												<div className="flex items-center gap-2">
 													<div
 														style={{
-														width: 12,
-														height: 12,
-														borderRadius: 3,
-														border: "1px solid rgba(0,0,0,0.12)",
-														background: color || "transparent",
+															width: 12,
+															height: 12,
+															borderRadius: 3,
+															border: "1px solid rgba(0,0,0,0.12)",
+															background: color || "transparent",
 														}}
 														aria-hidden
 													/>
 													<span>{option.label}</span>
-													</div>
-												);
-											}}
+												</div>
+											);
+										}}
 									/>
 								</td>
 								<td className="px-6 py-3">

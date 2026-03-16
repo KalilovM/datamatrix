@@ -301,10 +301,10 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 			<div className="w-full h-full">
 				<PrintingPreview
 					textFields={fields.map((f) => ({
-								field:
-									(printRenamings[
-										f.fieldType as keyof typeof printRenamings
-									] ?? "name") as "name" | "modelArticle" | "color" | "size",
+						field:
+							(printRenamings[
+								f.fieldType as keyof typeof printRenamings
+							] ?? "name") as "name" | "modelArticle" | "color" | "size",
 						bold: f.isBold,
 						size: f.fontSize,
 					}))}

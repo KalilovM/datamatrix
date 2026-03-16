@@ -106,8 +106,8 @@ export default function OrderCreationForm({
 						type="button"
 						onClick={() => setActiveTab(1)}
 						className={`inline-block px-4 py-3 rounded-lg ${activeTab === 1
-								? "text-white bg-blue-600"
-								: "hover:text-gray-900 hover:bg-gray-100"
+							? "text-white bg-blue-600"
+							: "hover:text-gray-900 hover:bg-gray-100"
 							}`}
 					>
 						Шаг 1
@@ -118,8 +118,8 @@ export default function OrderCreationForm({
 						type="button"
 						onClick={() => setActiveTab(2)}
 						className={`inline-block px-4 py-3 rounded-lg ${activeTab === 2
-								? "text-white bg-blue-600"
-								: "hover:text-gray-900 hover:bg-gray-100"
+							? "text-white bg-blue-600"
+							: "hover:text-gray-900 hover:bg-gray-100"
 							}`}
 					>
 						Шаг 2

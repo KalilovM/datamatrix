@@ -44,9 +44,8 @@ export default function UserCreateForm({ companies }: UserCreateFormProps) {
               name="email"
               type="email"
               required
-              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${
-                state?.errors?.email ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${state?.errors?.email ? "border-red-500" : "border-gray-300"
+                }`}
             />
             {state?.errors?.email && (
               <p className="mt-1 text-sm text-red-500">
@@ -65,9 +64,8 @@ export default function UserCreateForm({ companies }: UserCreateFormProps) {
               name="username"
               type="text"
               required
-              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${
-                state?.errors?.username ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${state?.errors?.username ? "border-red-500" : "border-gray-300"
+                }`}
             />
             {state?.errors?.username && (
               <p className="mt-1 text-sm text-red-500">
@@ -90,9 +88,8 @@ export default function UserCreateForm({ companies }: UserCreateFormProps) {
               name="password"
               type="password"
               required
-              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${
-                state?.errors?.password ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${state?.errors?.password ? "border-red-500" : "border-gray-300"
+                }`}
             />
             {state?.errors?.password && (
               <p className="mt-1 text-sm text-red-500">
@@ -110,9 +107,8 @@ export default function UserCreateForm({ companies }: UserCreateFormProps) {
             <select
               name="role"
               required
-              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${
-                state?.errors?.role ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${state?.errors?.role ? "border-red-500" : "border-gray-300"
+                }`}
             >
               <option value="">Выберите роль</option>
               <option value="ADMIN">Администратор</option>

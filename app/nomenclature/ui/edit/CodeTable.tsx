@@ -128,14 +128,14 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate">
 											{file.createdAt
 												? new Date(file.createdAt)
-														.toLocaleDateString("ru-RU", {
-															year: "numeric",
-															month: "2-digit",
-															day: "2-digit",
-															hour: "2-digit",
-															minute: "2-digit",
-														})
-														.replace(",", "")
+													.toLocaleDateString("ru-RU", {
+														year: "numeric",
+														month: "2-digit",
+														day: "2-digit",
+														hour: "2-digit",
+														minute: "2-digit",
+													})
+													.replace(",", "")
 												: ""}
 										</td>
 										<td className="px-6 py-4 font-medium justify-start items-center text-gray-900 whitespace-nowrap truncate">

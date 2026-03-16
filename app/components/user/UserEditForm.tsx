@@ -65,9 +65,8 @@ export default function UserEditForm({ user, companies }: UserEditFormProps) {
               type="email"
               defaultValue={user.email}
               required
-              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${
-                state?.errors?.email ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${state?.errors?.email ? "border-red-500" : "border-gray-300"
+                }`}
             />
             {state?.errors?.email && (
               <p className="mt-1 text-sm text-red-500">
@@ -87,9 +86,8 @@ export default function UserEditForm({ user, companies }: UserEditFormProps) {
               type="text"
               defaultValue={user.username}
               required
-              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${
-                state?.errors?.username ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${state?.errors?.username ? "border-red-500" : "border-gray-300"
+                }`}
             />
             {state?.errors?.username && (
               <p className="mt-1 text-sm text-red-500">
@@ -112,9 +110,8 @@ export default function UserEditForm({ user, companies }: UserEditFormProps) {
               name="role"
               defaultValue={user.role}
               required
-              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${
-                state?.errors?.role ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${state?.errors?.role ? "border-red-500" : "border-gray-300"
+                }`}
             >
               <option value="">Выберите роль</option>
               <option value="ADMIN">Администратор</option>
@@ -139,9 +136,8 @@ export default function UserEditForm({ user, companies }: UserEditFormProps) {
               name="password"
               type="password"
               placeholder="Введите новый пароль"
-              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${
-                state?.errors?.password ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-gray-700 ${state?.errors?.password ? "border-red-500" : "border-gray-300"
+                }`}
             />
             {state?.errors?.password && (
               <p className="mt-1 text-sm text-red-500">
@@ -163,11 +159,11 @@ export default function UserEditForm({ user, companies }: UserEditFormProps) {
             defaultValue={
               user.companyId
                 ? {
-                    value: user.companyId,
-                    label:
-                      companies.find((company) => company.id === user.companyId)
-                        ?.name || "",
-                  }
+                  value: user.companyId,
+                  label:
+                    companies.find((company) => company.id === user.companyId)
+                      ?.name || "",
+                }
                 : null
             }
             options={companies.map((company) => ({

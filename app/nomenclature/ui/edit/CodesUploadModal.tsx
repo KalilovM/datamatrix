@@ -189,8 +189,8 @@ export default function CodesUploadModal({
 						disabled={!selectedFile || !sizeInput.trim()}
 						onClick={handleUpload}
 						className={`mt-4 w-full rounded-md px-4 py-2 text-white ${!selectedFile || !sizeInput.trim()
-								? "cursor-not-allowed bg-gray-400"
-								: "bg-blue-600 hover:bg-blue-700"
+							? "cursor-not-allowed bg-gray-400"
+							: "bg-blue-600 hover:bg-blue-700"
 							}`}
 					>
 						Загрузить

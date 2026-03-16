@@ -101,11 +101,10 @@ export default function SizeGtinUploadModal({
 							type="button"
 							onClick={handleSubmit}
 							disabled={!gtin.trim() || Number.parseInt(size) <= 0}
-							className={`px-4 py-2 rounded-md text-white ${
-								!gtin.trim() || Number.parseInt(size) <= 0
+							className={`px-4 py-2 rounded-md text-white ${!gtin.trim() || Number.parseInt(size) <= 0
 									? "bg-blue-300 cursor-not-allowed"
 									: "bg-blue-500"
-							}`}
+								}`}
 						>
 							{gtinSize ? "Сохранить" : "Добавить"}
 						</button>

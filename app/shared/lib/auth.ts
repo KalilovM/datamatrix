@@ -64,19 +64,16 @@ export const authOptions: NextAuthOptions = {
 			return session;
 		},
 		async redirect({ url, baseUrl }) {
-			// Use NEXTAUTH_URL if available, otherwise fall back to baseUrl
-			const redirectBaseUrl = process.env.NEXTAUTH_URL || baseUrl;
-
-			// If url is relative, prepend baseUrl
+			// If url is relative, prepend current baseUrl
 			if (url.startsWith("/")) {
-				return `${redirectBaseUrl}${url}`;
+				return `${baseUrl}${url}`;
 			}
-			// If url already starts with baseUrl, return it
-			if (url.startsWith(redirectBaseUrl)) {
+			// If url already matches current baseUrl, return it
+			if (url.startsWith(baseUrl)) {
 				return url;
 			}
 			// Default redirect to companies page
-			return `${redirectBaseUrl}/companies`;
+			return `${baseUrl}/companies`;
 		},
 	},
 	session: { strategy: "jwt" },

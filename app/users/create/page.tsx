@@ -14,13 +14,13 @@ export default function Page() {
     return <Layout>Произошла ошибка: {error?.message}</Layout>;
   }
 
-	if (!companies) {
-		return <Layout>Нет данных компаний</Layout>;
-	}
+  if (!companies) {
+    return <Layout>Нет данных компаний</Layout>;
+  }
 
-	return (
-		<Layout>
-			<UserCreateForm companies={companies} />
-		</Layout>
-	);
+  return (
+    <Layout>
+      <UserCreateForm companies={companies} />
+    </Layout>
+  );
 }
