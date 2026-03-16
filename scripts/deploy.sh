@@ -48,7 +48,7 @@ check_requirements() {
 
     if [ ! -f "$ENV_FILE" ]; then
         log_error "Environment file not found: $ENV_FILE"
-        log_error "Create it from .env.prod.example"
+        log_error "Create it from .env.example (or run scripts/vps-setup.sh to generate it automatically)"
         exit 1
     fi
 

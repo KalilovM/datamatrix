@@ -5,7 +5,7 @@ Production-ready Next.js + Prisma app with VPS deployment scripts (PM2 + Nginx +
 ## Local development
 
 1. Copy env file:
-	- `.env.local.example` -> `.env.local`
+	- `.env.example` -> `.env.local`
 2. Install dependencies:
 	- `npm ci`
 3. Run app:
@@ -29,6 +29,8 @@ This script configures:
 - UFW + fail2ban + logrotate
 - `/etc/datamatrix/.env` with generated secrets
 
+Note: production env variables are generated automatically by `scripts/vps-setup.sh` into `/etc/datamatrix/.env`.
+
 ### 2) Deploy app updates (run as deploy user)
 
 - `bash scripts/deploy.sh`
@@ -46,4 +48,4 @@ This script:
 - `scripts/vps-setup.sh` - one-time server bootstrap
 - `scripts/deploy.sh` - repeatable deployment
 - `ecosystem.config.cjs` - PM2 process config
-- `.env.prod.example` - production env template
+- `.env.example` - single env template for local + production reference
