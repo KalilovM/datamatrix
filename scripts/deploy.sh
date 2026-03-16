@@ -107,9 +107,15 @@ check_database_connection() {
         return 0
     fi
 
+    # Prisma DATABASE_URL may include ?schema=public, but psql doesn't support this URI param.
+    # Strip query params for psql preflight check only.
+    local psql_url
+    psql_url="${DATABASE_URL%%\?*}"
+
     local db_check_output
-    if ! db_check_output="$(psql "$DATABASE_URL" -c "SELECT 1;" 2>&1)"; then
+    if ! db_check_output="$(psql "$psql_url" -c "SELECT 1;" 2>&1)"; then
         log_error "Failed to connect to PostgreSQL using DATABASE_URL from $ENV_FILE"
+        log_error "psql test URL (query removed): ${psql_url}"
         log_error "psql output: ${db_check_output}"
         log_error "If password contains special URL characters, URL-encode it in DATABASE_URL"
         log_error "Then retry deployment"
