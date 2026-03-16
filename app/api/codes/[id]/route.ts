@@ -1,7 +1,8 @@
 import { prisma } from "@/shared/lib/prisma";
+import { NextResponse } from "next/server";
 
-export default async function GET(
-	req: Request,
+export async function GET(
+	_req: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const { id } = await params;
@@ -17,7 +18,6 @@ export default async function GET(
 				select: {
 					name: true,
 					modelArticle: true,
-					size: true,
 					color: true,
 				},
 			},
@@ -26,4 +26,6 @@ export default async function GET(
 	if (!generatedCode) {
 		return new Response(null, { status: 404 });
 	}
+
+	return NextResponse.json(generatedCode);
 }

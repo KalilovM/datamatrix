@@ -32,7 +32,7 @@ export default function AggregationSelectors({
 	}, [reset]);
 
 	const { data: fetchedConfigurations } = useConfigurations(
-		selectedNomenclature?.id || null,
+		selectedNomenclature?.id ?? "",
 	);
 
 	useEffect(() => {
@@ -52,18 +52,24 @@ export default function AggregationSelectors({
 	}));
 
 	const handleNomenclatureChange = (
-		option: { label: string; value: NomenclatureOption } | null,
+		option: unknown,
 	) => {
-		setSelectedNomenclature(option ? option.value : null);
+		const selected = option as
+			| { label: string; value: NomenclatureOption }
+			| null;
+		setSelectedNomenclature(selected ? selected.value : null);
 		queryClient.invalidateQueries({
 			queryKey: ["configurations", selectedNomenclature?.id],
 		});
 	};
 
 	const handleConfigurationChange = (
-		option: { label: string; value: AggregationConfig } | null,
+		option: unknown,
 	) => {
-		setSelectedConfiguration(option ? option.value : null);
+		const selected = option as
+			| { label: string; value: AggregationConfig }
+			| null;
+		setSelectedConfiguration(selected ? selected.value : null);
 	};
 
 	return (
@@ -81,9 +87,9 @@ export default function AggregationSelectors({
 						value={
 							selectedNomenclature
 								? {
-										label: selectedNomenclature.modelArticle,
-										value: selectedNomenclature,
-									}
+									label: selectedNomenclature.modelArticle,
+									value: selectedNomenclature,
+								}
 								: null
 						}
 						placeholder="Выберите номенклатуру"
@@ -98,9 +104,9 @@ export default function AggregationSelectors({
 						value={
 							selectedConfiguration
 								? {
-										label: `1-${selectedConfiguration.pieceInPack}-${selectedConfiguration.packInPallet}`,
-										value: selectedConfiguration,
-									}
+									label: `1-${selectedConfiguration.pieceInPack}-${selectedConfiguration.packInPallet}`,
+									value: selectedConfiguration,
+								}
 								: null
 						}
 						placeholder="Выберите конфигурацию"

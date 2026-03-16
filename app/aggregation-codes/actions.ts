@@ -37,7 +37,11 @@ export async function getAggregatedCodes() {
 					color: true,
 					codePacks: {
 						select: {
-							size: true,
+							sizeGtin: {
+								select: {
+									size: true,
+								},
+							},
 						},
 					},
 				},
@@ -57,7 +61,11 @@ export async function getAggregatedCodes() {
 					color: true,
 					codePacks: {
 						select: {
-							size: true,
+							sizeGtin: {
+								select: {
+									size: true,
+								},
+							},
 						},
 					},
 				},
@@ -71,13 +79,13 @@ export async function getAggregatedCodes() {
 		name: pack.nomenclature.name,
 		modelArticle: pack.nomenclature.modelArticle,
 		size: pack.nomenclature.codePacks
-			.map((codePack) => codePack.size)
+			.map((codePack) => codePack.sizeGtin?.size)
+			.filter((size): size is number => typeof size === "number")
 			.join(", "),
 		color: pack.nomenclature.color,
 		generatedCode: pack.value,
-		configuration: `1-${pack.configuration.pieceInPack}-${
-			pack.configuration.packInPallet
-		}`,
+		configuration: `1-${pack.configuration.pieceInPack}-${pack.configuration.packInPallet
+			}`,
 		codes: pack.codes.map((code) => code.value),
 		type: "Пачка",
 		createdAt: pack.createdAt,
@@ -88,13 +96,13 @@ export async function getAggregatedCodes() {
 		name: pallet.nomenclature.name,
 		modelArticle: pallet.nomenclature.modelArticle,
 		size: pallet.nomenclature.codePacks
-			.map((codePack) => codePack.size)
+			.map((codePack) => codePack.sizeGtin?.size)
+			.filter((size): size is number => typeof size === "number")
 			.join(", "),
 		color: pallet.nomenclature.color,
 		generatedCode: pallet.value,
-		configuration: `1-${pallet.configuration.pieceInPack}-${
-			pallet.configuration.packInPallet
-		}`,
+		configuration: `1-${pallet.configuration.pieceInPack}-${pallet.configuration.packInPallet
+			}`,
 		type: "Паллет",
 		createdAt: pallet.createdAt,
 	}));

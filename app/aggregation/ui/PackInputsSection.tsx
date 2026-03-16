@@ -16,6 +16,7 @@ export default function PackInputsSection() {
 	const lastGeneratedCode = pages[currentPage]?.uniqueCode;
 	const printSize = pages[currentPage]?.size;
 	const handlePrint = () => {
+		if (!lastGeneratedCode || !printSize) return;
 		setPrintCodes([lastGeneratedCode]);
 		setSize(printSize);
 		triggerPrint();

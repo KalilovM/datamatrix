@@ -30,7 +30,7 @@ export interface PrintTemplate {
 		fieldType: "NAME" | "MODEL_ARTICLE" | "COLOR" | "SIZE";
 		isBold: boolean;
 		fontSize: number;
-	};
+	}[];
 }
 
 export interface GeneratedCodePack {

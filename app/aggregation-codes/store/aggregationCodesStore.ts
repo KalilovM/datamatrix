@@ -1,11 +1,11 @@
 "use client";
 
-import type { Nomenclature } from "@prisma/client";
+import type { IAggregatedCode } from "../definitions";
 import { create } from "zustand";
 
 interface PrintState {
-	nomenclature: Nomenclature | null;
-	setNomenclature: (nomenclature: Nomenclature) => void;
+	nomenclature: IAggregatedCode | null;
+	setNomenclature: (nomenclature: IAggregatedCode) => void;
 }
 
 export const useAggregationCodesStore = create<PrintState>((set) => ({

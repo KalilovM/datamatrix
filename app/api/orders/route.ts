@@ -3,6 +3,20 @@ import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+type OrderRowInput = {
+	nomenclature: {
+		value: string;
+	};
+	numberOfOrders: string;
+	numberOfPreparedOrders: string;
+};
+
+type CreateOrderPayload = {
+	counteragentId: string;
+	generatedCodePacks: string[];
+	rows: OrderRowInput[];
+};
+
 function normalizeScannerInput(raw: string): string {
 	const GS = String.fromCharCode(29); // ASCII 29
 	return `�${raw.split(GS).join("\x1D")}`; // insert raw ASCII 29 back
@@ -111,7 +125,7 @@ export async function POST(req: Request) {
 		counteragentId,
 		generatedCodePacks: allCodePacks,
 		rows,
-	} = await req.json();
+	} = (await req.json()) as CreateOrderPayload;
 	const isUUID = (str: string) =>
 		/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 

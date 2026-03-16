@@ -1,21 +1,21 @@
-import type { IAggregatedCode, Filters } from "@/app/aggregation-codes/definitions";
+import type { IAggregatedCode, Filters } from "@/aggregation-codes/definitions";
 import { useEffect, useState } from "react";
 import { FilterIcon, SearchIcon, CloseIcon } from "../Icons";
 import AggregationCodesRow from "./AggregationCodesRow";
 
 interface Props {
-        aggregatedCodes: IAggregatedCode[];
-        filters: Filters;
-        onApply: (filters: Filters) => void;
+	aggregatedCodes: IAggregatedCode[];
+	filters: Filters;
+	onApply: (filters: Filters) => void;
 }
 
 export default function TableContent({ aggregatedCodes, filters, onApply }: Props) {
-        const [tempFilters, setTempFilters] = useState(filters);
-        const [showFilters, setShowFilters] = useState(false);
+	const [tempFilters, setTempFilters] = useState(filters);
+	const [showFilters, setShowFilters] = useState(false);
 
-        useEffect(() => {
-                setTempFilters(filters); // keep in sync when global filters change externally
-        }, [filters]);
+	useEffect(() => {
+		setTempFilters(filters); // keep in sync when global filters change externally
+	}, [filters]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setTempFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));

@@ -1,8 +1,15 @@
 import { prisma } from "@/shared/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 
+interface GeneratePackCodePayload {
+	packCodes: string[];
+	nomenclatureId: string;
+	configurationId: string;
+}
+
 export async function POST(req: Request) {
-	const { packCodes, nomenclatureId, configurationId } = await req.json();
+	const { packCodes, nomenclatureId, configurationId } =
+		(await req.json()) as GeneratePackCodePayload;
 
 	const formattedValue = packCodes.map((code) =>
 		code.replace(/[^a-zA-Z0-9+=_]/g, ""),

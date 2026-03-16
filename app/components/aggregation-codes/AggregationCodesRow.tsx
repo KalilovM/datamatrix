@@ -1,16 +1,14 @@
 "use client";
 
 import { useAggregationCodesStore } from "@/aggregation-codes/store/aggregationCodesStore";
-import type { IAggregatedCode } from "@/app/aggregation-codes/definitions";
+import type { IAggregatedCode } from "@/aggregation-codes/definitions";
 import { usePrintStore } from "@/shared/store/printStore";
-import type { PrintingTemplate } from "@prisma/client";
 import { PrintIcon } from "../Icons";
 
 export default function AggregationCodesRow({
 	aggregatedCodes,
 }: {
 	aggregatedCodes: IAggregatedCode[];
-	defaultTemplate: PrintingTemplate | null | never[];
 }) {
 	const { triggerPrint, setPrintCodes, setSize } = usePrintStore();
 	const { setNomenclature } = useAggregationCodesStore();

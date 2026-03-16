@@ -56,7 +56,10 @@ export async function GET() {
 		}
 		const translatedUsers = users.map((user) => ({
 			...user,
-			role: ROLE_TRANSLATIONS[user.role] || "Неизвестная роль",
+			role:
+				typeof user.role === "string"
+					? (ROLE_TRANSLATIONS[user.role] ?? "Неизвестная роль")
+					: "Неизвестная роль",
 		}));
 
 		return NextResponse.json(translatedUsers, { status: 200 });

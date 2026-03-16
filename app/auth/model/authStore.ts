@@ -21,8 +21,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
 
       if (res?.error) throw new Error(res.error);
-    } catch (error) {
-      set({ error: error.message });
+    } catch (error: unknown) {
+      set({ error: error instanceof Error ? error.message : "Ошибка входа" });
     } finally {
       set({ loading: false });
     }

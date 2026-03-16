@@ -1,48 +1,20 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import AggregationSelectors from "../../app/aggregation/components/AggregationSelectors";
-import PackInputsSection from "./PackInputsSection";
-import { NomenclatureOption, Configuration } from "./definitions";
+import type { NomenclatureOption } from "@/aggregation/model/types";
+import AggregationSelectors from "@/aggregation/ui/AggregationSelectors";
+import PackInputsSection from "@/aggregation/ui/PackInputsSection";
 
 interface AggregationFormProps {
-  options: NomenclatureOption[] | null;
+  options: NomenclatureOption[];
 }
 
 const AggregationForm: React.FC<AggregationFormProps> = ({ options }) => {
-  const [selectedConfiguration, setSelectedConfiguration] =
-    useState<Configuration | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 5;
-
-  const handleConfigurationSelect = useCallback(
-    (
-      config: {
-        pieceInPack: number;
-        packInPallet: number;
-        id: string;
-        nomenclatureId: string;
-      } | null,
-    ) => {
-      setSelectedConfiguration(config);
-    },
-    [],
-  );
-
   return (
     <div className="flex flex-col w-full h-full gap-4">
-      <AggregationSelectors
-        options={options}
-        onConfigurationSelect={handleConfigurationSelect}
-      />
+      <AggregationSelectors options={options} />
       <div className="flex flex-row w-full gap-4 h-full">
         <div className="w-1/2">
-          <PackInputsSection
-            selectedConfiguration={selectedConfiguration}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
+          <PackInputsSection />
         </div>
         <div className="w-1/2">
           <div className="table-layout">

@@ -67,6 +67,7 @@ export function usePackGeneration() {
 						const newPage = {
 							packValues: Array(selectedConfiguration!.pieceInPack).fill(""),
 							uniqueCode: null,
+							size: null,
 						};
 
 						const updatedPages = [...pages, newPage];

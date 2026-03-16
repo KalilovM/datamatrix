@@ -1,5 +1,39 @@
 import { prisma } from "@/shared/lib/prisma";
+import type { TemplateFieldType } from "@prisma/client";
 import { NextResponse } from "next/server";
+
+type PrintTemplateFieldInput = {
+	id?: string;
+	fieldType: string;
+	isBold: boolean;
+	fontSize: number;
+	order: number;
+};
+
+type UpdatePrintTemplatePayload = {
+	name: string;
+	type: "AGGREGATION" | "NOMENCLATURE";
+	qrType: "QR" | "DATAMATRIX";
+	qrPosition: "LEFT" | "RIGHT" | "CENTER";
+	canvasSize: {
+		width: number;
+		height: number;
+	};
+	fields: PrintTemplateFieldInput[];
+};
+
+const toTemplateFieldType = (value: string): TemplateFieldType => {
+	const normalized = value.toUpperCase();
+	if (
+		normalized === "NAME" ||
+		normalized === "MODEL_ARTICLE" ||
+		normalized === "COLOR" ||
+		normalized === "SIZE"
+	) {
+		return normalized;
+	}
+	throw new Error(`Unsupported fieldType: ${value}`);
+};
 
 export async function GET(
 	req: Request,
@@ -42,7 +76,7 @@ export async function PUT(
 		qrPosition,
 		canvasSize: { width, height },
 		fields,
-	} = await req.json();
+	} = (await req.json()) as UpdatePrintTemplatePayload;
 	const { id } = await params;
 
 	// Filter out fields with empty fieldType.
@@ -54,13 +88,13 @@ export async function PUT(
 		.map((field) => ({
 			where: { id: field.id },
 			update: {
-				fieldType: field.fieldType.toUpperCase(),
+				fieldType: toTemplateFieldType(field.fieldType),
 				isBold: field.isBold,
 				fontSize: field.fontSize,
 				order: field.order,
 			},
 			create: {
-				fieldType: field.fieldType.toUpperCase(),
+				fieldType: toTemplateFieldType(field.fieldType),
 				isBold: field.isBold,
 				fontSize: field.fontSize,
 				order: field.order,
@@ -71,7 +105,7 @@ export async function PUT(
 	const createOperations = filteredFields
 		.filter((field) => !field.id || field.id === "")
 		.map((field) => ({
-			fieldType: field.fieldType.toUpperCase(),
+			fieldType: toTemplateFieldType(field.fieldType),
 			isBold: field.isBold,
 			fontSize: field.fontSize,
 			order: field.order,

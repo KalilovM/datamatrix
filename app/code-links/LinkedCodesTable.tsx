@@ -38,7 +38,7 @@ export default function LinkedCodesTable({
 		const chosenTemplate = isUuid4 ? aggPrintTemplate : nomPrintTemplate;
 
 		if (chosenTemplate) {
-			setTemplate(chosenTemplate);
+			setTemplate?.(chosenTemplate);
 		}
 
 		// now push the code(s) and size as before

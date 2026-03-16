@@ -84,9 +84,8 @@ export default function CompanyCreateForm({ users }: Props) {
 						<input
 							{...register("name")}
 							type="text"
-							className={`w-full rounded-lg border px-3 py-2 ${
-								errors.name ? "border-red-500" : "border-gray-300"
-							}`}
+							className={`w-full rounded-lg border px-3 py-2 ${errors.name ? "border-red-500" : "border-gray-300"
+								}`}
 						/>
 						{errors.name && (
 							<p className="text-sm text-red-500">{errors.name.message}</p>
@@ -99,9 +98,8 @@ export default function CompanyCreateForm({ users }: Props) {
 						<input
 							{...register("subscriptionEnd")}
 							type="date"
-							className={`w-full rounded-lg border px-3 py-2 ${
-								errors.subscriptionEnd ? "border-red-500" : "border-gray-300"
-							}`}
+							className={`w-full rounded-lg border px-3 py-2 ${errors.subscriptionEnd ? "border-red-500" : "border-gray-300"
+								}`}
 						/>
 						{errors.subscriptionEnd && (
 							<p className="text-sm text-red-500">
@@ -138,9 +136,12 @@ export default function CompanyCreateForm({ users }: Props) {
 									value={users
 										.filter((user) => field.value.includes(user.id))
 										.map((user) => ({ value: user.id, label: user.username }))}
-									onChange={(newValue) =>
-										field.onChange(newValue.map((option) => option.value))
-									}
+									onChange={(newValue) => {
+										const selected = Array.isArray(newValue)
+											? (newValue as Array<{ value: string; label: string }>)
+											: [];
+										field.onChange(selected.map((option) => option.value));
+									}}
 									placeholder="Выберите администраторов"
 									noOptionsMessage={() => "Нет доступных администраторов"}
 								/>
