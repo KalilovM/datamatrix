@@ -1,11 +1,11 @@
 "use server";
 
-import { IPrintTemplate } from "@/app/print-templates/definitions";
+import type { PrintTemplate } from "@/entities/print-template/model/types";
 import PrintTemplateRow from "./PrintTemplateRow";
 import Link from "next/link";
 
 interface ITableContentProps {
-  templates: IPrintTemplate[];
+  templates: PrintTemplate[];
 }
 
 export default async function TableContent({ templates }: ITableContentProps) {

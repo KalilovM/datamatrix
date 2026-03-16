@@ -10,8 +10,8 @@ import { useParams } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Page() {
-	const params = useParams();
-	const { id } = params;
+	const params = useParams<{ id: string | string[] }>();
+	const id = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
 	const { data: nomenclatureData, isLoading, error } = useNomenclatureById(id);
 	const {
 		data: printTemplateData,

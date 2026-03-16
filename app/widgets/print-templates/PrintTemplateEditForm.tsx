@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import type { PrintTemplateData } from "../models/types";
+import type { PrintTemplateData } from "@/print-templates/models/types";
 import PrintingPreview from "./PrintingPreview";
 
 enum TemplateFieldType {
@@ -301,7 +301,10 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 			<div className="w-full h-full">
 				<PrintingPreview
 					textFields={fields.map((f) => ({
-						field: printRenamings[f.fieldType],
+								field:
+									(printRenamings[
+										f.fieldType as keyof typeof printRenamings
+									] ?? "name") as "name" | "modelArticle" | "color" | "size",
 						bold: f.isBold,
 						size: f.fontSize,
 					}))}

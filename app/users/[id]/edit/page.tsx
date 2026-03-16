@@ -6,7 +6,8 @@ import { useParams } from "next/navigation";
 import UserEditForm from "./form";
 
 export default function Page() {
-	const { id } = useParams();
+	const params = useParams<{ id: string | string[] }>();
+	const id = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
 	const { data: user, isLoading: userLoading, error: userError } = useUser(id);
 	const {
 		data: companies,

@@ -10,7 +10,8 @@ import { useParams } from "next/navigation";
 import { useEffect } from "react";
 
 const Page = () => {
-	const { id } = useParams();
+	const params = useParams<{ id: string | string[] }>();
+	const id = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
 	const { data, isError, isLoading } = useOrderEdit(id);
 	const {
 		data: counteragentOptions,

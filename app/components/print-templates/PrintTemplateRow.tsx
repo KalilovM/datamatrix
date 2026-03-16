@@ -1,14 +1,13 @@
 "use client";
 
-import { IPrintTemplate } from "@/app/print-templates/definitions";
+import type { PrintTemplate } from "@/entities/print-template/model/types";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 export default function PrintTemplateRow({
   templates,
 }: {
-  templates: IPrintTemplate[];
-  onDefaultChange: (id: string) => void;
+  templates: PrintTemplate[];
 }) {
   // Function to mark a template as default
   const router = useRouter();

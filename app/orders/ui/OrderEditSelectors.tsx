@@ -103,7 +103,7 @@ export default function OrderEditSelectors({
 					console.log(data, "data");
 					addCodes({
 						generatedCode: aggregatedCode,
-						codes: data.linkedCodes.map((code: string) => code.value),
+						codes: data.linkedCodes.map((code: string) => code),
 						nomenclature: data.nomenclature.modelArticle,
 					});
 					setGeneratedCode("");

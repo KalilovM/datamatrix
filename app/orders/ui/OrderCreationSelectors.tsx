@@ -100,7 +100,7 @@ export default function OrderCreationSelectors({
 					toast.success("Коды успешно загружены!");
 					addCodes({
 						generatedCode: aggregatedCode,
-						codes: data.linkedCodes.map((code: string) => code.value),
+						codes: data.linkedCodes.map((code: string) => code),
 						nomenclature: data.nomenclature.id,
 					});
 					setGeneratedCode("");

@@ -6,23 +6,20 @@ import type { Prisma } from "@prisma/client";
 import { FormState, UpdateUserSchema } from "./definitions";
 
 export async function updateUser(
-  state: FormState,
+  state: FormState | void,
   formData: FormData,
 ): Promise<{ errors: Record<string, string> } | void> {
+  const rawPassword = formData.get("password") as string;
+
   // Extract form data.
   const data = {
     id: formData.get("id") as string,
     email: formData.get("email") as string,
     username: formData.get("username") as string,
-    password: formData.get("password") as string, // May be an empty string if not updating.
     role: formData.get("role") as string,
     companyId: formData.get("companyId") as string,
+    ...(rawPassword ? { password: rawPassword } : {}),
   };
-
-  // Remove password field if empty.
-  if (data.password === "") {
-    delete data.password;
-  }
 
   // Validate using Zod.
   const result = UpdateUserSchema.safeParse(data);

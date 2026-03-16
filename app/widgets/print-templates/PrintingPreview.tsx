@@ -3,7 +3,7 @@
 import type React from "react";
 
 interface TextField {
-	field: string;
+	field: TextFieldKey | "";
 	bold: boolean;
 	size: number;
 }
@@ -19,7 +19,9 @@ interface PrintingPreviewProps {
 	canvasSize: CanvasSize;
 }
 
-const TEXT_FIELD_LABEL = {
+type TextFieldKey = "name" | "modelArticle" | "color" | "size";
+
+const TEXT_FIELD_LABEL: Record<TextFieldKey, string> = {
 	name: "Имя",
 	modelArticle: "Модель",
 	color: "Цвет",

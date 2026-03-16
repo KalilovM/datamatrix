@@ -5,16 +5,29 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import Select from "react-select";
 
+type NomenclatureOptionMeta = {
+	id: string;
+	modelArticle: string;
+	color: string;
+};
+
+type NomenclatureOption = {
+	id: string;
+	value: string;
+	label: string;
+	meta: NomenclatureOptionMeta;
+};
+
 export default function OrderNomenclatures() {
 	const { codes } = useOrderStore();
 	const { rows, addRow, updateRow, updatePreparedOrders, removeRow } =
 		useOrderNomenclatureStore();
 
-	const { data: nomenclatures } = useQuery({
+	const { data: nomenclatures } = useQuery<NomenclatureOptionMeta[]>({
 		queryKey: ["fetchNomenclatures"],
 		queryFn: async () => {
 			const response = await fetch("/api/orders/nomenclatures");
-			return response.json();
+			return response.json() as Promise<NomenclatureOptionMeta[]>;
 		},
 	});
 
@@ -38,7 +51,11 @@ export default function OrderNomenclatures() {
 		}
 	}, [codes, updatePreparedOrders]);
 
-	const handleNomenclatureChange = (selectedOption, index) => {
+	const handleNomenclatureChange = (
+		selectedOption: NomenclatureOption | null,
+		index: number,
+	) => {
+		if (!selectedOption) return;
 		console.log(selectedOption);
 		console.log(codes);
 		const numberOfPreparedOrders = codes
@@ -51,7 +68,7 @@ export default function OrderNomenclatures() {
 		});
 	};
 
-	  const options = (nomenclatures ?? [])
+	const options: NomenclatureOption[] = (nomenclatures ?? [])
 		.slice() // copy to avoid mutating original
 		.sort((a, b) =>
 		(a.modelArticle ?? "").toString().toLowerCase() >
@@ -60,6 +77,7 @@ export default function OrderNomenclatures() {
 			: -1
 		)
 		.map((n) => ({
+			id: n.id,
 			value: n.id,
 			// label used for searching & keyboard selection
 			label: `${n.modelArticle} - ${n.color ?? ""}`,
@@ -100,15 +118,15 @@ export default function OrderNomenclatures() {
 						{rows.map((row, index) => (
 							<tr key={index}>
 								<td className="px-6 py-3">
-									<Select
+									<Select<NomenclatureOption, false>
 										options={options}
 										onChange={(selectedOption) =>
 											handleNomenclatureChange(selectedOption, index)
 										}
 										placeholder="Номенклатура"
-										value={row.nomenclature}
+										value={row.nomenclature as NomenclatureOption | null}
 										formatOptionLabel={(option) => {
-												const color = option?.color ?? "";
+												const color = option.meta?.color ?? "";
 												return (
 													<div className="flex items-center gap-2">
 													<div
@@ -132,7 +150,9 @@ export default function OrderNomenclatures() {
 										type="number"
 										value={row.numberOfOrders}
 										onChange={(e) =>
-											updateRow(index, { numberOfOrders: e.target.value })
+											updateRow(index, {
+												numberOfOrders: Number(e.target.value),
+											})
 										}
 										className="w-full px-2 py-1 border rounded"
 									/>

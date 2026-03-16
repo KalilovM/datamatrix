@@ -11,10 +11,15 @@ export interface User {
 	companyId: string | null;
 }
 
+export interface CompanyOption {
+	label: string;
+	value: string;
+}
+
 export interface FormData {
-	email: string;
+	email?: string;
 	username: string;
 	role: "ADMIN" | "COMPANY_ADMIN" | "COMPANY_USER" | null;
-	companyId: string | null;
-	password: string;
+	companyId?: CompanyOption | null;
+	password?: string;
 }

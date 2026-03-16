@@ -17,7 +17,9 @@ export default function SizeGtinUploadModal({
 	gtinSize,
 }: GtinSizeUploadModalProps) {
 	const { gtinSize: gtinSizeList } = useGtinSizeStore();
-	const [size, setSize] = useState<string>(gtinSize ? gtinSize.size : "");
+	const [size, setSize] = useState<string>(
+		gtinSize ? String(gtinSize.size) : "",
+	);
 	const [gtin, setGtin] = useState<string>(gtinSize ? gtinSize.GTIN : "");
 
 	const handleSubmit = () => {
@@ -40,6 +42,7 @@ export default function SizeGtinUploadModal({
 		}
 
 		const newGtinSize: IGtinSize = {
+			id: gtinSize?.id ?? null,
 			size: Number.parseInt(size),
 			GTIN: trimmedGtin,
 		};

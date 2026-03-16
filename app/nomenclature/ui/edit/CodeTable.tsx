@@ -12,10 +12,10 @@ import CodesUploadModal from "./CodesUploadModal";
 export interface Code {
 	fileName: string;
 	content: string;
-	id: string;
-	codes: string[];
-	size: number;
-	createdAt: string;
+	id?: string;
+	codes?: string[];
+	size: string | number;
+	createdAt?: string;
 }
 
 interface CodeTableProps {
@@ -51,7 +51,7 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const handlePrint = (fileName: string) => {
 		const code = codes.find((code) => code.fileName === fileName);
 		if (code) {
-			setPrintCodes(code.codes);
+			setPrintCodes(code.codes ?? []);
 			setSize(String(code.size));
 			triggerPrint();
 		}
@@ -60,7 +60,7 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const handleView = (fileName: string) => {
 		const code = codes.find((code) => code.fileName === fileName);
 		if (code) {
-			setCodesView(code.codes);
+			setCodesView(code.codes ?? []);
 			setIsViewModalOpen(true);
 		}
 	};

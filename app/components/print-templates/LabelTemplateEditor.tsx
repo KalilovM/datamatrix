@@ -6,8 +6,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
 
 // Define the text fields and their Russian labels
-const textFields = ["name", "modelArticle", "color", "size"];
-const fieldLabels = {
+type TextField = "name" | "modelArticle" | "color" | "size";
+type QrPosition = "left" | "right";
+
+const textFields: TextField[] = ["name", "modelArticle", "color", "size"];
+const fieldLabels: Record<TextField, string> = {
 	name: "Имя",
 	modelArticle: "Модель",
 	color: "Цвет",
@@ -16,14 +19,16 @@ const fieldLabels = {
 
 const LabelEditor = () => {
 	// State for QR code position ("left" or "right")
-	const [qrPosition, setQrPosition] = useState("right");
+	const [qrPosition, setQrPosition] = useState<QrPosition>("right");
 	const router = useRouter();
 
 	// State for text field selections (one per row)
-	const [selections, setSelections] = useState(Array(4).fill(""));
+	const [selections, setSelections] = useState<Array<TextField | "">>(
+		Array(4).fill(""),
+	);
 
 	// Compute available options for a given selector (exclude those already chosen in other rows)
-	const getAvailableOptions = (currentValue) => {
+	const getAvailableOptions = (currentValue: TextField | "") => {
 		const selectedValues = selections.filter(
 			(val) => val !== "" && val !== currentValue,
 		);
@@ -31,7 +36,7 @@ const LabelEditor = () => {
 	};
 
 	// Handle change in one of the field selectors
-	const handleSelectionChange = (index, value) => {
+	const handleSelectionChange = (index: number, value: TextField | "") => {
 		setSelections((prev) => {
 			const newSelections = [...prev];
 			newSelections[index] = value;
@@ -71,7 +76,7 @@ const LabelEditor = () => {
 	};
 
 	// Optional: compute scale for the printing area based on parent dimensions
-	const canvasRef = useRef(null);
+	const canvasRef = useRef<HTMLDivElement | null>(null);
 	const [scale, setScale] = useState(1);
 	useEffect(() => {
 		if (canvasRef.current) {
@@ -103,7 +108,7 @@ const LabelEditor = () => {
 				<label className="block mb-2">Позиция QR кода:</label>
 				<select
 					value={qrPosition}
-					onChange={(e) => setQrPosition(e.target.value)}
+					onChange={(e) => setQrPosition(e.target.value as QrPosition)}
 					className="border rounded p-2 mb-4 w-full"
 				>
 					<option value="left">Слева</option>
@@ -119,7 +124,9 @@ const LabelEditor = () => {
 						<label className="block mb-1">Поле {index + 1}:</label>
 						<select
 							value={sel}
-							onChange={(e) => handleSelectionChange(index, e.target.value)}
+							onChange={(e) =>
+								handleSelectionChange(index, e.target.value as TextField | "")
+							}
 							className="border rounded p-2 w-full"
 						>
 							<option value="">Выберите поле</option>

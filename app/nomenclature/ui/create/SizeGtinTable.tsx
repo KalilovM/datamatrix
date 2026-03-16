@@ -147,7 +147,7 @@ export function SizeGtinTable({
 						setIsDeleteModalOpen(false);
 					}}
 					title="Удалить размер"
-					message={`Вы уверены, что хотите удалить размер ${deleteGtinSize.size} с GTIN ${deleteGtinSize.GTIN}?`}
+					message={`Вы уверены, что хотите удалить размер ${deleteGtinSize?.size ?? ""} с GTIN ${deleteGtinSize?.GTIN ?? ""}?`}
 				/>
 			)}
 		</div>

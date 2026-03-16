@@ -47,7 +47,7 @@ export async function syncSizeGtin(
 		{ id?: string; size: number; gtin: string }
 	>();
 	for (const { id, size, GTIN } of gtinSize || []) {
-		const parsedSize = Number.parseInt(size);
+		const parsedSize = Number(size);
 		if (!Number.isNaN(parsedSize)) {
 			incomingMap.set(id || `${parsedSize}_${GTIN}`, {
 				id,
@@ -197,7 +197,10 @@ export async function syncCodePacks(nomenclatureId: string, codes: IncomingCode[
 	for (const code of codes) {
 		const codesArray = parseAndValidateCsvCodes(code.content, code.fileName);
 		await checkExistingCodes(prisma, codesArray, code.fileName, nomenclatureId);
-		const newCodePackData: ProcessedCodeFile = await processCodeFile(code);
+		const newCodePackData: ProcessedCodeFile = await processCodeFile({
+			...code,
+			size: String(code.size),
+		});
 
 		const linkedSizeGtin = sizeGtinList.find(
 			(sg) => sg.gtin === code.GTIN && sg.size === Number(code.size),

@@ -18,8 +18,8 @@ import ConfigurationTable from "./ConfigurationTable";
 import { SizeGtinTable } from "./SizeGtinTable";
 
 type IGtinSize = {
-	id: string;
-	size: string;
+	id: string | null;
+	size: number;
 	GTIN: string;
 };
 
@@ -53,7 +53,13 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	useEffect(() => {
 		if (nomenclature) {
 			console.log(nomenclature);
-			setGtinSize(nomenclature.sizeGtin);
+			setGtinSize(
+				(nomenclature.gtinSize ?? []).map((item) => ({
+					id: item.id ?? null,
+					size: Number(item.size),
+					GTIN: item.GTIN,
+				})),
+			);
 
 			setInitialData(nomenclature);
 			setNomenclature(nomenclature);
@@ -82,7 +88,11 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	const onSubmit = (data: NomenclatureEditData) => {
 		const payload = {
 			...data,
-			gtinSize,
+			gtinSize: gtinSize.map((item) => ({
+				id: item.id ?? undefined,
+				size: Number(item.size),
+				GTIN: item.GTIN,
+			})),
 		};
 		console.log(payload);
 		mutation.mutate(payload);

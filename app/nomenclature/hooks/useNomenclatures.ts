@@ -10,7 +10,13 @@ interface Filters {
 }
 
 export function useNomenclatures(filters: Filters = {}) {
-	const queryString = new URLSearchParams(filters).toString();
+	const params = new URLSearchParams();
+	Object.entries(filters).forEach(([key, value]) => {
+		if (typeof value === "string" && value.length > 0) {
+			params.set(key, value);
+		}
+	});
+	const queryString = params.toString();
 
 	return useQuery({
 		queryKey: ["nomenclatures", filters],

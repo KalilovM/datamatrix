@@ -4,12 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
 	secret: process.env.NEXTAUTH_SECRET,
-	trustHost: true,
 	useSecureCookies: process.env.NODE_ENV === "production",
-	// Ensure we use the correct base URL in production
-	...(process.env.NEXTAUTH_URL && {
-		url: process.env.NEXTAUTH_URL
-	}),
 	providers: [
 		CredentialsProvider({
 			name: "Credentials",
@@ -35,6 +30,8 @@ export const authOptions: NextAuthOptions = {
 
 				if (!user || !user.password)
 					throw new Error("Неверный логин или пароль");
+				if (!user.role)
+					throw new Error("Пользователь не имеет назначенной роли");
 
 				const isValid = credentials.password === user.password;
 				if (!isValid) throw new Error("Неверный логин или пароль");

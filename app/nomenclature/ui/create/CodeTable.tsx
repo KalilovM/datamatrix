@@ -9,14 +9,14 @@ import CodesUploadModal from "./CodesUploadModal";
 export interface Code {
 	fileName: string;
 	content: string;
-	size: number;
+	size: string;
 	GTIN: string;
 }
 
 interface ParsedCode {
 	fileName: string;
 	codes: string[];
-	size: number;
+	size: string;
 	GTIN: string;
 }
 

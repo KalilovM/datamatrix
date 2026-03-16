@@ -6,11 +6,13 @@ import { useParams } from "next/navigation";
 import { usePrintTemplateEdit } from "../../hooks/usePrintTemplateEdit";
 
 const PrintTemplateEditPage = () => {
-	const { id } = useParams();
+	const params = useParams<{ id: string | string[] }>();
+	const id = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
 	const { data, isLoading, isError } = usePrintTemplateEdit(id);
 
 	if (isLoading) return <Layout>Загрузка...</Layout>;
 	if (isError) return <Layout>Ошибка при загрузке данных</Layout>;
+	if (!data) return <Layout>Шаблон не найден</Layout>;
 
 	return (
 		<Layout>

@@ -7,10 +7,10 @@ import type { Nomenclature } from "../model/types";
 import NomenclatureRow from "./NomenclatureRow";
 
 interface Filters {
-	name?: string;
-	modelArticle?: string;
-	color?: string;
-	gtin?: string;
+	name: string;
+	modelArticle: string;
+	color: string;
+	gtin: string;
 }
 
 interface Props {

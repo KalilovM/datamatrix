@@ -98,11 +98,18 @@ export default function CodesUploadModal({
 				reader.readAsText(selectedFile);
 			});
 
+			const parsedCodes = content
+				.split(/\r?\n/)
+				.map((line) => line.trim())
+				.filter((line) => line.length > 0);
+
 			const code: Code = {
+				id: "",
 				fileName: selectedFile.name,
 				content,
-				size: sizeInput,
-				GTIN: gtin,
+				codes: parsedCodes,
+				size: Number(sizeInput),
+				createdAt: new Date().toISOString(),
 			};
 
 			onAdd([code]);

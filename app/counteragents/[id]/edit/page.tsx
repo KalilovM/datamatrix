@@ -24,8 +24,8 @@ export default async function Page({
 	const initialData = {
 		id: counteragent.id,
 		name: counteragent.name,
-		inn: counteragent.inn,
-		kpp: counteragent.kpp,
+		inn: counteragent.inn ?? "",
+		kpp: counteragent.kpp ?? "",
 	};
 
 	return (

@@ -16,6 +16,8 @@ enum TemplateFieldType {
 	SIZE = "size",
 }
 
+type PreviewField = "" | "name" | "modelArticle" | "color" | "size";
+
 const fieldOptions = [
 	{ value: TemplateFieldType.NAME, label: "Имя" },
 	{ value: TemplateFieldType.MODEL_ARTICLE, label: "Модель" },
@@ -47,8 +49,12 @@ const PrintTemplateForm = () => {
 	});
 
 	const qrPosition = watch("qrPosition");
-	const textFields = watch("textFields");
-	const canvasSize = watch("canvasSize");
+	const textFields = watch("textFields") ?? [];
+	const canvasSize = watch("canvasSize") ?? { width: "58mm", height: "40mm" };
+	const previewTextFields = textFields.map((field) => ({
+		...field,
+		field: (field.field ?? "") as PreviewField,
+	}));
 
 	// Handle switching between QR positions.
 	useEffect(() => {
@@ -71,7 +77,9 @@ const PrintTemplateForm = () => {
 	// Update available fields only in left/right modes.
 	useEffect(() => {
 		if (qrPosition !== "center") {
-			const selectedFields = getValues("textFields").map((t) => t.field);
+			const selectedFields = (getValues("textFields") ?? []).map(
+				(t) => t.field,
+			);
 			setAvailableFields(
 				fieldOptions.filter((opt) => !selectedFields.includes(opt.value)),
 			);
@@ -210,7 +218,7 @@ const PrintTemplateForm = () => {
 			</div>
 			<div className="w-full">
 				<PrintingPreview
-					textFields={textFields}
+					textFields={previewTextFields}
 					qrPosition={qrPosition}
 					canvasSize={canvasSize}
 				/>

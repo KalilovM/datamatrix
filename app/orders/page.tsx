@@ -26,6 +26,8 @@ const Page = () => {
 		return <Layout>Произошла ошибка: {error.message}</Layout>;
 	}
 
+	const ordersList = orders ?? [];
+
 	return (
 		<Layout>
 			<div className="table-layout">
@@ -66,8 +68,8 @@ const Page = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{orders.length > 0 ? (
-								orders.map((order) => (
+							{ordersList.length > 0 ? (
+								ordersList.map((order) => (
 									<OrderTableRow key={order.id} order={order} />
 								))
 							) : (

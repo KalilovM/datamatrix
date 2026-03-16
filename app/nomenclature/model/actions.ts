@@ -42,7 +42,9 @@ export async function fetchNomenclatures() {
 				name: true,
 				modelArticle: true,
 				color: true,
-				GTIN: true,
+				sizeGtin: {
+					select: { gtin: true },
+				},
 				codePacks: {
 					select: {
 						codes: {
@@ -64,7 +66,9 @@ export async function fetchNomenclatures() {
 				name: true,
 				modelArticle: true,
 				color: true,
-				GTIN: true,
+				sizeGtin: {
+					select: { gtin: true },
+				},
 				codePacks: {
 					select: {
 						codes: {
@@ -82,7 +86,7 @@ export async function fetchNomenclatures() {
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
-		GTIN: nomenclature.GTIN || "",
+		GTIN: nomenclature.sizeGtin.map((item) => item.gtin),
 		codeCount: nomenclature.codePacks.reduce(
 			(total, codePack) => total + codePack.codes.length,
 			0,
@@ -111,10 +115,12 @@ export async function fetchNomenclatureById(
 			name: true,
 			modelArticle: true,
 			color: true,
-			GTIN: true,
+			sizeGtin: {
+				select: { gtin: true },
+			},
 			configurations: true,
 			codePacks: {
-				include: { codes: true },
+				include: { codes: true, sizeGtin: true },
 			},
 		},
 	});
@@ -126,7 +132,7 @@ export async function fetchNomenclatureById(
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
-		GTIN: nomenclature.GTIN || "",
+		GTIN: nomenclature.sizeGtin[0]?.gtin || "",
 		configurations: nomenclature.configurations.map((cfg) => ({
 			id: cfg.id,
 			label: `1-${cfg.pieceInPack}-${cfg.packInPallet}`,
@@ -140,6 +146,8 @@ export async function fetchNomenclatureById(
 			fileName: pack.name,
 			content: codesToCsv(pack.codes.map((code) => code.value)),
 			codes: pack.codes.map((code) => code.value),
+			size: String(pack.sizeGtin?.size ?? ""),
+			GTIN: pack.sizeGtin?.gtin ?? "",
 		})),
 	};
 
@@ -151,7 +159,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
-		return [];
+		return { success: false, error: "Не авторизован" };
 	}
 
 	const user = await prisma.user.findUnique({
@@ -191,7 +199,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 			>();
 
 			for (const { GTIN, size } of gtinSize || []) {
-				const parsedSize = Number.parseInt(size);
+				const parsedSize = size;
 				if (Number.isNaN(parsedSize)) continue;
 				const existing = await tx.sizeGtin.findUnique({
 					where: {
@@ -303,9 +311,9 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 			data: { name, modelArticle, color },
 		});
 
-		await syncSizeGtin(id, gtinSize);
-		await syncConfigurations(id, configurations);
-		await syncCodePacks(id, codes);
+		await syncSizeGtin(id, gtinSize ?? []);
+		await syncConfigurations(id, configurations ?? []);
+		await syncCodePacks(id, codes ?? []);
 
 		return { success: true };
 	} catch (error) {

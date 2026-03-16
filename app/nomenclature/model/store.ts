@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 interface Configuration {
+	id?: string;
 	label: string;
 	value: {
 		pieceInPack: number;

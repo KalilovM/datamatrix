@@ -30,7 +30,7 @@ export async function updateUser(id: string, data: FormData) {
 			email: data.email,
 			username: data.username,
 			role: data.role,
-			companyId: data.companyId.value || null,
+			companyId: data.companyId?.value || null,
 		},
 	});
 	if (data.password && data.password.trim().length >= 5) {

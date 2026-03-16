@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { updateUser } from "@/app/users/[id]/edit/actions";
+import { updateUser } from "../../../users/[id]/edit/actions";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 

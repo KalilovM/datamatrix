@@ -17,7 +17,9 @@ export default function SizeGtinUploadModal({
 	gtinSize,
 }: GtinSizeUploadModalProps) {
 	const { gtinSize: gtinSizeList } = useGtinSizeStore();
-	const [size, setSize] = useState<string>(gtinSize ? gtinSize.size : "");
+	const [size, setSize] = useState<string>(
+		gtinSize ? String(gtinSize.size) : "",
+	);
 	const [gtin, setGtin] = useState<string>(gtinSize ? gtinSize.GTIN : "");
 
 	const handleSubmit = () => {
@@ -40,6 +42,7 @@ export default function SizeGtinUploadModal({
 		}
 
 		const newGtinSize: IGtinSize = {
+			id: gtinSize?.id ?? null,
 			size: Number.parseInt(size),
 			GTIN: trimmedGtin,
 		};
@@ -67,7 +70,7 @@ export default function SizeGtinUploadModal({
 								name="size"
 								type="number"
 								value={size}
-								onChange={(e) => setSize(Number(e.target.value))}
+								onChange={(e) => setSize(e.target.value)}
 								className="w-full border rounded-lg px-3 py-2"
 								required
 							/>
@@ -97,9 +100,9 @@ export default function SizeGtinUploadModal({
 						<button
 							type="button"
 							onClick={handleSubmit}
-							disabled={!gtin.trim() || size <= 0}
+							disabled={!gtin.trim() || Number.parseInt(size) <= 0}
 							className={`px-4 py-2 rounded-md text-white ${
-								!gtin.trim() || size <= 0
+								!gtin.trim() || Number.parseInt(size) <= 0
 									? "bg-blue-300 cursor-not-allowed"
 									: "bg-blue-500"
 							}`}

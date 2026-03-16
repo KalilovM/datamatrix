@@ -1,5 +1,5 @@
 import UserEditForm from "@/components/user/UserEditForm";
-import MainLayout from "@/components/MainLayout";
+import Layout from "@/shared/ui/Layout";
 import { getUser, getCompanies } from "./actions";
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -8,15 +8,21 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   if (!user) {
     return (
-      <MainLayout>
+      <Layout>
         <p>Пользователь не найден.</p>
-      </MainLayout>
+      </Layout>
     );
   }
 
   return (
-    <MainLayout>
-      <UserEditForm user={user} companies={companies} />
-    </MainLayout>
+    <Layout>
+      <UserEditForm
+        user={{
+          ...user,
+          role: user.role ?? "COMPANY_USER",
+        }}
+        companies={companies}
+      />
+    </Layout>
   );
 }

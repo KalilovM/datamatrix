@@ -20,8 +20,8 @@ import ConfigurationTable from "./ConfigurationTable";
 import { SizeGtinTable } from "./SizeGtinTable";
 
 type IGtinSize = {
-	id: string;
-	size: string;
+	id: string | null;
+	size: number;
 	GTIN: string;
 };
 
@@ -54,6 +54,11 @@ export default function NomenclatureForm() {
 				return;
 			}
 
+			if (!response.data) {
+				toast.error("Не удалось получить данные созданной номенклатуры");
+				return;
+			}
+
 			toast.success("Номенклатура сохранена!");
 			reset();
 			resetSizes();
@@ -72,7 +77,11 @@ export default function NomenclatureForm() {
 	const onSubmit = (data: NomenclatureFormData) => {
 		const payloadWithGtinSize = {
 			...data,
-			gtinSize,
+			gtinSize: gtinSize.map((item) => ({
+				id: item.id ?? undefined,
+				size: Number(item.size),
+				GTIN: item.GTIN,
+			})),
 		};
 		mutation.mutate(payloadWithGtinSize);
 	};

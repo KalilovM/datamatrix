@@ -1,8 +1,8 @@
 "use client";
 import dynamic from "next/dynamic";
-import { Company } from "@/app/users/create/definitions";
+import { Company } from "../../../../users/create/definitions";
 import { useActionState } from "react";
-import { createUser } from "@/app/users/create/actions";
+import { createUser } from "../../../../users/create/actions";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 

@@ -46,10 +46,27 @@ export default function OrderCreationForm({
 
 		const filename = `${orderData.showId}-${selectedCounteragent.label}-от-${formattedDate}.csv`;
 
+		type WritableFileLike = {
+			write: (data: Blob) => Promise<void>;
+			close: () => Promise<void>;
+		};
+		type FileHandleLike = {
+			createWritable: () => Promise<WritableFileLike>;
+		};
+		const browserWindow = window as Window & {
+			showSaveFilePicker?: (options: {
+				suggestedName: string;
+				types: Array<{
+					description: string;
+					accept: Record<string, string[]>;
+				}>;
+			}) => Promise<FileHandleLike>;
+		};
+
 		// Use File System Access API if available
-		if ("showSaveFilePicker" in window) {
+		if (browserWindow.showSaveFilePicker) {
 			try {
-				const fileHandle = await window.showSaveFilePicker({
+				const fileHandle = await browserWindow.showSaveFilePicker({
 					suggestedName: filename,
 					types: [
 						{
