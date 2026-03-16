@@ -3,6 +3,9 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
+	secret: process.env.NEXTAUTH_SECRET,
+	trustHost: true,
+	useSecureCookies: process.env.NODE_ENV === "production",
 	// Ensure we use the correct base URL in production
 	...(process.env.NEXTAUTH_URL && {
 		url: process.env.NEXTAUTH_URL

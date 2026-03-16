@@ -1,29 +1,26 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # =============================================================================
-# VPS Initial Setup Script for DataMatrix
+# DataMatrix - Production VPS Bootstrap (Ubuntu 22.04/24.04)
 # =============================================================================
-# Run this ONCE on a fresh Ubuntu 22.04/24.04 VPS
-# Usage: sudo bash vps-setup.sh
-#
-# Prerequisites:
-#   - Fresh Ubuntu 22.04 or 24.04 LTS
-#   - Root or sudo access
-#   - Domain A record pointing to this server's IP
+# Run once on the server:
+#   sudo bash scripts/vps-setup.sh
 # =============================================================================
 
 set -euo pipefail
 
-# ---------------------------------------------------------------------------
-# Configuration - MODIFY THESE
-# ---------------------------------------------------------------------------
-DOMAIN="yourdomain.com"
-SSL_EMAIL="admin@yourdomain.com"
+DOMAIN="dm.alonamoda.com"
+SERVER_IP="193.124.33.151"
+SSL_EMAIL="admin@alonamoda.com"
 DEPLOY_USER="deploy"
 APP_DIR="/var/www/datamatrix"
-GIT_REPO="git@github.com:your-username/datamatrix.git"
-NODE_VERSION="20"  # LTS version
+ENV_DIR="/etc/datamatrix"
+ENV_FILE="${ENV_DIR}/.env"
+BACKUP_DIR="/var/www/datamatrix-backups"
+LOG_DIR="/var/log/datamatrix"
+DB_NAME="datamatrix_prod"
+DB_USER="datamatrix_user"
+NODE_VERSION="20"
 
-# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -33,326 +30,335 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# ---------------------------------------------------------------------------
-# Check if running as root
-# ---------------------------------------------------------------------------
-if [ "$EUID" -ne 0 ]; then
-    log_error "Please run as root or with sudo"
-    exit 1
-fi
-
-log_info "========================================="
-log_info "Starting VPS setup for DataMatrix"
-log_info "========================================="
-
-# ---------------------------------------------------------------------------
-# Step 1: System Update
-# ---------------------------------------------------------------------------
-log_info "Step 1: Updating system packages..."
-apt update && apt upgrade -y
-
-# ---------------------------------------------------------------------------
-# Step 2: Install Essential Packages
-# ---------------------------------------------------------------------------
-log_info "Step 2: Installing essential packages..."
-apt install -y \
-    curl \
-    wget \
-    git \
-    build-essential \
-    ufw \
-    fail2ban \
-    htop \
-    ncdu
-
-# ---------------------------------------------------------------------------
-# Step 3: Create Deploy User
-# ---------------------------------------------------------------------------
-log_info "Step 3: Creating deploy user..."
-if id "$DEPLOY_USER" &>/dev/null; then
-    log_warn "User $DEPLOY_USER already exists"
-else
-    useradd -m -s /bin/bash "$DEPLOY_USER"
-    usermod -aG sudo "$DEPLOY_USER"
-    log_info "Created user: $DEPLOY_USER"
-
-    # Set up SSH for deploy user (copy from root)
-    mkdir -p /home/$DEPLOY_USER/.ssh
-    if [ -f /root/.ssh/authorized_keys ]; then
-        cp /root/.ssh/authorized_keys /home/$DEPLOY_USER/.ssh/
+require_root() {
+    if [ "${EUID}" -ne 0 ]; then
+        log_error "Run this script as root (sudo)."
+        exit 1
     fi
-    chown -R $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.ssh
-    chmod 700 /home/$DEPLOY_USER/.ssh
-    chmod 600 /home/$DEPLOY_USER/.ssh/authorized_keys 2>/dev/null || true
-fi
+}
 
-# ---------------------------------------------------------------------------
-# Step 4: Install Node.js
-# ---------------------------------------------------------------------------
-log_info "Step 4: Installing Node.js ${NODE_VERSION}.x..."
-curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
-apt install -y nodejs
+check_dns() {
+    local resolved
+    resolved="$(getent ahostsv4 "${DOMAIN}" | awk '{print $1}' | sort -u | tr '\n' ' ')"
 
-log_info "Node.js version: $(node --version)"
-log_info "npm version: $(npm --version)"
+    if [ -z "${resolved}" ]; then
+        log_warn "Could not resolve ${DOMAIN}. SSL issuance may fail until DNS is propagated."
+        return
+    fi
 
-# ---------------------------------------------------------------------------
-# Step 5: Install PM2 Globally
-# ---------------------------------------------------------------------------
-log_info "Step 5: Installing PM2..."
-npm install -g pm2
+    if [[ " ${resolved} " != *" ${SERVER_IP} "* ]]; then
+        log_warn "${DOMAIN} does not currently resolve to ${SERVER_IP}. Resolved: ${resolved}"
+    else
+        log_info "DNS check passed: ${DOMAIN} -> ${SERVER_IP}"
+    fi
+}
 
-# Configure PM2 to start on boot
-pm2 startup systemd -u $DEPLOY_USER --hp /home/$DEPLOY_USER
+install_base_packages() {
+    log_info "Updating system and installing base packages..."
+    apt update
+    DEBIAN_FRONTEND=noninteractive apt upgrade -y
+    DEBIAN_FRONTEND=noninteractive apt install -y \
+        ca-certificates \
+        curl \
+        git \
+        gnupg \
+                openssl \
+        build-essential \
+        ufw \
+        fail2ban \
+        nginx \
+        certbot \
+        postgresql \
+        postgresql-contrib
+}
 
-# ---------------------------------------------------------------------------
-# Step 6: Install Nginx
-# ---------------------------------------------------------------------------
-log_info "Step 6: Installing Nginx..."
-apt install -y nginx
+ensure_tls_params() {
+        if [ ! -f /etc/letsencrypt/options-ssl-nginx.conf ] || [ ! -f /etc/letsencrypt/ssl-dhparams.pem ]; then
+                log_info "Installing recommended TLS parameters..."
+                mkdir -p /etc/letsencrypt
+                curl -fsSL \
+                    https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf \
+                    -o /etc/letsencrypt/options-ssl-nginx.conf
+                curl -fsSL \
+                    https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem \
+                    -o /etc/letsencrypt/ssl-dhparams.pem
+        fi
+}
 
-# Remove default site
-rm -f /etc/nginx/sites-enabled/default
+install_node_pm2() {
+    log_info "Installing Node.js ${NODE_VERSION}.x and PM2..."
+    curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash -
+    DEBIAN_FRONTEND=noninteractive apt install -y nodejs
+    npm install -g pm2
 
-systemctl enable nginx
-systemctl start nginx
+    log_info "Node: $(node --version)"
+    log_info "npm: $(npm --version)"
+    log_info "pm2: $(pm2 --version)"
+}
 
-# ---------------------------------------------------------------------------
-# Step 7: Install Certbot
-# ---------------------------------------------------------------------------
-log_info "Step 7: Installing Certbot..."
-apt install -y certbot python3-certbot-nginx
+setup_deploy_user() {
+    log_info "Ensuring deploy user exists..."
+    if ! id "${DEPLOY_USER}" &>/dev/null; then
+        useradd -m -s /bin/bash "${DEPLOY_USER}"
+        usermod -aG sudo "${DEPLOY_USER}"
+    fi
 
-# ---------------------------------------------------------------------------
-# Step 8: Install PostgreSQL
-# ---------------------------------------------------------------------------
-log_info "Step 8: Installing PostgreSQL..."
-apt install -y postgresql postgresql-contrib
+    mkdir -p "/home/${DEPLOY_USER}/.ssh"
+    if [ -f /root/.ssh/authorized_keys ] && [ ! -f "/home/${DEPLOY_USER}/.ssh/authorized_keys" ]; then
+        cp /root/.ssh/authorized_keys "/home/${DEPLOY_USER}/.ssh/authorized_keys"
+    fi
 
-# Start PostgreSQL
-systemctl enable postgresql
-systemctl start postgresql
+    chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "/home/${DEPLOY_USER}/.ssh"
+    chmod 700 "/home/${DEPLOY_USER}/.ssh"
+    [ -f "/home/${DEPLOY_USER}/.ssh/authorized_keys" ] && chmod 600 "/home/${DEPLOY_USER}/.ssh/authorized_keys"
+}
 
-# Create database and user
-log_info "Creating PostgreSQL database and user..."
-sudo -u postgres psql -c "CREATE USER datamatrix_user WITH PASSWORD 'CHANGE_THIS_PASSWORD';" 2>/dev/null || log_warn "User may already exist"
-sudo -u postgres psql -c "CREATE DATABASE datamatrix_prod OWNER datamatrix_user;" 2>/dev/null || log_warn "Database may already exist"
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE datamatrix_prod TO datamatrix_user;"
+setup_firewall_and_services() {
+    log_info "Configuring services and firewall..."
+    systemctl enable nginx postgresql fail2ban certbot.timer
+    systemctl start nginx postgresql fail2ban certbot.timer
 
-log_warn "IMPORTANT: Change the database password in PostgreSQL and update /etc/datamatrix/.env"
+    ufw --force reset
+    ufw default deny incoming
+    ufw default allow outgoing
+    ufw allow OpenSSH
+    ufw allow 'Nginx Full'
+    ufw --force enable
+}
 
-# ---------------------------------------------------------------------------
-# Step 9: Configure Firewall (UFW)
-# ---------------------------------------------------------------------------
-log_info "Step 9: Configuring firewall..."
-ufw default deny incoming
-ufw default allow outgoing
-ufw allow ssh
-ufw allow 'Nginx Full'
-ufw --force enable
+setup_directories() {
+    log_info "Creating directories..."
+    mkdir -p "${APP_DIR}" "${BACKUP_DIR}" "${LOG_DIR}" "${ENV_DIR}" /var/www/certbot
+    chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "${APP_DIR}" "${BACKUP_DIR}" "${LOG_DIR}" /var/www/certbot
+    chown root:"${DEPLOY_USER}" "${ENV_DIR}"
+    chmod 750 "${ENV_DIR}"
+}
 
-log_info "Firewall rules:"
-ufw status
+setup_postgres() {
+    log_info "Configuring PostgreSQL database/user..."
+    DB_PASSWORD="$(openssl rand -hex 24)"
 
-# ---------------------------------------------------------------------------
-# Step 10: Create Application Directories
-# ---------------------------------------------------------------------------
-log_info "Step 10: Creating application directories..."
+    sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'" | grep -q 1 \
+        || sudo -u postgres psql -c "CREATE USER ${DB_USER} WITH PASSWORD '${DB_PASSWORD}';"
 
-# Application directory
-mkdir -p $APP_DIR
-chown -R $DEPLOY_USER:$DEPLOY_USER $APP_DIR
+    sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" | grep -q 1 \
+        || sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME} OWNER ${DB_USER};"
 
-# Environment config directory
-mkdir -p /etc/datamatrix
-chmod 750 /etc/datamatrix
-chown root:$DEPLOY_USER /etc/datamatrix
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};"
+}
 
-# Log directory
-mkdir -p /var/log/datamatrix
-chown -R $DEPLOY_USER:$DEPLOY_USER /var/log/datamatrix
+write_env_file() {
+    log_info "Creating ${ENV_FILE}..."
+    NEXTAUTH_SECRET="$(openssl rand -base64 32)"
+    SESSION_SECRET="$(openssl rand -base64 32)"
 
-# Backup directory
-mkdir -p /var/www/datamatrix-backups
-chown -R $DEPLOY_USER:$DEPLOY_USER /var/www/datamatrix-backups
-
-# Certbot webroot
-mkdir -p /var/www/certbot
-
-# ---------------------------------------------------------------------------
-# Step 11: Create Environment File Template
-# ---------------------------------------------------------------------------
-log_info "Step 11: Creating environment file template..."
-
-cat > /etc/datamatrix/.env << 'EOF'
-# =============================================================================
-# PRODUCTION ENVIRONMENT - DataMatrix
-# =============================================================================
-# IMPORTANT: Update all placeholder values before deploying
-# Permissions: chmod 600 /etc/datamatrix/.env
-# =============================================================================
-
+    cat > "${ENV_FILE}" <<EOF
 NODE_ENV=production
 PORT=3000
 HOSTNAME=127.0.0.1
 
-# Database
-DATABASE_URL="postgresql://datamatrix_user:CHANGE_THIS_PASSWORD@localhost:5432/datamatrix_prod?schema=public"
+DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}?schema=public"
 
-# NextAuth - Generate secrets with: openssl rand -base64 32
-NEXTAUTH_SECRET="GENERATE_ME_openssl_rand_base64_32"
-NEXTAUTH_URL="https://yourdomain.com"
+NEXTAUTH_SECRET="${NEXTAUTH_SECRET}"
+NEXTAUTH_URL="https://${DOMAIN}"
 
-# Session
-SESSION_SECRET="GENERATE_ME_openssl_rand_base64_32"
+SESSION_SECRET="${SESSION_SECRET}"
 
-# Application
-NEXT_API_URL="https://yourdomain.com"
-APP_DOMAIN="yourdomain.com"
-SSL_EMAIL="admin@yourdomain.com"
+NEXT_API_URL="https://${DOMAIN}"
+APP_DOMAIN="${DOMAIN}"
+SSL_EMAIL="${SSL_EMAIL}"
 
-# Logging
 LOG_LEVEL=error
 DEBUG_PRISMA=false
 
-# Public variables
 NEXT_PUBLIC_APP_NAME="DataMatrix"
-NEXT_PUBLIC_API_URL="https://yourdomain.com"
+NEXT_PUBLIC_API_URL="https://${DOMAIN}"
 EOF
 
-chmod 600 /etc/datamatrix/.env
-chown root:$DEPLOY_USER /etc/datamatrix/.env
+    chmod 600 "${ENV_FILE}"
+    chown root:"${DEPLOY_USER}" "${ENV_FILE}"
+}
 
-log_warn "IMPORTANT: Edit /etc/datamatrix/.env with your actual values!"
-
-# ---------------------------------------------------------------------------
-# Step 12: Configure Nginx
-# ---------------------------------------------------------------------------
-log_info "Step 12: Setting up Nginx configuration..."
-
-# Create a basic HTTP config first (SSL will be added by Certbot)
-cat > /etc/nginx/sites-available/datamatrix << EOF
-# Temporary HTTP-only config (Certbot will modify this)
+write_nginx_http_bootstrap() {
+    log_info "Writing initial HTTP Nginx config..."
+    cat > /etc/nginx/sites-available/datamatrix <<EOF
 server {
-    listen 80;
-    listen [::]:80;
-    server_name ${DOMAIN} www.${DOMAIN};
+        listen 80;
+        listen [::]:80;
+        server_name ${DOMAIN};
 
-    # Certbot challenge location
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
+        location /.well-known/acme-challenge/ {
+                root /var/www/certbot;
+        }
 
-    # Proxy to Next.js during initial setup
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_cache_bypass \$http_upgrade;
-    }
+        location / {
+                proxy_pass http://127.0.0.1:3000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade \$http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host \$host;
+                proxy_set_header X-Real-IP \$remote_addr;
+                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto \$scheme;
+                proxy_cache_bypass \$http_upgrade;
+        }
 }
 EOF
 
-ln -sf /etc/nginx/sites-available/datamatrix /etc/nginx/sites-enabled/
+    rm -f /etc/nginx/sites-enabled/default
+    ln -sf /etc/nginx/sites-available/datamatrix /etc/nginx/sites-enabled/datamatrix
+    nginx -t
+    systemctl reload nginx
+}
 
-nginx -t && systemctl reload nginx
+issue_ssl_certificate() {
+    log_info "Issuing Let's Encrypt certificate..."
+    certbot certonly --webroot \
+        -w /var/www/certbot \
+        -d "${DOMAIN}" \
+        --email "${SSL_EMAIL}" \
+        --agree-tos \
+        --no-eff-email \
+        --non-interactive \
+        --keep-until-expiring
+}
 
-# ---------------------------------------------------------------------------
-# Step 13: Configure Fail2ban
-# ---------------------------------------------------------------------------
-log_info "Step 13: Configuring Fail2ban..."
+write_nginx_https_production() {
+    log_info "Writing hardened HTTPS Nginx config..."
 
-cat > /etc/fail2ban/jail.local << 'EOF'
-[DEFAULT]
-bantime = 1h
-findtime = 10m
-maxretry = 5
+    cat > /etc/nginx/sites-available/datamatrix <<EOF
+limit_req_zone \$binary_remote_addr zone=api_limit:10m rate=20r/s;
 
-[sshd]
-enabled = true
-port = ssh
-logpath = %(sshd_log)s
-maxretry = 3
+server {
+        listen 80;
+        listen [::]:80;
+        server_name ${DOMAIN};
 
-[nginx-http-auth]
-enabled = true
-port = http,https
-logpath = /var/log/nginx/error.log
+        location /.well-known/acme-challenge/ {
+                root /var/www/certbot;
+        }
 
-[nginx-limit-req]
-enabled = true
-port = http,https
-logpath = /var/log/nginx/error.log
+        location / {
+                return 301 https://\$host\$request_uri;
+        }
+}
+
+server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+        server_name ${DOMAIN};
+        server_tokens off;
+
+        ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+        include /etc/letsencrypt/options-ssl-nginx.conf;
+        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+        client_max_body_size 20M;
+
+        location /api/ {
+                limit_req zone=api_limit burst=40 nodelay;
+                proxy_pass http://127.0.0.1:3000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade \$http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host \$host;
+                proxy_set_header X-Real-IP \$remote_addr;
+                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto https;
+        }
+
+        location / {
+                proxy_pass http://127.0.0.1:3000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade \$http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host \$host;
+                proxy_set_header X-Real-IP \$remote_addr;
+                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto https;
+        }
+}
 EOF
 
-systemctl enable fail2ban
-systemctl restart fail2ban
+    nginx -t
+    systemctl reload nginx
+}
 
-# ---------------------------------------------------------------------------
-# Step 14: Configure Log Rotation
-# ---------------------------------------------------------------------------
-log_info "Step 14: Configuring log rotation..."
+setup_certbot_auto_renew() {
+    log_info "Configuring certificate auto-renew hooks..."
+    mkdir -p /etc/letsencrypt/renewal-hooks/deploy
+    cat > /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+systemctl reload nginx
+EOF
+    chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
 
-cat > /etc/logrotate.d/datamatrix << 'EOF'
-/var/log/datamatrix/*.log {
+    systemctl enable certbot.timer
+    systemctl restart certbot.timer
+    certbot renew --dry-run
+}
+
+setup_logrotate() {
+    log_info "Configuring log rotation..."
+    cat > /etc/logrotate.d/datamatrix <<EOF
+${LOG_DIR}/*.log {
     daily
     rotate 14
     compress
     delaycompress
     missingok
     notifempty
-    create 0640 deploy deploy
+    create 0640 ${DEPLOY_USER} ${DEPLOY_USER}
     sharedscripts
     postrotate
-        pm2 reloadLogs
+        su - ${DEPLOY_USER} -c 'pm2 reloadLogs' || true
     endscript
 }
 EOF
+}
 
-# ---------------------------------------------------------------------------
-# Summary
-# ---------------------------------------------------------------------------
-log_info "========================================="
-log_info "VPS Setup Complete!"
-log_info "========================================="
-echo ""
-log_info "Next steps:"
-echo "  1. Edit /etc/datamatrix/.env with your production values:"
-echo "     - Generate secrets: openssl rand -base64 32"
-echo "     - Set database password"
-echo "     - Update domain name"
-echo ""
-echo "  2. Clone your repository:"
-echo "     sudo -u $DEPLOY_USER git clone $GIT_REPO $APP_DIR"
-echo ""
-echo "  3. Install dependencies and build:"
-echo "     cd $APP_DIR"
-echo "     sudo -u $DEPLOY_USER npm ci"
-echo "     sudo -u $DEPLOY_USER npm run prod:build"
-echo ""
-echo "  4. Run database migrations:"
-echo "     sudo -u $DEPLOY_USER npx prisma migrate deploy"
-echo ""
-echo "  5. Start the application:"
-echo "     sudo -u $DEPLOY_USER pm2 start ecosystem.config.cjs --env production"
-echo "     sudo -u $DEPLOY_USER pm2 save"
-echo ""
-echo "  6. Obtain SSL certificate:"
-echo "     sudo certbot --nginx -d ${DOMAIN} -d www.${DOMAIN} --email ${SSL_EMAIL} --agree-tos"
-echo ""
-echo "  7. Replace Nginx config with the production version from deploy/nginx.conf"
-echo ""
-echo "  8. Test SSL renewal:"
-echo "     sudo certbot renew --dry-run"
-echo ""
-log_warn "Don't forget to:"
-echo "  - Change PostgreSQL password"
-echo "  - Update /etc/datamatrix/.env"
-echo "  - Set up SSH key for git access"
-echo ""
-log_info "Server IP: $(curl -s ifconfig.me)"
+show_summary() {
+    log_info "=========================================="
+    log_info "VPS bootstrap completed"
+    log_info "=========================================="
+    echo "Domain: ${DOMAIN}"
+    echo "Server IP (expected): ${SERVER_IP}"
+    echo "App dir: ${APP_DIR}"
+    echo "Env file: ${ENV_FILE}"
+    echo ""
+    echo "Next steps:"
+    echo "1) As ${DEPLOY_USER}, clone project into ${APP_DIR}"
+    echo "2) Run deployment: sudo -u ${DEPLOY_USER} bash ${APP_DIR}/scripts/deploy.sh"
+    echo "3) Enable PM2 startup once app is running:"
+    echo "   sudo -u ${DEPLOY_USER} pm2 save"
+    echo "   sudo env PATH=\$PATH:/usr/bin pm2 startup systemd -u ${DEPLOY_USER} --hp /home/${DEPLOY_USER}"
+}
+
+main() {
+    require_root
+    check_dns
+    install_base_packages
+    install_node_pm2
+    setup_deploy_user
+    setup_firewall_and_services
+    setup_directories
+    setup_postgres
+    write_env_file
+    write_nginx_http_bootstrap
+    issue_ssl_certificate
+    ensure_tls_params
+    write_nginx_https_production
+    setup_certbot_auto_renew
+    setup_logrotate
+    show_summary
+}
+
+main "$@"

@@ -11,18 +11,6 @@ import type { NextConfig } from "next";
  */
 
 const nextConfig: NextConfig = {
-  // Build configuration
-  eslint: {
-    // Allow builds to complete even with ESLint errors
-    // Remove this in production once ESLint is clean
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    // Allow builds to complete even with TypeScript errors
-    // Remove this in production once types are clean
-    ignoreBuildErrors: true,
-  },
-
   // React strict mode for development best practices
   reactStrictMode: true,
 

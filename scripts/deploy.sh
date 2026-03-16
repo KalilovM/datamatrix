@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # =============================================================================
 # DataMatrix Deployment Script
 # =============================================================================
@@ -57,10 +57,27 @@ check_requirements() {
         exit 1
     fi
 
+    if ! command -v npm &> /dev/null; then
+        log_error "npm not found"
+        exit 1
+    fi
+
+    if ! command -v git &> /dev/null; then
+        log_error "git not found"
+        exit 1
+    fi
+
     if ! command -v pm2 &> /dev/null; then
         log_error "PM2 not found. Install with: npm install -g pm2"
         exit 1
     fi
+}
+
+load_env() {
+    set -a
+    # shellcheck disable=SC1090
+    source "$ENV_FILE"
+    set +a
 }
 
 backup_current() {
@@ -106,10 +123,7 @@ run_migrations() {
     log_info "Running database migrations..."
     cd "$APP_DIR"
 
-    # Source environment variables
-    set -a
-    source "$ENV_FILE"
-    set +a
+    load_env
 
     # Deploy Prisma migrations
     npx prisma migrate deploy
@@ -124,13 +138,10 @@ build_app() {
     log_info "Building application..."
     cd "$APP_DIR"
 
-    # Source environment variables for build
-    set -a
-    source "$ENV_FILE"
-    set +a
+    load_env
 
     # Build Next.js app
-    npm run prod:build
+    npm run build
 
     log_info "Build completed"
 }
@@ -154,15 +165,16 @@ copy_static_files() {
 restart_app() {
     log_info "Restarting application..."
     cd "$APP_DIR"
+    load_env
 
     # Check if PM2 process exists
     if pm2 list | grep -q "datamatrix"; then
         # Reload with zero-downtime restart
-        pm2 reload datamatrix --update-env
+        pm2 reload ecosystem.config.cjs --only datamatrix --env production --update-env
         log_info "Application reloaded (zero-downtime)"
     else
         # Start fresh
-        pm2 start ecosystem.config.cjs --env production
+        pm2 start ecosystem.config.cjs --only datamatrix --env production --update-env
         log_info "Application started"
     fi
 

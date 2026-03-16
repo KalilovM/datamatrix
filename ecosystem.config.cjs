@@ -12,8 +12,8 @@
  *   pm2 monit                                # Real-time monitoring
  *
  * Environment Variables:
- *   PM2 loads env vars from /etc/datamatrix/.env via env_file option.
- *   Alternatively, set them directly in the env_production block.
+ *   Deployment script exports vars from /etc/datamatrix/.env before start/reload.
+ *   Base runtime defaults are set in env_production block.
  */
 
 const path = require("path");
@@ -39,8 +39,7 @@ module.exports = {
       max_memory_restart: "500M",      // Restart if memory exceeds limit
 
       // Startup behavior
-      wait_ready: true,                // Wait for process.send('ready')
-      listen_timeout: 10000,           // Timeout for ready signal (ms)
+      wait_ready: false,               // Next.js standalone does not emit process.send('ready')
       kill_timeout: 5000,              // Grace period before SIGKILL (ms)
 
       // Logging
@@ -57,11 +56,6 @@ module.exports = {
         HOSTNAME: "127.0.0.1",
       },
 
-      // Load additional env vars from file
-      // Create this file with your production secrets
-      // Format: KEY=value (one per line)
-      env_file: "/etc/datamatrix/.env",
-
       // Health monitoring
       exp_backoff_restart_delay: 100,  // Exponential backoff on crashes
       max_restarts: 10,                // Max restarts within min_uptime
@@ -76,9 +70,9 @@ module.exports = {
   deploy: {
     production: {
       user: "deploy",
-      host: "your-server-ip",
+      host: "193.124.33.151",
       ref: "origin/main",
-      repo: "git@github.com:your-username/datamatrix.git",
+      repo: "REPLACE_WITH_YOUR_GIT_REMOTE",
       path: "/var/www/datamatrix",
       "pre-deploy-local": "",
       "post-deploy": "npm ci && export $(cat /etc/datamatrix/.env | xargs) && npm run prod:build && pm2 reload ecosystem.config.cjs --env production",
