@@ -107,8 +107,10 @@ check_database_connection() {
         return 0
     fi
 
-    if ! psql "$DATABASE_URL" -c "SELECT 1;" >/dev/null 2>&1; then
+    local db_check_output
+    if ! db_check_output="$(psql "$DATABASE_URL" -c "SELECT 1;" 2>&1)"; then
         log_error "Failed to connect to PostgreSQL using DATABASE_URL from $ENV_FILE"
+        log_error "psql output: ${db_check_output}"
         log_error "If password contains special URL characters, URL-encode it in DATABASE_URL"
         log_error "Then retry deployment"
         exit 1
