@@ -216,7 +216,11 @@ export async function createNomenclature(data: NomenclatureFormData) {
 				sizeGtinMap.set(GTIN, created);
 			}
 			// Step 4: Prepare code packs
-			const codePackCreateData: ProcessedCodeFile[] = [];
+			type CodePackCreatePayload = ProcessedCodeFile & {
+				nomenclatureId: string;
+				sizeGtinId?: string;
+			};
+			const codePackCreateData: CodePackCreatePayload[] = [];
 
 			if (codes) {
 				for (const fileObj of codes) {
@@ -227,7 +231,10 @@ export async function createNomenclature(data: NomenclatureFormData) {
 					await checkExistingCodes(prisma, codesArray, fileObj.fileName);
 
 					try {
-						const codePackData = await processCodeFile(fileObj);
+						const codePackData: CodePackCreatePayload = {
+							...(await processCodeFile(fileObj)),
+							nomenclatureId: createdNomenclature.id,
+						};
 						const gtinMatch = Array.from(sizeGtinMap.keys()).find((gtin) =>
 							fileObj.GTIN.includes(gtin),
 						);
@@ -235,11 +242,9 @@ export async function createNomenclature(data: NomenclatureFormData) {
 						if (gtinMatch) {
 							const sizeGtin = sizeGtinMap.get(gtinMatch);
 							if (sizeGtin) {
-								(codePackData as any).sizeGtinId = sizeGtin.id;
+								codePackData.sizeGtinId = sizeGtin.id;
 							}
 						}
-
-						(codePackData as any).nomenclatureId = createdNomenclature.id;
 
 						codePackCreateData.push(codePackData);
 					} catch (err: unknown) {

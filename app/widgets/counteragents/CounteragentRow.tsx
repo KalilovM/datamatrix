@@ -30,8 +30,9 @@ export default function CounteragentRow({
 			queryClient.invalidateQueries({
 				queryKey: ["counteragents"],
 			});
-		} catch (error: any) {
-			toast.error(error.message);
+		} catch (error: unknown) {
+			const message = error instanceof Error ? error.message : "Неизвестная ошибка";
+			toast.error(message);
 		} finally {
 			setModalOpen(false);
 		}

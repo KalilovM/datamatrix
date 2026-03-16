@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 const PRINT_TYPE = "NOMENCLATURE";
 
-export async function GET(req: Request) {
+export async function GET() {
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
 		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });

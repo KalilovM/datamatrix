@@ -7,7 +7,6 @@ import "react-toastify/dist/ReactToastify.css";
 export default function DisaggregationForm() {
 	const [generatedCode, setGeneratedCode] = useState<string>("");
 	const [codes, setCodes] = useState<{ id: string; value: string }[]>([]);
-	const [isExisting, setIsExisting] = useState<boolean>(false);
 
 	// Checks if the generated code exists and retrieves its linked codes
 	const checkGeneratedCode = async () => {
@@ -18,11 +17,9 @@ export default function DisaggregationForm() {
 			);
 			const data = await response.json();
 			if (response.ok) {
-				setIsExisting(true);
 				setCodes(data.codes);
 				toast.success("Загружены связанные коды");
 			} else {
-				setIsExisting(false);
 				setCodes([]);
 				toast.error("DataMatrix код не найден");
 			}

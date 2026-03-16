@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 			},
 		});
 		return NextResponse.json({ message: "Контрагент успешно сохранен" });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ error: "Произошла ошибка при сохранении" },
 			{ status: 400 },
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 	}
 }
 
-export async function GET(req: Request) {
+export async function GET() {
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
 		return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
@@ -94,7 +94,7 @@ export async function GET(req: Request) {
 			});
 		}
 		return NextResponse.json(counteragents);
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ error: "Произошла ошибка при получении данных" },
 			{ status: 400 },

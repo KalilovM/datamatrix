@@ -42,9 +42,10 @@ export default function UserCreateForm({ companies }: Props) {
 			toast.success("Пользователь создан успешно!");
 			router.push("/companies");
 		},
-		onError: (error: any) => {
-			if (error.message.includes("Имя пользователя")) {
-				setError("username", { message: error.message });
+		onError: (error: unknown) => {
+			const message = error instanceof Error ? error.message : "Неизвестная ошибка";
+			if (message.includes("Имя пользователя")) {
+				setError("username", { message });
 			} else {
 				toast.error("Ошибка при создании пользователя");
 			}
@@ -84,9 +85,8 @@ export default function UserCreateForm({ companies }: Props) {
 						<input
 							{...register("email")}
 							type="email"
-							className={`w-full rounded-lg border px-3 py-2 ${
-								errors.email ? "border-red-500" : "border-gray-300"
-							}`}
+							className={`w-full rounded-lg border px-3 py-2 ${errors.email ? "border-red-500" : "border-gray-300"
+								}`}
 						/>
 						{errors.email && (
 							<p className="text-sm text-red-500">{errors.email.message}</p>
@@ -98,9 +98,8 @@ export default function UserCreateForm({ companies }: Props) {
 						<input
 							{...register("username")}
 							type="text"
-							className={`w-full rounded-lg border px-3 py-2 ${
-								errors.username ? "border-red-500" : "border-gray-300"
-							}`}
+							className={`w-full rounded-lg border px-3 py-2 ${errors.username ? "border-red-500" : "border-gray-300"
+								}`}
 						/>
 						{errors.username && (
 							<p className="text-sm text-red-500">{errors.username.message}</p>
@@ -115,9 +114,8 @@ export default function UserCreateForm({ companies }: Props) {
 						<input
 							{...register("password")}
 							type="password"
-							className={`w-full rounded-lg border px-3 py-2 ${
-								errors.password ? "border-red-500" : "border-gray-300"
-							}`}
+							className={`w-full rounded-lg border px-3 py-2 ${errors.password ? "border-red-500" : "border-gray-300"
+								}`}
 						/>
 						{errors.password && (
 							<p className="text-sm text-red-500">{errors.password.message}</p>
@@ -128,9 +126,8 @@ export default function UserCreateForm({ companies }: Props) {
 						<label htmlFor="role">Роль</label>
 						<select
 							{...register("role")}
-							className={`w-full rounded-lg border px-3 py-2 ${
-								errors.role ? "border-red-500" : "border-gray-300"
-							}`}
+							className={`w-full rounded-lg border px-3 py-2 ${errors.role ? "border-red-500" : "border-gray-300"
+								}`}
 						>
 							<option value="">Выберите роль</option>
 							<option value="ADMIN">Администратор</option>

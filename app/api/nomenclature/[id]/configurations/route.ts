@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function GET(
-	req: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	try {
@@ -36,7 +35,7 @@ export async function GET(
 		}));
 
 		return NextResponse.json(result, { status: 200 });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ error: "Ошибка загрузки конфигурации" },
 			{ status: 500 },

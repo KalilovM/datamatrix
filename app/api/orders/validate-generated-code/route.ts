@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 			codePack?.nomenclature || codePallet?.generatedCodePacks[0].nomenclature;
 
 		return NextResponse.json({ linkedCodes, nomenclature });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ error: "Ошибка сервера. Попробуйте позже." },
 			{ status: 500 },

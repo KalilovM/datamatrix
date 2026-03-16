@@ -7,7 +7,33 @@ import {
 } from "../lib/helpers";
 import type { ProcessedCodeFile } from "./types";
 
-export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
+type IncomingGtinSize = {
+	id?: string;
+	size: string | number;
+	GTIN: string;
+};
+
+type IncomingConfiguration = {
+	id?: string;
+	label?: string;
+	value: {
+		pieceInPack: number;
+		packInPallet: number;
+	};
+};
+
+type IncomingCode = {
+	id?: string;
+	fileName: string;
+	content: string;
+	GTIN: string;
+	size: string | number;
+};
+
+export async function syncSizeGtin(
+	nomenclatureId: string,
+	gtinSize: IncomingGtinSize[],
+) {
 	if (!gtinSize || gtinSize.length === 0) {
 		return;
 	}
@@ -113,7 +139,7 @@ export async function syncSizeGtin(nomenclatureId: string, gtinSize: any[]) {
 
 export async function syncConfigurations(
 	nomenclatureId: string,
-	configurations: any[],
+	configurations: IncomingConfiguration[],
 ) {
 	const existing = await prisma.configuration.findMany({
 		where: { nomenclatureId },
@@ -147,7 +173,7 @@ export async function syncConfigurations(
 	}
 }
 
-export async function syncCodePacks(nomenclatureId: string, codes: any[]) {
+export async function syncCodePacks(nomenclatureId: string, codes: IncomingCode[]) {
 	const existingCodePacks = await prisma.codePack.findMany({
 		where: { nomenclatureId },
 	});

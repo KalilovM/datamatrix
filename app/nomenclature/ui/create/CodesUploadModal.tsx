@@ -13,20 +13,11 @@ import type { Code } from "./CodeTable";
 interface CodesUploadModalProps {
 	onClose: () => void;
 	onAdd: (codes: Code[]) => void;
-	codes: ParsedCode[];
-}
-
-interface ParsedCode {
-	fileName: string;
-	codes: string[];
-	size: number;
-	GTIN: string;
 }
 
 export default function CodesUploadModal({
 	onClose,
 	onAdd,
-	codes,
 }: CodesUploadModalProps) {
 	const DEBOUNCE_DELAY = 2000;
 
@@ -122,8 +113,9 @@ export default function CodesUploadModal({
 			onAdd([code]);
 			toast.success(`Файл ${selectedFile.name} загружен!`);
 			onClose();
-		} catch (error: any) {
-			toast.error(error.message);
+		} catch (error: unknown) {
+			const message = error instanceof Error ? error.message : "Ошибка загрузки";
+			toast.error(message);
 		}
 	};
 
@@ -185,20 +177,18 @@ export default function CodesUploadModal({
 						value={gtin}
 						onChange={(e) => setGtin(e.target.value)}
 						disabled={isGtinDisabled}
-						className={`mt-4 w-full rounded-md px-4 py-2 border ${
-							isGtinDisabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
-						} border-gray-300`}
+						className={`mt-4 w-full rounded-md px-4 py-2 border ${isGtinDisabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+							} border-gray-300`}
 					/>
 
 					<button
 						type="button"
 						disabled={!selectedFile || !sizeInput.trim()}
 						onClick={handleUpload}
-						className={`mt-4 w-full rounded-md px-4 py-2 text-white ${
-							!selectedFile || !sizeInput.trim()
+						className={`mt-4 w-full rounded-md px-4 py-2 text-white ${!selectedFile || !sizeInput.trim()
 								? "cursor-not-allowed bg-gray-400"
 								: "bg-blue-600 hover:bg-blue-700"
-						}`}
+							}`}
 					>
 						Загрузить
 					</button>

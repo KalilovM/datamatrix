@@ -107,10 +107,11 @@ export async function POST(req: Request) {
 		return NextResponse.json({
 			message: "Коды обновлены, агрегированный код удалён",
 		});
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("Ошибка при обновлении кодов:", error);
+		const message = error instanceof Error ? error.message : "Неизвестная ошибка";
 		return NextResponse.json(
-			{ message: "Ошибка сервера", error: error.message },
+			{ message: "Ошибка сервера", error: message },
 			{ status: 500 },
 		);
 	}

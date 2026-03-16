@@ -18,7 +18,6 @@ export function usePackGeneration() {
 		setPages,
 		setCurrentPage,
 		setUniqueCode,
-		setCodes,
 		setPrintSize,
 	} = useAggregationPackStore();
 
@@ -75,7 +74,7 @@ export function usePackGeneration() {
 						setCurrentPage(currentPage + 1);
 						mutationTriggered.current = false;
 					},
-					onError: (error: any) => {
+					onError: (error: unknown) => {
 						console.error(error);
 						toast.error("Ошибка генерации кода");
 						mutationTriggered.current = false;
@@ -91,8 +90,9 @@ export function usePackGeneration() {
 		setPages,
 		setCurrentPage,
 		mutation,
-		setCodes,
 		setSize,
 		setPrintCodes,
+		setPrintSize,
+		triggerPrint,
 	]);
 }

@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import type { PrintTemplateData } from "../models/types";
@@ -55,26 +55,29 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	// Map initialData to our form shape.
-	const defaultValues: EditPrintTemplateFormValues = {
-		name: initialData.name,
-		type: initialData.type,
-		qrType: initialData.qrType,
-		qrPosition: initialData.qrPosition,
-		canvasSize: {
-			width: initialData.width,
-			height: initialData.height,
-		},
-		fields: initialData.fields
-			.sort((a, b) => a.order - b.order)
-			.map((field) => ({
-				id: field.id,
-				fieldType: field.fieldType.toLowerCase(),
-				isBold: field.isBold,
-				// Convert fontSize from string to number for the input.
-				fontSize: Number(field.fontSize),
-				order: field.order,
-			})),
-	};
+	const defaultValues: EditPrintTemplateFormValues = useMemo(
+		() => ({
+			name: initialData.name,
+			type: initialData.type,
+			qrType: initialData.qrType,
+			qrPosition: initialData.qrPosition,
+			canvasSize: {
+				width: initialData.width,
+				height: initialData.height,
+			},
+			fields: [...initialData.fields]
+				.sort((a, b) => a.order - b.order)
+				.map((field) => ({
+					id: field.id,
+					fieldType: field.fieldType.toLowerCase(),
+					isBold: field.isBold,
+					// Convert fontSize from string to number for the input.
+					fontSize: Number(field.fontSize),
+					order: field.order,
+				})),
+		}),
+		[initialData],
+	);
 
 	const {
 		register,
@@ -122,7 +125,7 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 				);
 			}
 		}
-	}, [qrPosition, setValue, fields.length]);
+	}, [defaultValues.fields, fields.length, qrPosition, setValue]);
 
 	// Update available fields options when not in CENTER mode.
 	const [availableFields, setAvailableFields] = useState(fieldOptions);
@@ -246,8 +249,8 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 
 								const optionsToRender =
 									currentValue &&
-									!availableFields.some((opt) => opt.value === currentValue) &&
-									selectedOption
+										!availableFields.some((opt) => opt.value === currentValue) &&
+										selectedOption
 										? [selectedOption, ...availableFields]
 										: availableFields;
 

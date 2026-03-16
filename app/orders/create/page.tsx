@@ -10,7 +10,6 @@ const Page = () => {
 		data: counteragentOptions,
 		isLoading,
 		isError,
-		error,
 	} = useCounteragentOptions();
 	if (isLoading) {
 		return <Layout>Загрузка...</Layout>;

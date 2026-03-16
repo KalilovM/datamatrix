@@ -7,12 +7,10 @@ import ConfigurationsUploadModal from "./ConfigurationsUploadModal";
 import type { ConfigurationOption } from "./ConfigurationsUploadModal";
 
 interface ConfigurationTableProps {
-	value?: ConfigurationOption[]; // controlled configurations array
 	onChange: (value: ConfigurationOption[]) => void;
 }
 
 export default function ConfigurationTable({
-	value,
 	onChange,
 }: ConfigurationTableProps) {
 	const {

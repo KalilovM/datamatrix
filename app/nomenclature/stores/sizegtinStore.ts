@@ -26,7 +26,7 @@ export const useGtinSizeStore = create<GtinSizeState>((set) => ({
 			gtinSize: [...state.gtinSize, gtinSize],
 		})),
 	setGtinSize: (gtinSize) =>
-		set((state) => ({
+		set(() => ({
 			gtinSize,
 		})),
 	updateGtinSize: (oldGtin, oldSize, updatedGtinSize) =>

@@ -3,7 +3,7 @@ import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET() {
 	try {
 		const session = await getServerSession(authOptions);
 		if (!session?.user) {
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 			orderBy: { type: "asc" },
 		});
 		return NextResponse.json(printingTemplates, { status: 200 });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("Ошибка при получении шаблонов печати:", error);
 		return NextResponse.json(
 			{ error: "Ошибка при получении шаблонов печати" },
@@ -143,9 +143,15 @@ export async function POST(request: Request) {
 			size: "SIZE",
 		};
 
+		type TemplateFieldInput = {
+			field: string;
+			bold: boolean;
+			size: number;
+		};
+
 		// Filter out text fields where the field id is empty.
 		const filteredFields = textFields.filter(
-			(field: any) => field.field && field.field.trim() !== "",
+			(field: TemplateFieldInput) => field.field && field.field.trim() !== "",
 		);
 		// Create the printing template with nested field creation.
 		const template = await prisma.printingTemplate.create({
@@ -160,7 +166,7 @@ export async function POST(request: Request) {
 					connect: { id: companyId },
 				},
 				fields: {
-					create: filteredFields.map((field: any, index: number) => ({
+					create: filteredFields.map((field: TemplateFieldInput, index: number) => ({
 						order: index + 1,
 						fieldType: fieldTypeMapping[field.field],
 						isBold: field.bold,
@@ -174,7 +180,7 @@ export async function POST(request: Request) {
 			{ message: "Шаблон успешно создан", template },
 			{ status: 200 },
 		);
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("Ошибка сохранения шаблона:", error);
 		return NextResponse.json(
 			{ error: "Ошибка при сохранении шаблона" },

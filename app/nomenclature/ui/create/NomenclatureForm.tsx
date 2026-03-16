@@ -143,9 +143,8 @@ export default function NomenclatureForm() {
 						<input
 							{...register("name")}
 							type="text"
-							className={`w-full rounded-lg border px-2 py-1 ${
-								errors.name ? "border-red-500" : "border-gray-300"
-							}`}
+							className={`w-full rounded-lg border px-2 py-1 ${errors.name ? "border-red-500" : "border-gray-300"
+								}`}
 						/>
 						{errors.name && (
 							<p className="text-sm text-red-500">{errors.name.message}</p>
@@ -160,9 +159,8 @@ export default function NomenclatureForm() {
 							<input
 								{...register("modelArticle")}
 								type="text"
-								className={`w-full rounded-lg border px-2 py-1 ${
-									errors.modelArticle ? "border-red-500" : "border-gray-300"
-								}`}
+								className={`w-full rounded-lg border px-2 py-1 ${errors.modelArticle ? "border-red-500" : "border-gray-300"
+									}`}
 							/>
 							{errors.modelArticle && (
 								<p className="text-sm text-red-500">
@@ -177,9 +175,8 @@ export default function NomenclatureForm() {
 							<input
 								{...register("color")}
 								type="text"
-								className={`w-full rounded-lg border px-2 py-1 ${
-									errors.color ? "border-red-500" : "border-gray-300"
-								}`}
+								className={`w-full rounded-lg border px-2 py-1 ${errors.color ? "border-red-500" : "border-gray-300"
+									}`}
 							/>
 							{errors.color && (
 								<p className="text-sm text-red-500">{errors.color.message}</p>
@@ -194,8 +191,8 @@ export default function NomenclatureForm() {
 				<Controller
 					control={control}
 					name="configurations"
-					render={({ field: { value, onChange } }) => (
-						<ConfigurationTable value={value} onChange={onChange} />
+					render={({ field: { onChange } }) => (
+						<ConfigurationTable onChange={onChange} />
 					)}
 				/>
 

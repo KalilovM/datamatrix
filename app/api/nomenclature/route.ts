@@ -1,5 +1,6 @@
 import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
 		);
 	}
 
-	const where: any = {
+	const where: Prisma.NomenclatureWhereInput = {
 		name: name ? { contains: name, mode: "insensitive" } : undefined,
 		modelArticle: modelArticle
 			? { contains: modelArticle, mode: "insensitive" }

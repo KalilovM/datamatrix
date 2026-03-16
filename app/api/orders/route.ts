@@ -8,7 +8,7 @@ function normalizeScannerInput(raw: string): string {
 	return `�${raw.split(GS).join("\x1D")}`; // insert raw ASCII 29 back
 }
 
-export async function GET(req: Request) {
+export async function GET() {
 	const session = await getServerSession(authOptions);
 
 	if (!session?.user) {

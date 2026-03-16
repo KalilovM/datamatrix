@@ -24,11 +24,11 @@ interface Nomenclature {
 
 interface NomenclatureStore {
 	nomenclature: Nomenclature;
-	printTemplate: any;
+	printTemplate: unknown;
 	setNomenclature: (data: Partial<Nomenclature>) => void;
 	reset: () => void;
 
-	setPrintTemplate: (data: any) => void;
+	setPrintTemplate: (data: unknown) => void;
 
 	// Configurations
 	addConfiguration: (config: Configuration) => void;

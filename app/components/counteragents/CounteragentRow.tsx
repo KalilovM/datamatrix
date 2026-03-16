@@ -37,7 +37,7 @@ export default function CounteragentRow({
         toast.success("Контрагент успешно удален");
         router.refresh(); // refresh the list
       }
-    } catch (err) {
+    } catch {
       toast.error("Ошибка при удалении контрагента");
     } finally {
       setModalOpen(false);

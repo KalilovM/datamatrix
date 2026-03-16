@@ -42,7 +42,7 @@ export async function PUT(
 		return new Response("Контрагент обновлен!", {
 			status: 200,
 		});
-	} catch (error) {
+	} catch {
 		return new Response("Произошла ошибка при обновлении!", {
 			status: 400,
 		});

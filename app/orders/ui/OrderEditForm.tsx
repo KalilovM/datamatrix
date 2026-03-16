@@ -2,7 +2,6 @@
 
 import type { ICounteragentOption } from "@/orders/create/definitions";
 import { useOrderStore } from "@/orders/stores/useOrderStore";
-import { saveAs } from "file-saver";
 import Papa from "papaparse";
 import { useState } from "react";
 import OrderCodesList from "./OrderCodesList";
@@ -65,8 +64,8 @@ export default function OrderCreationForm({
 				);
 				await writable.close();
 				return;
-			} catch (err) {
-				console.log("File save cancelled or failed", err);
+			} catch (error) {
+				console.log("File save cancelled or failed", error);
 			}
 		}
 
@@ -89,11 +88,10 @@ export default function OrderCreationForm({
 					<button
 						type="button"
 						onClick={() => setActiveTab(1)}
-						className={`inline-block px-4 py-3 rounded-lg ${
-							activeTab === 1
+						className={`inline-block px-4 py-3 rounded-lg ${activeTab === 1
 								? "text-white bg-blue-600"
 								: "hover:text-gray-900 hover:bg-gray-100"
-						}`}
+							}`}
 					>
 						Шаг 1
 					</button>
@@ -102,11 +100,10 @@ export default function OrderCreationForm({
 					<button
 						type="button"
 						onClick={() => setActiveTab(2)}
-						className={`inline-block px-4 py-3 rounded-lg ${
-							activeTab === 2
+						className={`inline-block px-4 py-3 rounded-lg ${activeTab === 2
 								? "text-white bg-blue-600"
 								: "hover:text-gray-900 hover:bg-gray-100"
-						}`}
+							}`}
 					>
 						Шаг 2
 					</button>

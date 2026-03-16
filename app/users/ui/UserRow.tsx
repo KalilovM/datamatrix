@@ -31,7 +31,7 @@ export default function UserRow({ user }: UserRowProps) {
 			});
 			router.refresh();
 			toast.success("Пользователь удален");
-		} catch (err) {
+		} catch {
 			toast.error("Ошибка при удалении пользователя");
 		} finally {
 			setModalOpen(false);

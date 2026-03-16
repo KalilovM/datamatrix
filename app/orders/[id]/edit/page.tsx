@@ -24,7 +24,7 @@ const Page = () => {
 		if (!data) return;
 		setRows(data.initialRows);
 		setCodes(data.initialCodes);
-	}, [data, setRows]);
+	}, [data, setRows, setCodes]);
 
 	if (isLoading || counteragentOptionsIsLoading) {
 		return <Layout>Загрузка...</Layout>;

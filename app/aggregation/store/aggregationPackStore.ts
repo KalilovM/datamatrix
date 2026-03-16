@@ -17,7 +17,7 @@ interface AggregationPackState {
 }
 
 export const useAggregationPackStore = create<AggregationPackState>(
-	(set, get) => ({
+	(set) => ({
 		codes: [],
 		pages: [],
 		currentPage: 0,

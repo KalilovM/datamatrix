@@ -165,7 +165,6 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 
 			{isModalOpen && (
 				<CodesUploadModal
-					codes={codesList}
 					onClose={() => setIsModalOpen(false)}
 					onAdd={handleUpload}
 				/>

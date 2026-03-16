@@ -2,6 +2,7 @@
 "use client";
 
 import type { NomenclatureOption } from "@/aggregation/model/types";
+import type { PrintTemplate } from "@/aggregation/model/types";
 import { usePrintStore } from "@/shared/store/printStore";
 import { PrintIcon } from "@/shared/ui/icons";
 
@@ -12,7 +13,7 @@ import { usePrintTemplate as useAggPrintTemplate } from "../aggregation/api/prin
 interface Props {
 	linkedCodes: string[];
 	nomenclature: NomenclatureOption | null;
-	setTemplate?: (template: any) => void;
+	setTemplate?: React.Dispatch<React.SetStateAction<PrintTemplate | null>>;
 }
 
 const UUID4_REGEX =

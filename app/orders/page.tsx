@@ -17,7 +17,7 @@ const Page = () => {
 	useEffect(() => {
 		reset();
 		resetRows();
-	}, []);
+	}, [reset, resetRows]);
 
 	if (isLoading) {
 		return <Layout>Загрузка...</Layout>;

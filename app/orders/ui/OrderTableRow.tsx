@@ -37,7 +37,7 @@ export default function OrderTableRow({ order }: { order: IOrder }) {
 				});
 				toast.success("Заказ успешно удален");
 			}
-		} catch (err) {
+		} catch {
 			toast.error("Ошибка при удалении заказа");
 		} finally {
 			setModalOpen(false);
