@@ -23,8 +23,40 @@ interface CodeTableProps {
 	onChange: (value: Code[]) => void; // callback to update codes
 }
 
+function getCodeTimestamp(createdAt?: string) {
+	if (!createdAt) return Number.NEGATIVE_INFINITY;
+
+	const timestamp = new Date(createdAt).getTime();
+	return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+}
+
+function getCodeSize(size: Code["size"]) {
+	const numericSize =
+		typeof size === "number" ? size : Number.parseFloat(String(size));
+
+	return Number.isNaN(numericSize) ? Number.NEGATIVE_INFINITY : numericSize;
+}
+
+function compareCodes(left: Code, right: Code) {
+	const timestampDiff =
+		getCodeTimestamp(right.createdAt) - getCodeTimestamp(left.createdAt);
+
+	if (timestampDiff !== 0) {
+		return timestampDiff;
+	}
+
+	const sizeDiff = getCodeSize(right.size) - getCodeSize(left.size);
+
+	if (sizeDiff !== 0) {
+		return sizeDiff;
+	}
+
+	return left.fileName.localeCompare(right.fileName, "ru");
+}
+
 export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const codes = value;
+	const sortedCodes = [...codes].sort(compareCodes);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [deleteFileName, setDeleteFileName] = useState<string | null>(null);
@@ -113,8 +145,8 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 							</tr>
 						</thead>
 						<tbody>
-							{codes.length > 0 ? (
-								codes.map((file) => (
+							{sortedCodes.length > 0 ? (
+								sortedCodes.map((file) => (
 									<tr
 										key={file.fileName}
 										className="bg-white border-b border-gray-200 hover:bg-gray-50"

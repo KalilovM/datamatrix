@@ -92,16 +92,46 @@ export async function GET(
 				packInPallet: cfg.packInPallet,
 			},
 		})),
-		codes: nomenclature.codePacks.map((pack) => ({
-			id: pack.id,
-			fileName: pack.name,
-			size: String(pack.sizeGtin?.size ?? ""),
-			GTIN: String(pack.sizeGtin?.gtin ?? ""),
-			sizeGtin: pack.sizeGtin?.id,
-			content: codesToCsv(pack.codes.map((code) => code.value)),
-			createdAt: pack.createdAt,
-			codes: pack.codes.map((code) => code.value),
-		})),
+		codes: nomenclature.codePacks
+			.map((pack) => ({
+				id: pack.id,
+				fileName: pack.name,
+				size: String(pack.sizeGtin?.size ?? ""),
+				GTIN: String(pack.sizeGtin?.gtin ?? ""),
+				sizeGtin: pack.sizeGtin?.id,
+				content: codesToCsv(pack.codes.map((code) => code.value)),
+				createdAt: pack.createdAt,
+				codes: pack.codes.map((code) => code.value),
+			}))
+			.sort((left, right) => {
+				const leftTimestamp = left.createdAt
+					? new Date(left.createdAt).getTime()
+					: Number.NEGATIVE_INFINITY;
+				const rightTimestamp = right.createdAt
+					? new Date(right.createdAt).getTime()
+					: Number.NEGATIVE_INFINITY;
+				const timestampDiff = rightTimestamp - leftTimestamp;
+
+				if (timestampDiff !== 0) {
+					return timestampDiff;
+				}
+
+				const leftSize = Number.parseFloat(left.size);
+				const rightSize = Number.parseFloat(right.size);
+				const safeLeftSize = Number.isNaN(leftSize)
+					? Number.NEGATIVE_INFINITY
+					: leftSize;
+				const safeRightSize = Number.isNaN(rightSize)
+					? Number.NEGATIVE_INFINITY
+					: rightSize;
+				const sizeDiff = safeRightSize - safeLeftSize;
+
+				if (sizeDiff !== 0) {
+					return sizeDiff;
+				}
+
+				return left.fileName.localeCompare(right.fileName, "ru");
+			}),
 	};
 
 	return NextResponse.json(transformed);
