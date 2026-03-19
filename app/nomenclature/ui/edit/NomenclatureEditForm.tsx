@@ -218,8 +218,8 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 				<Controller
 					control={control}
 					name="configurations"
-					render={({ field: { onChange } }) => (
-						<ConfigurationTable onChange={onChange} />
+					render={({ field: { value, onChange } }) => (
+						<ConfigurationTable value={value ?? []} onChange={onChange} />
 					)}
 				/>
 				<SizeGtinTable onSaveGtinSize={handleSaveGtinSize} />
