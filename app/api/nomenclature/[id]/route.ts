@@ -85,7 +85,6 @@ export async function GET(
 		GTIN: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.gtin),
 		size: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.size),
 		gtinSize,
-		sizeGtin: gtinSize,
 		configurations: nomenclature.configurations.map((cfg) => ({
 			id: cfg.id,
 			label: `1-${cfg.pieceInPack}-${cfg.packInPallet}`,

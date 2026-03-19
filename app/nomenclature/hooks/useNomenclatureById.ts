@@ -11,9 +11,16 @@ type NomenclatureByIdResponse = Omit<NomenclatureEditData, "gtinSize"> & {
 function normalizeNomenclature(
 	data: NomenclatureByIdResponse,
 ): NomenclatureEditData {
+	const normalizedGtinSize = data.gtinSize ?? data.sizeGtin ?? [];
+
 	return {
-		...data,
-		gtinSize: data.gtinSize ?? data.sizeGtin ?? [],
+		id: data.id,
+		name: data.name,
+		modelArticle: data.modelArticle,
+		color: data.color,
+		configurations: data.configurations,
+		codes: data.codes,
+		gtinSize: normalizedGtinSize,
 	};
 }
 
