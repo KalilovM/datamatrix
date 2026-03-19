@@ -1,7 +1,12 @@
 import { useGtinSizeStore } from "@/nomenclature/stores/sizegtinStore";
 import { BinIcon, CloseIcon, UploadIcon } from "@/shared/ui/icons";
-import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
-import { useEffect } from "react";
+import {
+	type ChangeEvent,
+	type DragEvent,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { toast } from "react-toastify";
 import type { Code } from "./CodeTable";
 
@@ -31,7 +36,11 @@ export default function CodesUploadModal({
 	};
 
 	useEffect(() => {
-		if (!sizeInput) return;
+		if (!sizeInput) {
+			setGtin("");
+			setIsGtinDisabled(false);
+			return;
+		}
 
 		const handler = setTimeout(() => {
 			const existingSize = gtinSize.find(
@@ -44,7 +53,7 @@ export default function CodesUploadModal({
 				toast.error("Размер не найден в базе данных GTIN.");
 				setGtin("");
 				setSizeInput("");
-				setIsGtinDisabled(true);
+				setIsGtinDisabled(false);
 			}
 		}, DEBOUNCE_DELAY);
 
@@ -66,6 +75,8 @@ export default function CodesUploadModal({
 	};
 
 	const handleUpload = async () => {
+		const trimmedGtin = gtin.trim();
+
 		if (!selectedFile) {
 			toast.error("Выберите CSV файл для загрузки.");
 			return;
@@ -78,6 +89,11 @@ export default function CodesUploadModal({
 
 		if (!sizeInput.trim()) {
 			toast.error("Введите размер.");
+			return;
+		}
+
+		if (!trimmedGtin) {
+			toast.error("Введите GTIN.");
 			return;
 		}
 
@@ -104,11 +120,12 @@ export default function CodesUploadModal({
 				.filter((line) => line.length > 0);
 
 			const code: Code = {
-				id: "",
+				id: undefined,
 				fileName: selectedFile.name,
 				content,
 				codes: parsedCodes,
 				size: Number(sizeInput),
+				GTIN: trimmedGtin,
 				createdAt: new Date().toISOString(),
 			};
 
@@ -116,7 +133,8 @@ export default function CodesUploadModal({
 			toast.success(`Файл ${selectedFile.name} загружен!`);
 			onClose();
 		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : "Ошибка загрузки";
+			const message =
+				error instanceof Error ? error.message : "Ошибка загрузки";
 			toast.error(message);
 		}
 	};
@@ -174,24 +192,26 @@ export default function CodesUploadModal({
 					/>
 
 					<input
-						type="string"
+						type="text"
 						name="gtin"
 						placeholder="Введите GTIN"
 						value={gtin}
 						onChange={(e) => setGtin(e.target.value)}
 						disabled={isGtinDisabled}
-						className={`mt-4 w-full rounded-md px-4 py-2 border ${isGtinDisabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
-							} border-gray-300`}
+						className={`mt-4 w-full rounded-md px-4 py-2 border ${
+							isGtinDisabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+						} border-gray-300`}
 					/>
 
 					<button
 						type="button"
-						disabled={!selectedFile || !sizeInput.trim()}
+						disabled={!selectedFile || !sizeInput.trim() || !gtin.trim()}
 						onClick={handleUpload}
-						className={`mt-4 w-full rounded-md px-4 py-2 text-white ${!selectedFile || !sizeInput.trim()
-							? "cursor-not-allowed bg-gray-400"
-							: "bg-blue-600 hover:bg-blue-700"
-							}`}
+						className={`mt-4 w-full rounded-md px-4 py-2 text-white ${
+							!selectedFile || !sizeInput.trim() || !gtin.trim()
+								? "cursor-not-allowed bg-gray-400"
+								: "bg-blue-600 hover:bg-blue-700"
+						}`}
 					>
 						Загрузить
 					</button>

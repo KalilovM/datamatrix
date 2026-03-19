@@ -15,6 +15,7 @@ export interface Code {
 	id?: string;
 	codes?: string[];
 	size: string | number;
+	GTIN: string;
 	createdAt?: string;
 }
 
