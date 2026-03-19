@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, type FieldErrors, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { updateNomenclature } from "../../model/actions";
 import {
@@ -69,6 +69,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	const mutation = useMutation({
 		mutationFn: updateNomenclature,
 		onSuccess: (response) => {
+			console.info("[NomenclatureEditForm] update response", response);
 			if (!response.success) {
 				toast.error(response.error || "Произошла ошибка");
 				return;
@@ -79,7 +80,8 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 			resetSizes();
 			router.push("/nomenclature");
 		},
-		onError: () => {
+		onError: (error) => {
+			console.error("[NomenclatureEditForm] update request failed", error);
 			toast.error("Произошла ошибка при выполнении запроса");
 		},
 	});
@@ -93,7 +95,16 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 				GTIN: item.GTIN,
 			})),
 		};
+		console.info("[NomenclatureEditForm] submitting payload", payload);
 		mutation.mutate(payload);
+	};
+
+	const onInvalidSubmit = (formErrors: FieldErrors<NomenclatureEditData>) => {
+		console.error("[NomenclatureEditForm] validation blocked submit", {
+			errors: formErrors,
+			currentCodes: codes,
+			currentGtinSize: gtinSize,
+		});
 	};
 
 	const handleSaveGtinSize = (
@@ -132,7 +143,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	return (
 		<form
 			className="flex flex-col w-full h-full gap-4 print:hidden"
-			onSubmit={handleSubmit(onSubmit)}
+			onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
 		>
 			<div className="table-layout h-auto">
 				<div className="table-header">
@@ -153,6 +164,13 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 							type="submit"
 							className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md cursor-pointer"
 							disabled={mutation.isPending}
+							onClick={() => {
+								console.info("[NomenclatureEditForm] save button clicked", {
+									mutationPending: mutation.isPending,
+									codesCount: codes?.length ?? 0,
+									gtinSizeCount: gtinSize.length,
+								});
+							}}
 						>
 							{mutation.isPending ? "Сохранение..." : "Сохранить"}
 						</button>
@@ -160,30 +178,29 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 				</div>
 
 				<div className="flex flex-col gap-4 px-8 py-3">
-					{/* Наименование */}
 					<div className="flex flex-col">
 						<label htmlFor="name">Наименование</label>
 						<input
 							{...register("name")}
 							type="text"
-							className={`w-full rounded-lg border px-3 py-2 ${errors.name ? "border-red-500" : "border-gray-300"
-								}`}
+							className={`w-full rounded-lg border px-3 py-2 ${
+								errors.name ? "border-red-500" : "border-gray-300"
+							}`}
 						/>
 						{errors.name && (
 							<p className="text-sm text-red-500">{errors.name.message}</p>
 						)}
 					</div>
 
-					{/* Row for Модель/Артикул, Цвет, and Размер */}
 					<div className="flex flex-row gap-4">
-						{/* Модель/Артикул */}
 						<div className="flex flex-col flex-1">
 							<label htmlFor="modelArticle">Модель</label>
 							<input
 								{...register("modelArticle")}
 								type="text"
-								className={`w-full rounded-lg border px-3 py-2 ${errors.modelArticle ? "border-red-500" : "border-gray-300"
-									}`}
+								className={`w-full rounded-lg border px-3 py-2 ${
+									errors.modelArticle ? "border-red-500" : "border-gray-300"
+								}`}
 							/>
 							{errors.modelArticle && (
 								<p className="text-sm text-red-500">
@@ -192,14 +209,14 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 							)}
 						</div>
 
-						{/* Цвет */}
 						<div className="flex flex-col flex-1">
 							<label htmlFor="color">Цвет</label>
 							<input
 								{...register("color")}
 								type="text"
-								className={`w-full rounded-lg border px-3 py-2 ${errors.color ? "border-red-500" : "border-gray-300"
-									}`}
+								className={`w-full rounded-lg border px-3 py-2 ${
+									errors.color ? "border-red-500" : "border-gray-300"
+								}`}
 							/>
 							{errors.color && (
 								<p className="text-sm text-red-500">{errors.color.message}</p>
@@ -207,8 +224,6 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 						</div>
 					</div>
 				</div>
-
-				{/* Tables for Configurations and Codes */}
 			</div>
 			<div className="flex flex-row w-full gap-4 h-full flex-1 min-h-[400px] max-h-[400px]">
 				<Controller

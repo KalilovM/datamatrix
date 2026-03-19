@@ -129,6 +129,7 @@ export default function CodesUploadModal({
 				createdAt: new Date().toISOString(),
 			};
 
+			console.info("[CodesUploadModal] adding uploaded code", code);
 			onAdd([code]);
 			toast.success(`Файл ${selectedFile.name} загружен!`);
 			onClose();
