@@ -2,19 +2,18 @@
 # =============================================================================
 # DataMatrix Deployment Script
 # =============================================================================
-# Usage: ./scripts/deploy.sh
-# Run on VPS to deploy latest code from git
+# Usage: ./scripts/deploy.sh [dev|prod]
+# Run on VPS to deploy the requested environment from git.
 # =============================================================================
 
 set -euo pipefail
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
-APP_DIR="/var/www/datamatrix"
-ENV_FILE="/etc/datamatrix/.env"
-LOG_DIR="/var/log/datamatrix"
-BACKUP_DIR="/var/www/datamatrix-backups"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./lib/deploy-targets.sh
+source "${SCRIPT_DIR}/lib/deploy-targets.sh"
+
+TARGET="${1:-${DEPLOY_TARGET:-prod}}"
+load_target_config "$TARGET"
 MAX_BACKUPS=5
 
 # Colors for output
@@ -39,7 +38,7 @@ log_error() {
 }
 
 check_requirements() {
-    log_info "Checking requirements..."
+    log_info "Checking requirements for ${TARGET_LABEL} (${TARGET_ENV})..."
 
     if [ ! -d "$APP_DIR" ]; then
         log_error "Application directory not found: $APP_DIR"
@@ -48,7 +47,7 @@ check_requirements() {
 
     if [ ! -f "$ENV_FILE" ]; then
         log_error "Environment file not found: $ENV_FILE"
-        log_error "Create it from .env.example (or run scripts/vps-setup.sh to generate it automatically)"
+        log_error "Create it from .env.example (or run scripts/vps-setup.sh ${TARGET_ENV} to generate it automatically)"
         exit 1
     fi
 
@@ -144,7 +143,7 @@ backup_current() {
 }
 
 pull_latest() {
-    log_info "Pulling latest code..."
+    log_info "Pulling latest code from branch ${DEPLOY_BRANCH}..."
     cd "$APP_DIR"
 
     # Mark repository as safe for current user to avoid 'dubious ownership' blocks
@@ -153,8 +152,9 @@ pull_latest() {
     # Stash any local changes
     git stash --quiet || true
 
-    # Pull latest from origin
-    git pull origin main
+    git fetch origin "$DEPLOY_BRANCH"
+    git checkout "$DEPLOY_BRANCH"
+    git pull origin "$DEPLOY_BRANCH"
 
     log_info "Current commit: $(git rev-parse --short HEAD)"
 }
@@ -215,14 +215,20 @@ restart_app() {
     cd "$APP_DIR"
     load_env
 
-    # Check if PM2 process exists
-    if pm2 list | grep -q "datamatrix"; then
+    export DATAMATRIX_PM2_APP_NAME="$PM2_APP_NAME"
+    export DATAMATRIX_LOG_DIR="$LOG_DIR"
+    export APP_ENV="$TARGET_ENV"
+    export NODE_ENV="${NODE_ENV:-production}"
+    export PORT="${PORT:-$DEFAULT_PORT}"
+    export HOSTNAME="${HOSTNAME:-$APP_HOST}"
+
+    if pm2 describe "$PM2_APP_NAME" > /dev/null 2>&1; then
         # Reload with zero-downtime restart
-        pm2 reload ecosystem.config.cjs --only datamatrix --env production --update-env
+        pm2 reload ecosystem.config.cjs --only "$PM2_APP_NAME" --update-env
         log_info "Application reloaded (zero-downtime)"
     else
         # Start fresh
-        pm2 start ecosystem.config.cjs --only datamatrix --env production --update-env
+        pm2 start ecosystem.config.cjs --only "$PM2_APP_NAME" --update-env
         log_info "Application started"
     fi
 
@@ -232,13 +238,17 @@ restart_app() {
 
 health_check() {
     log_info "Running health check..."
+    load_env
+
+    local runtime_host="${HOSTNAME:-$APP_HOST}"
+    local runtime_port="${PORT:-$DEFAULT_PORT}"
 
     # Wait for app to be ready
     sleep 5
 
     # Check health endpoint
     for i in {1..10}; do
-        if curl -sf http://127.0.0.1:3000/api/health > /dev/null 2>&1; then
+        if curl -sf "http://${runtime_host}:${runtime_port}/api/health" > /dev/null 2>&1; then
             log_info "Health check passed!"
             return 0
         fi
@@ -247,7 +257,7 @@ health_check() {
     done
 
     log_error "Health check failed after 10 attempts"
-    log_warn "Check logs: pm2 logs datamatrix"
+    log_warn "Check logs: pm2 logs ${PM2_APP_NAME}"
     return 1
 }
 
@@ -261,7 +271,7 @@ rollback() {
         log_info "Rolling back to: $LATEST_BACKUP"
         rm -rf "$APP_DIR/.next"
         cp -r "$BACKUP_DIR/$LATEST_BACKUP" "$APP_DIR/.next"
-        pm2 reload datamatrix --update-env
+        pm2 reload "$PM2_APP_NAME" --update-env
         log_info "Rollback completed"
     else
         log_error "No backup available for rollback"
@@ -273,7 +283,7 @@ rollback() {
 # ---------------------------------------------------------------------------
 main() {
     log_info "========================================="
-    log_info "Starting deployment..."
+    log_info "Starting ${TARGET_LABEL} deployment..."
     log_info "========================================="
 
     check_requirements
