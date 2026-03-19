@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 interface Filters {
 	name: string;
@@ -21,12 +22,21 @@ const defaultFilters: Filters = {
 	gtin: "",
 };
 
-export const useNomenclatureFilterStore = create<FilterStore>((set) => ({
-	filters: defaultFilters,
-	setFilters: (filters) => set({ filters }),
-	updateFilter: (key, value) =>
-		set((state) => ({
-			filters: { ...state.filters, [key]: value },
-		})),
-	resetFilters: () => set({ filters: defaultFilters }),
-}));
+export const useNomenclatureFilterStore = create<FilterStore>()(
+	persist(
+		(set) => ({
+			filters: defaultFilters,
+			setFilters: (filters) => set({ filters }),
+			updateFilter: (key, value) =>
+				set((state) => ({
+					filters: { ...state.filters, [key]: value },
+				})),
+			resetFilters: () => set({ filters: defaultFilters }),
+		}),
+		{
+			name: "nomenclature-filters",
+			storage: createJSONStorage(() => localStorage),
+			partialize: (state) => ({ filters: state.filters }),
+		},
+	),
+);
