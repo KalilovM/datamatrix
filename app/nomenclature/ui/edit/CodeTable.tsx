@@ -20,8 +20,15 @@ export interface Code {
 }
 
 interface CodeTableProps {
-	value?: Code[]; // the controlled array of codes
-	onChange: (value: Code[]) => void; // callback to update codes
+	value?: Code[];
+	onChange: (value: Code[]) => void;
+}
+
+function getCodeIdentity(code: Code) {
+	return (
+		code.id ??
+		`${code.fileName}::${code.createdAt ?? ""}::${String(code.size)}::${code.GTIN}`
+	);
 }
 
 function getCodeTimestamp(createdAt?: string) {
@@ -60,40 +67,35 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const sortedCodes = [...codes].sort(compareCodes);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const [deleteFileName, setDeleteFileName] = useState<string | null>(null);
+	const [deleteCode, setDeleteCode] = useState<Code | null>(null);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 	const [codesView, setCodesView] = useState<string[]>([]);
-	// We still use the print store to set codes and trigger printing.
 	const { setPrintCodes, setSize, triggerPrint } = usePrintStore();
-	// And we read the printTemplate from the nomenclature store.
 	const { printTemplate } = useNomenclatureStore();
 
-	const handleConfirmDelete = (fileName: string) => {
-		const updated = codes.filter((code) => code.fileName !== fileName);
+	const handleConfirmDelete = (codeToDelete: Code) => {
+		const targetIdentity = getCodeIdentity(codeToDelete);
+		const updated = codes.filter(
+			(code) => getCodeIdentity(code) !== targetIdentity,
+		);
 		onChange(updated);
 		toast.success("Файл удален");
 	};
 
-	const handleDelete = (fileName: string) => {
+	const handleDelete = (code: Code) => {
 		setIsDeleteModalOpen(true);
-		setDeleteFileName(fileName);
+		setDeleteCode(code);
 	};
 
-	const handlePrint = (fileName: string) => {
-		const code = codes.find((code) => code.fileName === fileName);
-		if (code) {
-			setPrintCodes(code.codes ?? []);
-			setSize(String(code.size));
-			triggerPrint();
-		}
+	const handlePrint = (code: Code) => {
+		setPrintCodes(code.codes ?? []);
+		setSize(String(code.size));
+		triggerPrint();
 	};
 
-	const handleView = (fileName: string) => {
-		const code = codes.find((code) => code.fileName === fileName);
-		if (code) {
-			setCodesView(code.codes ?? []);
-			setIsViewModalOpen(true);
-		}
+	const handleView = (code: Code) => {
+		setCodesView(code.codes ?? []);
+		setIsViewModalOpen(true);
 	};
 
 	const handleUpload = (newCodes: Code[]) => {
@@ -105,7 +107,6 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	return (
 		<div className="w-full min-h-[400px] max-h-[550px]">
 			<div className="table-layout">
-				{/* Table Header */}
 				<div className="table-header flex justify-between items-center">
 					<p className="table-header-title">Коды DataMatrix</p>
 					<button
@@ -117,7 +118,6 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 					</button>
 				</div>
 
-				{/* Table Rows */}
 				<div className="table-rows-layout relative overflow-x-auto">
 					<table className="w-full text-sm text-left text-gray-500">
 						<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
@@ -128,7 +128,6 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 								>
 									Размер
 								</th>
-
 								<th scope="col" className="px-6 py-3 text-start">
 									Имя файла
 								</th>
@@ -147,7 +146,7 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 							{sortedCodes.length > 0 ? (
 								sortedCodes.map((file) => (
 									<tr
-										key={file.fileName}
+										key={getCodeIdentity(file)}
 										className="bg-white border-b border-gray-200 hover:bg-gray-50"
 									>
 										<td className="pl-6 pr-2 py-4 font-medium whitespace-nowrap w-0">
@@ -175,29 +174,30 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 										<td className="px-6 py-4 text-right flex items-center justify-end gap-2">
 											<button
 												type="button"
-												onClick={() => handleView(file.fileName)}
+												onClick={() => handleView(file)}
 												className="bg-blue-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer"
 											>
 												<EyeIcon className="size-5" />
 											</button>
-											{/* Conditionally render the print button if a print template exists */}
 											<button
 												type="button"
-												onClick={() =>
-													printTemplate && handlePrint(file.fileName)
-												}
+												onClick={() => printTemplate && handlePrint(file)}
 												disabled={!printTemplate}
-												className={`px-2.5 py-2.5 rounded-md shadow-md ring ring-gray-300 transition-colors
-                          ${printTemplate ? "bg-white cursor-pointer" : "cursor-not-allowed"}`}
+												className={`px-2.5 py-2.5 rounded-md shadow-md ring ring-gray-300 transition-colors ${
+													printTemplate
+														? "bg-white cursor-pointer"
+														: "cursor-not-allowed"
+												}`}
 											>
 												<PrintIcon
-													className={`size-5 stroke-2 transition-colors fill-none
-                            ${printTemplate ? "stroke-blue-500" : ""}`}
+													className={`size-5 stroke-2 transition-colors fill-none ${
+														printTemplate ? "stroke-blue-500" : ""
+													}`}
 												/>
 											</button>
 											<button
 												type="button"
-												onClick={() => handleDelete(file.fileName)}
+												onClick={() => handleDelete(file)}
 												className="bg-red-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer"
 											>
 												<BinIcon className="size-5" />
@@ -229,13 +229,13 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 					isOpen={isDeleteModalOpen}
 					onCancel={() => setIsDeleteModalOpen(false)}
 					onConfirm={() => {
-						if (deleteFileName) {
-							handleConfirmDelete(deleteFileName);
+						if (deleteCode) {
+							handleConfirmDelete(deleteCode);
 						}
 						setIsDeleteModalOpen(false);
 					}}
 					title="Удалить файл?"
-					message={`Вы уверены, что хотите удалить файл ${deleteFileName}?`}
+					message={`Вы уверены, что хотите удалить файл ${deleteCode?.fileName ?? ""}?`}
 				/>
 			)}
 
