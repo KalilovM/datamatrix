@@ -124,7 +124,7 @@ export default function CodesUploadModal({
 				fileName: selectedFile.name,
 				content,
 				codes: parsedCodes,
-				size: Number(sizeInput),
+				size: sizeInput,
 				GTIN: trimmedGtin,
 				createdAt: new Date().toISOString(),
 			};
