@@ -71,6 +71,12 @@ export async function GET(
 		return NextResponse.json(null, { status: 404 });
 	}
 
+	const gtinSize = nomenclature.sizeGtin.map((sizeGtin) => ({
+		id: sizeGtin.id,
+		size: sizeGtin.size,
+		GTIN: sizeGtin.gtin,
+	}));
+
 	const transformed = {
 		id: nomenclature.id,
 		name: nomenclature.name,
@@ -78,12 +84,8 @@ export async function GET(
 		color: nomenclature.color || "",
 		GTIN: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.gtin),
 		size: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.size),
-		sizeGtin:
-			nomenclature.sizeGtin.map((sizeGtin) => ({
-				id: sizeGtin.id,
-				size: sizeGtin.size,
-				GTIN: sizeGtin.gtin,
-			})) ?? [],
+		gtinSize,
+		sizeGtin: gtinSize,
 		configurations: nomenclature.configurations.map((cfg) => ({
 			id: cfg.id,
 			label: `1-${cfg.pieceInPack}-${cfg.packInPallet}`,

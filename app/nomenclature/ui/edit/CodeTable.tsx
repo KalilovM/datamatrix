@@ -62,8 +62,6 @@ export default function CodeTable({ value = [], onChange }: CodeTableProps) {
 	const [deleteFileName, setDeleteFileName] = useState<string | null>(null);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 	const [codesView, setCodesView] = useState<string[]>([]);
-	console.log(codes);
-
 	// We still use the print store to set codes and trigger printing.
 	const { setPrintCodes, setSize, triggerPrint } = usePrintStore();
 	// And we read the printTemplate from the nomenclature store.

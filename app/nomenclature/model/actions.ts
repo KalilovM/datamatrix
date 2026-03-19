@@ -116,7 +116,11 @@ export async function fetchNomenclatureById(
 			modelArticle: true,
 			color: true,
 			sizeGtin: {
-				select: { gtin: true },
+				select: {
+					id: true,
+					gtin: true,
+					size: true,
+				},
 			},
 			configurations: true,
 			codePacks: {
@@ -127,12 +131,19 @@ export async function fetchNomenclatureById(
 
 	if (!nomenclature) return null;
 
+	const gtinSize = nomenclature.sizeGtin.map((sizeGtin) => ({
+		id: sizeGtin.id,
+		size: sizeGtin.size,
+		GTIN: sizeGtin.gtin,
+	}));
+
 	const transformed = {
 		id: nomenclature.id,
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
 		GTIN: nomenclature.sizeGtin[0]?.gtin || "",
+		gtinSize,
 		configurations: nomenclature.configurations.map((cfg) => ({
 			id: cfg.id,
 			label: `1-${cfg.pieceInPack}-${cfg.packInPallet}`,

@@ -52,7 +52,6 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 
 	useEffect(() => {
 		if (nomenclature) {
-			console.log(nomenclature);
 			setGtinSize(
 				(nomenclature.gtinSize ?? []).map((item) => ({
 					id: item.id ?? null,
@@ -94,7 +93,6 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 				GTIN: item.GTIN,
 			})),
 		};
-		console.log(payload);
 		mutation.mutate(payload);
 	};
 
@@ -115,8 +113,6 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 				return code;
 			});
 			setValue("codes", updatedCodes);
-			console.log("Old codes:", codes);
-			console.log("Updated codes:", updatedCodes);
 			const { updateGtinSize, addGtinSize } = useGtinSizeStore.getState();
 
 			if (oldGtin !== undefined && oldSize !== undefined) {

@@ -32,7 +32,8 @@ export default function Page() {
 	]);
 
 	if (isLoading) return <Layout>Загрузка...</Layout>;
-	if (error || !nomenclature) return <Layout>Номенклатура не найдена</Layout>;
+	if (error || !nomenclatureData)
+		return <Layout>Номенклатура не найдена</Layout>;
 
 	return (
 		<Layout>
