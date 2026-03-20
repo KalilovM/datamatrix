@@ -17,7 +17,6 @@ source "${SCRIPT_DIR}/lib/deploy-targets.sh"
 TARGET="${1:-all}"
 NODE_VERSION="${NODE_VERSION:-20}"
 DEPLOY_USER="${DEPLOY_USER:-marlen}"
-SSH_PORT="${SSH_PORT:-45633}"
 SSL_EMAIL="${SSL_EMAIL:-admin@alonamoda.com}"
 
 RED='\033[0;31m'
@@ -387,13 +386,21 @@ setup_target() {
 
 main() {
     require_root
+    BOOTSTRAP_TARGET="$(normalize_target "$TARGET")"
+
+    if [ "$BOOTSTRAP_TARGET" = "all" ]; then
+        SSH_PORT="${SSH_PORT:-22}"
+    else
+        load_target_config "$BOOTSTRAP_TARGET"
+    fi
+
     install_base_packages
     install_node_pm2
     setup_deploy_user
     setup_firewall_and_services
     setup_certbot_auto_renew
 
-    case "$(normalize_target "$TARGET")" in
+    case "$BOOTSTRAP_TARGET" in
         all)
             setup_target prod
             setup_target dev

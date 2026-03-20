@@ -36,7 +36,6 @@ load_target_config() {
     export DEPLOY_USER="${DEPLOY_USER:-marlen}"
     export REPO_URL="${REPO_URL:-https://github.com/KalilovM/datamatrix.git}"
     export SSL_EMAIL="${SSL_EMAIL:-admin@alonamoda.com}"
-    export SSH_PORT="${SSH_PORT:-45633}"
     export APP_HOST="${APP_HOST:-127.0.0.1}"
 
     case "$target" in
@@ -44,6 +43,7 @@ load_target_config() {
             export TARGET_LABEL="production"
             export DOMAIN="dm.alonamoda.com"
             export SERVER_IP="${SERVER_IP:-193.124.33.151}"
+            export SSH_PORT="${SSH_PORT:-${PROD_SSH_PORT:-22}}"
             export DEFAULT_PORT="${DEFAULT_PORT:-3000}"
             export APP_DIR="/var/www/datamatrix"
             export ENV_DIR="/etc/datamatrix"
@@ -60,7 +60,8 @@ load_target_config() {
         dev)
             export TARGET_LABEL="development"
             export DOMAIN="dm.smartlogistics.com"
-            export SERVER_IP="${SERVER_IP:-217.29.22.10}"
+            export SERVER_IP="${SERVER_IP:-185.54.253.210}"
+            export SSH_PORT="${SSH_PORT:-${DEV_SSH_PORT:-45632}}"
             export DEFAULT_PORT="${DEFAULT_PORT:-3001}"
             export APP_DIR="/var/www/datamatrix-dev"
             export ENV_DIR="/etc/datamatrix"

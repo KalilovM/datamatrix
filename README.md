@@ -12,7 +12,7 @@ Next.js + Prisma app with VPS deployment scripts for separate development and pr
 
 - Production: `dm.alonamoda.com`
 - Development: `dm.smartlogistics.com`
-- Dev VPS: `217.29.22.10:45633`
+- Dev VPS: `185.54.253.210:45632`
 - Current prod IP: `193.124.33.151`
 
 Both environments use the same deployment script and PM2 ecosystem file, but keep separate runtime resources:
@@ -37,7 +37,7 @@ Current layout:
 This works whether dev and prod live on one host or on separate servers. Your current setup is split-host:
 
 - Prod stays on `dm.alonamoda.com` / `193.124.33.151`
-- Dev goes to `dm.smartlogistics.com` / `217.29.22.10`
+- Dev goes to `dm.smartlogistics.com` / `185.54.253.210`
 
 ## VPS bootstrap
 
@@ -60,7 +60,7 @@ What it configures:
 - PostgreSQL
 - Nginx reverse proxy for both domains
 - Let's Encrypt certificates
-- UFW using SSH port `45633`
+- UFW using the configured SSH port for that server
 - fail2ban
 - logrotate
 - per-environment env files with generated secrets
@@ -70,7 +70,7 @@ The bootstrap is idempotent and keeps an existing env file instead of regenerati
 Important DNS note:
 
 - `dm.alonamoda.com` currently resolves to `193.124.33.151`
-- `dm.smartlogistics.com` currently does not resolve yet, so its A record still needs to be pointed at `217.29.22.10`
+- `dm.smartlogistics.com` currently does not resolve yet, so its A record still needs to be pointed at `185.54.253.210`
 
 ## Deploying on the VPS
 
@@ -107,8 +107,8 @@ Flow:
 
 Required GitHub repository secrets:
 
-- `DEV_SSH_HOST` = `217.29.22.10`
-- `DEV_SSH_PORT` = `45633`
+- `DEV_SSH_HOST` = `185.54.253.210`
+- `DEV_SSH_PORT` = `45632`
 - `DEV_SSH_USER` = `marlen`
 - `DEV_SSH_PASSWORD` = your dev VPS password
 - `PROD_SSH_HOST` = your production server host/IP
