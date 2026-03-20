@@ -1,37 +1,24 @@
 "use client";
 
+import type { PrintTemplateData } from "@/print-templates/models/types";
+import {
+	fixedNomenclatureDetailsFields,
+	isNomenclatureDetailsLayout,
+	normalizeEditableFieldType,
+	templateFieldOptions,
+	type EditableTemplateField,
+} from "@/shared/lib/printingTemplate";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import type { PrintTemplateData } from "@/print-templates/models/types";
 import PrintingPreview from "./PrintingPreview";
-
-enum TemplateFieldType {
-	NAME = "name",
-	MODEL_ARTICLE = "model_article",
-	COLOR = "color",
-	SIZE = "size",
-}
-
-const printRenamings = {
-	model_article: "modelArticle",
-	name: "name",
-	color: "color",
-	size: "size",
-};
-
-const fieldOptions = [
-	{ value: TemplateFieldType.NAME, label: "Имя" },
-	{ value: TemplateFieldType.MODEL_ARTICLE, label: "Модель" },
-	{ value: TemplateFieldType.COLOR, label: "Цвет" },
-	{ value: TemplateFieldType.SIZE, label: "Размер" },
-];
 
 interface EditPrintTemplateFormValues {
 	name: string;
 	type: "AGGREGATION" | "NOMENCLATURE";
+	layout: "STANDARD" | "NOMENCLATURE_DETAILS";
 	qrType: "QR" | "DATAMATRIX";
 	qrPosition: "LEFT" | "RIGHT" | "CENTER";
 	canvasSize: {
@@ -40,7 +27,7 @@ interface EditPrintTemplateFormValues {
 	};
 	fields: {
 		id?: string;
-		fieldType: string;
+		fieldType: EditableTemplateField | "";
 		isBold: boolean;
 		fontSize: number;
 		order: number;
@@ -51,27 +38,46 @@ interface PrintTemplateEditFormProps {
 	initialData: PrintTemplateData;
 }
 
-const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
+function hasSameFields(
+	left: EditPrintTemplateFormValues["fields"],
+	right: EditPrintTemplateFormValues["fields"],
+) {
+	return (
+		left.length === right.length &&
+		left.every(
+			(field, index) =>
+				field.id === right[index]?.id &&
+				field.fieldType === right[index]?.fieldType &&
+				field.isBold === right[index]?.isBold &&
+				field.fontSize === right[index]?.fontSize &&
+				field.order === right[index]?.order,
+		)
+	);
+}
+
+const PrintTemplateEditForm = ({
+	initialData,
+}: PrintTemplateEditFormProps) => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	// Map initialData to our form shape.
+
 	const defaultValues: EditPrintTemplateFormValues = useMemo(
 		() => ({
 			name: initialData.name,
 			type: initialData.type,
+			layout: initialData.layout ?? "STANDARD",
 			qrType: initialData.qrType,
 			qrPosition: initialData.qrPosition,
 			canvasSize: {
-				width: initialData.width,
-				height: initialData.height,
+				width: String(initialData.width),
+				height: String(initialData.height),
 			},
 			fields: [...initialData.fields]
 				.sort((a, b) => a.order - b.order)
 				.map((field) => ({
 					id: field.id,
-					fieldType: field.fieldType.toLowerCase(),
+					fieldType: normalizeEditableFieldType(field.fieldType),
 					isBold: field.isBold,
-					// Convert fontSize from string to number for the input.
 					fontSize: Number(field.fontSize),
 					order: field.order,
 				})),
@@ -91,61 +97,121 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 		defaultValues,
 	});
 
+	const [availableFields, setAvailableFields] = useState(templateFieldOptions);
+	const templateType = watch("type");
+	const layout = watch("layout");
 	const qrPosition = watch("qrPosition");
 	const fields = watch("fields");
 	const canvasSize = watch("canvasSize");
+	const isDetailsLayout = isNomenclatureDetailsLayout(layout);
 
-	// Manage field count and defaults based on QR position.
+	const buildFixedDetailFields = useCallback(() => {
+		const existingFields = new Map(
+			(getValues("fields") ?? []).map((field) => [field.fieldType, field]),
+		);
+
+		return fixedNomenclatureDetailsFields.map((field, index) => ({
+			id: existingFields.get(field.field)?.id ?? "",
+			fieldType: field.field,
+			isBold: existingFields.get(field.field)?.isBold ?? field.bold,
+			fontSize: existingFields.get(field.field)?.fontSize ?? field.size,
+			order: index + 1,
+		}));
+	}, [getValues]);
+
 	useEffect(() => {
+		if (templateType !== "NOMENCLATURE" && layout !== "STANDARD") {
+			setValue("layout", "STANDARD");
+		}
+	}, [layout, setValue, templateType]);
+
+	useEffect(() => {
+		if (isDetailsLayout) {
+			if (qrPosition !== "RIGHT") {
+				setValue("qrPosition", "RIGHT");
+			}
+
+			const detailFields = buildFixedDetailFields();
+			if (!hasSameFields(getValues("fields") ?? [], detailFields)) {
+				setValue("fields", detailFields);
+			}
+			return;
+		}
+
 		if (qrPosition === "CENTER") {
-			// When in CENTER mode, only allow one field (with "Имя")
-			setValue("fields", [
+			const currentFields = getValues("fields") ?? [];
+			const centerFields = [
 				{
-					id: defaultValues.fields[0]?.id || "",
-					fieldType: TemplateFieldType.NAME,
+					id: currentFields[0]?.id ?? "",
+					fieldType: "name" as const,
 					isBold: false,
 					fontSize: 14,
 					order: 1,
 				},
-			]);
-		} else {
-			// For LEFT/RIGHT, if we don't have 4 fields then set a default array.
-			if (fields.length !== 4) {
-				setValue(
-					"fields",
-					Array(4)
-						.fill(0)
-						.map((_, index) => ({
-							id: defaultValues.fields[index]?.id || "",
-							fieldType: defaultValues.fields[index]?.fieldType || "",
-							isBold: defaultValues.fields[index]?.isBold || false,
-							fontSize: defaultValues.fields[index]?.fontSize || 14,
-							order: defaultValues.fields[index]?.order || index + 1,
-						})),
-				);
+			];
+			if (!hasSameFields(currentFields, centerFields)) {
+				setValue("fields", centerFields);
 			}
+			return;
 		}
-	}, [defaultValues.fields, fields.length, qrPosition, setValue]);
 
-	// Update available fields options when not in CENTER mode.
-	const [availableFields, setAvailableFields] = useState(fieldOptions);
-	useEffect(() => {
-		if (qrPosition !== "CENTER") {
-			const selectedFields = getValues("fields").map((f) => f.fieldType);
-			setAvailableFields(
-				fieldOptions.filter((opt) => !selectedFields.includes(opt.value)),
+		if (fields.length !== 4) {
+			const nextFields: EditPrintTemplateFormValues["fields"] = Array.from(
+				{ length: 4 },
+				(_, index) => ({
+				id: defaultValues.fields[index]?.id || "",
+				fieldType:
+					(defaultValues.fields[index]?.fieldType as
+						| EditableTemplateField
+						| "") || "",
+				isBold: defaultValues.fields[index]?.isBold || false,
+				fontSize: defaultValues.fields[index]?.fontSize || 14,
+				order: defaultValues.fields[index]?.order || index + 1,
+				}),
 			);
+			setValue("fields", nextFields);
 		}
-	}, [getValues, qrPosition]);
+	}, [
+		defaultValues.fields,
+		fields.length,
+		getValues,
+		isDetailsLayout,
+		qrPosition,
+		setValue,
+		buildFixedDetailFields,
+	]);
+
+	useEffect(() => {
+		if (isDetailsLayout || qrPosition === "CENTER") {
+			return;
+		}
+
+		const selectedFields = (getValues("fields") ?? []).map(
+			(field) => field.fieldType,
+		);
+		setAvailableFields(
+			templateFieldOptions.filter(
+				(option) => !selectedFields.includes(option.value),
+			),
+		);
+	}, [fields, getValues, isDetailsLayout, qrPosition]);
 
 	const onSubmit = async (data: EditPrintTemplateFormValues) => {
+		const payload = isNomenclatureDetailsLayout(data.layout)
+			? {
+					...data,
+					qrPosition: "RIGHT" as const,
+					fields: buildFixedDetailFields(),
+				}
+			: data;
+
 		try {
 			const res = await fetch(
 				`/api/printing-templates/${initialData.id}/edit`,
 				{
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(data),
+					body: JSON.stringify(payload),
 				},
 			);
 			if (res.ok) {
@@ -184,6 +250,18 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 					<option value="NOMENCLATURE">Номенклатура</option>
 				</select>
 
+				{templateType === "NOMENCLATURE" && (
+					<>
+						<label className="font-bold">Вариант макета:</label>
+						<select {...register("layout")} className="border rounded p-2 w-full">
+							<option value="STANDARD">Стандартный</option>
+							<option value="NOMENCLATURE_DETAILS">
+								Условно номенклатура
+							</option>
+						</select>
+					</>
+				)}
+
 				<label className="font-bold">Тип кода:</label>
 				<select {...register("qrType")} className="border rounded p-2 w-full">
 					<option value="QR">QR</option>
@@ -194,6 +272,7 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 				<select
 					{...register("qrPosition")}
 					className="border rounded p-2 w-full"
+					disabled={isDetailsLayout}
 				>
 					<option value="LEFT">Слева</option>
 					<option value="RIGHT">Справа</option>
@@ -211,12 +290,7 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 							value={JSON.stringify(value)}
 							onChange={(e) => onChange(JSON.parse(e.target.value))}
 						>
-							<option
-								value={JSON.stringify({
-									width: value.width,
-									height: value.height,
-								})}
-							>
+							<option value={JSON.stringify(value)}>
 								{value.width} x {value.height}
 							</option>
 						</select>
@@ -225,94 +299,117 @@ const PrintTemplateEditForm = ({ initialData }: PrintTemplateEditFormProps) => {
 			</div>
 
 			<div className="p-4 border rounded-lg bg-white border-blue-600">
-				<label className="font-bold">Выберите текстовые поля:</label>
-				{fields.map((_, index) => (
-					<div key={index} className="flex items-center space-x-4 mt-2">
-						<Controller
-							name={`fields.${index}.fieldType`}
-							control={control}
-							render={({ field }) => {
-								const currentValue = field.value;
-								// In CENTER mode, only allow "Имя"
-								if (qrPosition === "CENTER") {
+				<label className="font-bold">Поля этикетки:</label>
+
+				{isDetailsLayout ? (
+					<>
+						<p className="mt-2 text-sm text-gray-600">
+							Фиксированный макет: Дата, Наименование, Бренд, Модель,
+							Размер, Цвет, Изготовитель, Адрес, Сделано в Кыргызстане и
+							Состав.
+						</p>
+						<div className="mt-3 flex flex-wrap gap-2">
+							{fixedNomenclatureDetailsFields.map((field) => (
+								<span
+									key={field.field}
+									className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+								>
+									{
+										templateFieldOptions.find(
+											(option) => option.value === field.field,
+										)?.label
+									}
+								</span>
+							))}
+						</div>
+					</>
+				) : (
+					fields.map((_, index) => (
+						<div key={index} className="flex items-center space-x-4 mt-2">
+							<Controller
+								name={`fields.${index}.fieldType`}
+								control={control}
+								render={({ field }) => {
+									if (qrPosition === "CENTER") {
+										return (
+											<select {...field} className="border rounded p-2 w-full">
+												<option value="">Не выбрано</option>
+												<option value="name">Наименование</option>
+											</select>
+										);
+									}
+
+									const currentValue = field.value ?? "";
+									const selectedOption = templateFieldOptions.find(
+										(option) => option.value === currentValue,
+									);
+									const optionsToRender =
+										currentValue &&
+										!availableFields.some(
+											(option) => option.value === currentValue,
+										) &&
+										selectedOption
+											? [selectedOption, ...availableFields]
+											: availableFields;
+
 									return (
 										<select {...field} className="border rounded p-2 w-full">
 											<option value="">Не выбрано</option>
-											<option value={TemplateFieldType.NAME}>Имя</option>
+											{optionsToRender.map((option) => (
+												<option key={option.value} value={option.value}>
+													{option.label}
+												</option>
+											))}
 										</select>
 									);
-								}
-								// For LEFT/RIGHT, combine available options with the currently selected value if missing.
-								const selectedOption = fieldOptions.find(
-									(opt) => opt.value === currentValue,
-								);
-
-								const optionsToRender =
-									currentValue &&
-										!availableFields.some((opt) => opt.value === currentValue) &&
-										selectedOption
-										? [selectedOption, ...availableFields]
-										: availableFields;
-
-								return (
-									<select {...field} className="border rounded p-2 w-full">
-										<option value="">Не выбрано</option>
-										{optionsToRender.map((option) => (
-											<option key={option.value} value={option.value}>
-												{option.label}
-											</option>
-										))}
-									</select>
-								);
-							}}
-						/>
-						<Controller
-							name={`fields.${index}.isBold`}
-							control={control}
-							render={({ field }) => (
-								<label className="flex items-center">
+								}}
+							/>
+							<Controller
+								name={`fields.${index}.isBold`}
+								control={control}
+								render={({ field }) => (
+									<label className="flex items-center">
+										<input
+											type="checkbox"
+											checked={field.value}
+											onChange={(e) => field.onChange(e.target.checked)}
+										/>
+										<span>Жирный</span>
+									</label>
+								)}
+							/>
+							<Controller
+								name={`fields.${index}.fontSize`}
+								control={control}
+								render={({ field }) => (
 									<input
-										type="checkbox"
-										checked={field.value}
-										onChange={(e) => field.onChange(e.target.checked)}
+										{...field}
+										type="number"
+										min="8"
+										max="32"
+										onChange={(e) => field.onChange(Number(e.target.value))}
+										className="border rounded p-1 w-16 text-center"
 									/>
-									<span>Жирный</span>
-								</label>
-							)}
-						/>
-						<Controller
-							name={`fields.${index}.fontSize`}
-							control={control}
-							render={({ field }) => (
-								<input
-									{...field}
-									type="number"
-									min="8"
-									max="32"
-									onChange={(e) => field.onChange(Number(e.target.value))}
-									className="border rounded p-1 w-16 text-center"
-								/>
-							)}
-						/>
-					</div>
-				))}
+								)}
+							/>
+						</div>
+					))
+				)}
 			</div>
 
 			<div className="w-full h-full">
 				<PrintingPreview
-					textFields={fields.map((f) => ({
-						field:
-							(printRenamings[
-								f.fieldType as keyof typeof printRenamings
-							] ?? "name") as "name" | "modelArticle" | "color" | "size",
-						bold: f.isBold,
-						size: f.fontSize,
+					textFields={fields.map((field) => ({
+						field: field.fieldType,
+						bold: field.isBold,
+						size: field.fontSize,
 					}))}
 					qrPosition={qrPosition}
 					canvasSize={{
 						width: `${canvasSize.width}mm`,
 						height: `${canvasSize.height}mm`,
 					}}
+					layout={layout}
 				/>
 			</div>
 

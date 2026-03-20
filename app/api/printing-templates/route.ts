@@ -1,7 +1,18 @@
 import { authOptions } from "@/shared/lib/auth";
+import {
+	isNomenclatureDetailsLayout,
+	toPrismaTemplateFieldType,
+	toPrismaTemplateLayout,
+} from "@/shared/lib/printingTemplate";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+
+type TemplateFieldInput = {
+	field: string;
+	bold: boolean;
+	size: number;
+};
 
 export async function GET() {
 	try {
@@ -25,7 +36,7 @@ export async function GET() {
 			);
 		}
 
-		if (!user?.companyId) {
+		if (!user.companyId) {
 			return NextResponse.json(
 				{ error: "Требуется наличие компании" },
 				{ status: 401 },
@@ -38,12 +49,7 @@ export async function GET() {
 			});
 			return NextResponse.json(printingTemplates, { status: 200 });
 		}
-		if (!companyId) {
-			return NextResponse.json(
-				{ error: "Не найдена компания" },
-				{ status: 404 },
-			);
-		}
+
 		const printingTemplates = await prisma.printingTemplate.findMany({
 			where: { companyId },
 			orderBy: { type: "asc" },
@@ -60,16 +66,24 @@ export async function GET() {
 
 export async function POST(request: Request) {
 	try {
-		// Parse the JSON payload
 		const data = await request.json();
-		const { qrPosition, textFields, qrType, canvasSize, name, type } = data;
+		const {
+			qrPosition,
+			textFields = [],
+			qrType,
+			canvasSize,
+			name,
+			type,
+			layout = "standard",
+		} = data;
 		const { width, height } = canvasSize;
 
-		// Convert canvasSize dimensions from strings (e.g., "58mm") to numbers
-		const widthInt = Number.parseInt(width.replace("mm", "").trim(), 10);
-		const heightInt = Number.parseInt(height.replace("mm", "").trim(), 10);
+		const widthInt = Number.parseInt(String(width).replace("mm", "").trim(), 10);
+		const heightInt = Number.parseInt(
+			String(height).replace("mm", "").trim(),
+			10,
+		);
 
-		// Ensure the user is authenticated and has an associated company
 		const session = await getServerSession(authOptions);
 		if (!session?.user) {
 			return NextResponse.json({ message: "Не авторизован" }, { status: 401 });
@@ -82,28 +96,13 @@ export async function POST(request: Request) {
 				companyId: true,
 			},
 		});
-		if (!user) {
-			return NextResponse.json(
-				{ message: "Пользователь не найден" },
-				{ status: 401 },
-			);
-		}
-
 		if (!user?.companyId) {
 			return NextResponse.json(
 				{ error: "Требуется наличие компании" },
 				{ status: 401 },
 			);
 		}
-		const { companyId } = user;
-		if (!companyId) {
-			return NextResponse.json(
-				{ error: "Требуется наличие компании" },
-				{ status: 401 },
-			);
-		}
 
-		// Validate payload
 		if (!qrPosition || !["left", "right", "center"].includes(qrPosition)) {
 			return NextResponse.json(
 				{ error: "Некорректная позиция QR кода" },
@@ -117,10 +116,6 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Map the frontend values to your Prisma enums.
-		const qrPos = qrPosition.toUpperCase(); // "left" => "LEFT", "right" => "RIGHT", "center" => "CENTER"
-
-		// Mapping for the printing template type
 		const typeMapping: { [key: string]: "AGGREGATION" | "NOMENCLATURE" } = {
 			aggregation: "AGGREGATION",
 			nomenclature: "NOMENCLATURE",
@@ -133,45 +128,52 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Mapping for text fields from frontend keys to Prisma enum values.
-		const fieldTypeMapping: {
-			[key: string]: "NAME" | "MODEL_ARTICLE" | "COLOR" | "SIZE";
-		} = {
-			name: "NAME",
-			modelArticle: "MODEL_ARTICLE",
-			color: "COLOR",
-			size: "SIZE",
-		};
+		const templateLayout = toPrismaTemplateLayout(layout);
+		if (
+			templateLayout === "NOMENCLATURE_DETAILS" &&
+			templateType !== "NOMENCLATURE"
+		) {
+			return NextResponse.json(
+				{ error: "Этот макет доступен только для номенклатуры" },
+				{ status: 400 },
+			);
+		}
 
-		type TemplateFieldInput = {
-			field: string;
-			bold: boolean;
-			size: number;
-		};
-
-		// Filter out text fields where the field id is empty.
 		const filteredFields = textFields.filter(
 			(field: TemplateFieldInput) => field.field && field.field.trim() !== "",
 		);
-		// Create the printing template with nested field creation.
+		const normalizedQrPosition: "LEFT" | "RIGHT" | "CENTER" =
+			isNomenclatureDetailsLayout(layout)
+				? "RIGHT"
+				: qrPosition === "left"
+					? "LEFT"
+					: qrPosition === "center"
+						? "CENTER"
+						: "RIGHT";
+		const normalizedQrType: "QR" | "DATAMATRIX" =
+			String(qrType).toLowerCase() === "datamatrix" ? "DATAMATRIX" : "QR";
+
 		const template = await prisma.printingTemplate.create({
 			data: {
 				name: name || "Новый шаблон",
 				type: templateType,
-				qrPosition: qrPos,
+				layout: templateLayout,
+				qrPosition: normalizedQrPosition,
 				width: widthInt,
 				height: heightInt,
-				qrType: qrType.toUpperCase(),
+				qrType: normalizedQrType,
 				company: {
-					connect: { id: companyId },
+					connect: { id: user.companyId },
 				},
 				fields: {
-					create: filteredFields.map((field: TemplateFieldInput, index: number) => ({
-						order: index + 1,
-						fieldType: fieldTypeMapping[field.field],
-						isBold: field.bold,
-						fontSize: field.size,
-					})),
+					create: filteredFields.map(
+						(field: TemplateFieldInput, index: number) => ({
+							order: index + 1,
+							fieldType: toPrismaTemplateFieldType(field.field),
+							isBold: field.bold,
+							fontSize: field.size,
+						}),
+					),
 				},
 			},
 		});

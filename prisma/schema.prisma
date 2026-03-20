@@ -73,6 +73,7 @@ model Nomenclature {
   name                 String
   modelArticle         String?
   color                String?
+  composition          String?
   configurations       Configuration[]
   codePacks            CodePack[]
   company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -233,11 +234,17 @@ enum TemplateFieldType {
   MODEL_ARTICLE // "Модель"
   COLOR // "Цвет"
   SIZE // "Размер"
+  COMPOSITION // "Состав"
 }
 
 enum PrintingTemplateType {
   NOMENCLATURE
   AGGREGATION
+}
+
+enum PrintingTemplateLayout {
+  STANDARD
+  NOMENCLATURE_DETAILS
 }
 
 enum QrType {
@@ -248,6 +255,7 @@ enum QrType {
 model PrintingTemplate {
   id         String                  @id @default(uuid())
   type       PrintingTemplateType
+  layout     PrintingTemplateLayout  @default(STANDARD)
   name       String
   width      Int
   height     Int

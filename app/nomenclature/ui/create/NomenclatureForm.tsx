@@ -192,6 +192,16 @@ export default function NomenclatureForm() {
 							)}
 						</div>
 					</div>
+
+					<div className="flex flex-col">
+						<label htmlFor="composition">Состав</label>
+						<input
+							{...register("composition")}
+							type="text"
+							className="w-full rounded-lg border border-gray-300 px-2 py-1"
+							placeholder="Необязательно"
+						/>
+					</div>
 				</div>
 
 				{/* Tables for Configurations and Codes */}

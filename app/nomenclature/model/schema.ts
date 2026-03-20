@@ -20,9 +20,12 @@ export const CodeSchema = z.object({
 });
 
 export const NomenclatureSchema = z.object({
-	name: z.string().min(3, "Наименование должно содержать не менее 3 символов"),
+	name: z
+		.string()
+		.min(3, "Наименование должно содержать не менее 3 символов"),
 	modelArticle: z.string().min(1, "Модель обязательна"),
 	color: z.string().min(1, "Цвет обязателен"),
+	composition: z.string().optional(),
 	configurations: z.array(ConfigurationSchema).optional(),
 	codes: z.array(CodeSchema).optional(),
 	gtinSize: z
@@ -65,9 +68,12 @@ export const CodeEditSchema = z.object({
 
 export const NomenclatureEditSchema = z.object({
 	id: z.string().min(1, "Идентификатор обязателен"),
-	name: z.string().min(3, "Наименование должно содержать не менее 3 символов"),
+	name: z
+		.string()
+		.min(3, "Наименование должно содержать не менее 3 символов"),
 	modelArticle: z.string().min(1, "Модель обязательна"),
 	color: z.string().min(1, "Цвет обязателен"),
+	composition: z.string().optional(),
 	configurations: z.array(ConfigurationEditSchema).optional(),
 	codes: z.array(CodeEditSchema).optional(),
 	gtinSize: z

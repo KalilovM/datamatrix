@@ -1,9 +1,15 @@
 "use client";
 
+import {
+	isNomenclatureDetailsLayout,
+	nomenclatureLayoutStaticContent,
+	templateFieldLabels,
+	type EditableTemplateField,
+} from "@/shared/lib/printingTemplate";
 import type React from "react";
 
 interface TextField {
-	field: TextFieldKey | "";
+	field: EditableTemplateField | "";
 	bold: boolean;
 	size: number;
 }
@@ -17,86 +23,149 @@ interface PrintingPreviewProps {
 	textFields: TextField[];
 	qrPosition: "left" | "right" | "center" | string;
 	canvasSize: CanvasSize;
+	layout?: string;
 }
-
-type TextFieldKey = "name" | "modelArticle" | "color" | "size";
-
-const TEXT_FIELD_LABEL: Record<TextFieldKey, string> = {
-	name: "Имя",
-	modelArticle: "Модель",
-	color: "Цвет",
-	size: "Размер",
-};
 
 const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 	textFields,
 	qrPosition,
 	canvasSize,
+	layout,
 }) => {
-	// Prepare the container style based on canvasSize
 	const containerStyle = {
 		width: canvasSize.width,
 		height: canvasSize.height,
 	};
 
-	// Renders a simple QR placeholder.
-	const renderQRCode = () => (
-		<div className="flex items-center justify-center border p-4 w-full h-full">
-			<span>QR Code</span>
+	const normalizedQrPosition = String(qrPosition).toLowerCase();
+	const textFieldMap = new Map(
+		textFields
+			.filter((field): field is TextField & { field: EditableTemplateField } =>
+				Boolean(field.field),
+			)
+			.map((field) => [field.field, field]),
+	);
+
+	const renderQRCode = (compact = false) => (
+		<div className="flex items-center justify-center border w-full h-full rounded-sm bg-gray-50">
+			<span className={compact ? "text-xs" : "text-sm"}>QR</span>
 		</div>
 	);
 
-	// Renders text fields as previewed text with the given font size and weight.
 	const renderTextFields = () => (
 		<div className="flex flex-col gap-2 p-2 w-full h-full">
-			{textFields.map((tf, index) => {
-				if (!tf.field) return null;
+			{textFields.map((field, index) => {
+				if (!field.field) return null;
+
 				return (
 					<div
-						key={index}
+						key={`${field.field}-${index}`}
 						style={{
-							fontSize: `${tf.size}px`,
-							fontWeight: tf.bold ? "bold" : "normal",
+							fontSize: `${field.size}px`,
+							fontWeight: field.bold ? "bold" : "normal",
 						}}
 						className="w-full h-full flex items-center"
 					>
-						{TEXT_FIELD_LABEL[tf.field]}
+						{templateFieldLabels[field.field]}
 					</div>
 				);
 			})}
 		</div>
 	);
 
-	if (qrPosition === "center") {
+	const renderDetailRow = (
+		label: string,
+		value: string,
+		options?: { field?: EditableTemplateField; isAccent?: boolean },
+	) => {
+		const fieldStyle = options?.field ? textFieldMap.get(options.field) : undefined;
+		return (
+			<div className="flex items-baseline gap-1 leading-tight">
+				<span className="text-[8px] font-semibold uppercase tracking-tight">
+					{label}:
+				</span>
+				<span
+					style={{
+						fontSize: `${fieldStyle?.size ?? (options?.isAccent ? 11 : 9)}px`,
+						fontWeight: fieldStyle?.bold || options?.isAccent ? "bold" : "normal",
+					}}
+					className="truncate"
+				>
+					{value}
+				</span>
+			</div>
+		);
+	};
+
+	if (isNomenclatureDetailsLayout(layout)) {
+		return (
+			<div
+				style={containerStyle}
+				className="border p-1 bg-white mx-auto flex flex-col gap-1"
+			>
+				<div className="flex gap-2 h-[60%]">
+					<div className="w-[62%] flex flex-col justify-between overflow-hidden">
+						{renderDetailRow("Дата", "20.03.2026")}
+						{renderDetailRow("Наименование", "Номенклатура", {
+							field: "name",
+							isAccent: true,
+						})}
+						{renderDetailRow("Бренд", nomenclatureLayoutStaticContent.brand)}
+						{renderDetailRow("Модель", "Модель", {
+							field: "modelArticle",
+						})}
+						{renderDetailRow("Размер", "42", {
+							field: "size",
+						})}
+						{renderDetailRow("Цвет", "Черный", {
+							field: "color",
+						})}
+					</div>
+					<div className="w-[38%] flex items-center justify-center">
+						<div className="w-full h-[75%]">{renderQRCode(true)}</div>
+					</div>
+				</div>
+				<div className="h-[40%] flex flex-col justify-between overflow-hidden border-t pt-1">
+					{renderDetailRow(
+						"Изготовитель",
+						nomenclatureLayoutStaticContent.manufacturer,
+					)}
+					{renderDetailRow("Адрес", nomenclatureLayoutStaticContent.address)}
+					<div className="text-[9px] font-semibold">
+						{nomenclatureLayoutStaticContent.countryOfOrigin}
+					</div>
+					{renderDetailRow("Состав", "100% хлопок", {
+						field: "composition",
+					})}
+				</div>
+			</div>
+		);
+	}
+
+	if (normalizedQrPosition === "center") {
 		return (
 			<div
 				style={containerStyle}
 				className="border p-1 flex flex-col items-center bg-white mx-auto gap-2"
 			>
-				{/* QR code centered and taking 50% of the width */}
 				<div className="w-1/2 h-full">{renderQRCode()}</div>
 				<div>{renderTextFields()}</div>
 			</div>
 		);
 	}
 
-	if (qrPosition === "left") {
+	if (normalizedQrPosition === "left") {
 		return (
 			<div style={containerStyle} className="border p-1 flex bg-white mx-auto">
-				{/* Left side: QR code (50% width) */}
 				<div className="w-1/2">{renderQRCode()}</div>
-				{/* Right side: Text fields */}
 				<div className="w-1/2">{renderTextFields()}</div>
 			</div>
 		);
 	}
 
-	// Default to "right" if not center or left.
 	return (
 		<div style={containerStyle} className="border p-1 flex bg-white mx-auto">
-			{/* Left side: Text fields */}
 			<div className="w-1/2">{renderTextFields()}</div>
-			{/* Right side: QR code (50% width) */}
 			<div className="w-1/2">{renderQRCode()}</div>
 		</div>
 	);

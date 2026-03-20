@@ -18,6 +18,7 @@ function normalizeNomenclature(
 		name: data.name,
 		modelArticle: data.modelArticle,
 		color: data.color,
+		composition: data.composition,
 		configurations: data.configurations,
 		codes: data.codes,
 		gtinSize: normalizedGtinSize,

@@ -223,6 +223,16 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 							)}
 						</div>
 					</div>
+
+					<div className="flex flex-col">
+						<label htmlFor="composition">Состав</label>
+						<input
+							{...register("composition")}
+							type="text"
+							className="w-full rounded-lg border border-gray-300 px-3 py-2"
+							placeholder="Необязательно"
+						/>
+					</div>
 				</div>
 			</div>
 			<div className="flex flex-row w-full gap-4 h-full flex-1 min-h-[400px] max-h-[400px]">

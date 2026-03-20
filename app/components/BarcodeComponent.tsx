@@ -8,12 +8,14 @@ interface BarcodeComponentProps {
 	text: string;
 	size?: number;
 	type?: "QR" | "DATAMATRIX"; // Allow switching between QR and DataMatrix
+	showText?: boolean;
 }
 
 const BarcodeComponent: React.FC<BarcodeComponentProps> = ({
 	text,
 	size = 100,
 	type = "QR",
+	showText = true,
 }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -60,7 +62,7 @@ const BarcodeComponent: React.FC<BarcodeComponentProps> = ({
 			) : (
 				<div>
 					<canvas ref={canvasRef} />
-					<p className="text-xs font-bold">{text.slice(-8)}</p>
+					{showText && <p className="text-xs font-bold">{text.slice(-8)}</p>}
 				</div>
 			)}
 		</div>

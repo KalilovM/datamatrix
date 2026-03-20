@@ -18,6 +18,7 @@ interface Nomenclature {
 	name: string;
 	modelArticle: string;
 	color: string;
+	composition: string;
 	size: string;
 	configurations: Configuration[];
 	codes: Code[];
@@ -49,6 +50,7 @@ export const useNomenclatureStore = create<NomenclatureStore>((set) => ({
 		name: "",
 		modelArticle: "",
 		color: "",
+		composition: "",
 		size: "",
 		configurations: [],
 		codes: [],
@@ -68,6 +70,7 @@ export const useNomenclatureStore = create<NomenclatureStore>((set) => ({
 				name: "",
 				modelArticle: "",
 				color: "",
+				composition: "",
 				size: "",
 				configurations: [],
 				codes: [],

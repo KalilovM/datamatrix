@@ -43,6 +43,7 @@ export async function GET() {
 		select: {
 			width: true,
 			height: true,
+			layout: true,
 			qrPosition: true,
 			qrType: true,
 			fields: {
