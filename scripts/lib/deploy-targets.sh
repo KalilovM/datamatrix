@@ -61,7 +61,7 @@ load_target_config() {
             export TARGET_LABEL="development"
             export DOMAIN="dm.smartlogistics.com"
             export SERVER_IP="${SERVER_IP:-185.54.253.210}"
-            export SSH_PORT="${SSH_PORT:-${DEV_SSH_PORT:-45632}}"
+            export SSH_PORT="${SSH_PORT:-${DEV_SSH_PORT:-45633}}"
             export DEFAULT_PORT="${DEFAULT_PORT:-3001}"
             export APP_DIR="/var/www/datamatrix-dev"
             export ENV_DIR="/etc/datamatrix"
