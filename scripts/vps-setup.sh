@@ -327,7 +327,12 @@ EOF
 
     systemctl enable certbot.timer
     systemctl restart certbot.timer
-    certbot renew --dry-run
+
+    if find /etc/letsencrypt/renewal -maxdepth 1 -name '*.conf' -print -quit | grep -q .; then
+        certbot renew --dry-run
+    else
+        log_warn "Skipping certbot dry-run because no certificates have been issued yet"
+    fi
 }
 
 setup_logrotate() {
@@ -380,6 +385,7 @@ setup_target() {
     issue_ssl_certificate
     ensure_tls_params
     write_nginx_https_production
+    setup_certbot_auto_renew
     setup_logrotate
     show_summary
 }
@@ -398,7 +404,6 @@ main() {
     install_node_pm2
     setup_deploy_user
     setup_firewall_and_services
-    setup_certbot_auto_renew
 
     case "$BOOTSTRAP_TARGET" in
         all)
