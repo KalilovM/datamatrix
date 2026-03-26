@@ -199,7 +199,7 @@ NEXT_PUBLIC_APP_NAME="DataMatrix"
 NEXT_PUBLIC_API_URL="https://${DOMAIN}"
 EOF
 
-    chmod 600 "${ENV_FILE}"
+    chmod 640 "${ENV_FILE}"
     chown root:"${DEPLOY_USER}" "${ENV_FILE}"
 }
 

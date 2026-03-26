@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import PrintingPreview from "./PrintingPreview";
 
 type PreviewField = "" | EditableTemplateField;
+type TemplateKind = "aggregation" | "nomenclature" | "nomenclatureDetails";
 
 const DEFAULT_TEXT_FIELDS = Array.from({ length: 4 }, () => ({
 	field: "",
@@ -71,6 +72,12 @@ const PrintTemplateForm = () => {
 	const textFields = useMemo(() => watchedTextFields ?? [], [watchedTextFields]);
 	const canvasSize = watch("canvasSize") ?? { width: "58mm", height: "40mm" };
 	const isDetailsLayout = isNomenclatureDetailsLayout(layout);
+	const templateKind: TemplateKind =
+		templateType === "aggregation"
+			? "aggregation"
+			: isDetailsLayout
+				? "nomenclatureDetails"
+				: "nomenclature";
 
 	const previewTextFields = textFields.map((field) => ({
 		...field,
@@ -120,6 +127,23 @@ const PrintTemplateForm = () => {
 			),
 		);
 	}, [getValues, isDetailsLayout, qrPosition, textFields]);
+
+	const handleTemplateKindChange = (nextTemplateKind: TemplateKind) => {
+		if (nextTemplateKind === "aggregation") {
+			setValue("type", "aggregation");
+			setValue("layout", "standard");
+			return;
+		}
+
+		if (nextTemplateKind === "nomenclatureDetails") {
+			setValue("type", "nomenclature");
+			setValue("layout", "nomenclatureDetails");
+			return;
+		}
+
+		setValue("type", "nomenclature");
+		setValue("layout", "standard");
+	};
 
 	const onSubmit = async (data: PrintTemplateFormValues) => {
 		const payload: PrintTemplateFormValues = isNomenclatureDetailsLayout(data.layout)
@@ -172,22 +196,17 @@ const PrintTemplateForm = () => {
 				{errors.name && <p className="text-red-500">{errors.name.message}</p>}
 
 				<label className="font-bold">Тип этикетки:</label>
-				<select {...register("type")} className="border rounded p-2 w-full">
+				<select
+					value={templateKind}
+					onChange={(e) =>
+						handleTemplateKindChange(e.target.value as TemplateKind)
+					}
+					className="border rounded p-2 w-full"
+				>
 					<option value="aggregation">Агрегация</option>
 					<option value="nomenclature">Номенклатура</option>
+					<option value="nomenclatureDetails">Условно номенклатура</option>
 				</select>
-
-				{templateType === "nomenclature" && (
-					<>
-						<label className="font-bold">Вариант макета:</label>
-						<select {...register("layout")} className="border rounded p-2 w-full">
-							<option value="standard">Стандартный</option>
-							<option value="nomenclatureDetails">
-								Условно номенклатура
-							</option>
-						</select>
-					</>
-				)}
 
 				<label className="font-bold">Тип кода:</label>
 				<select {...register("qrType")} className="border rounded p-2 w-full">

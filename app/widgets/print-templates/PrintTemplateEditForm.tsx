@@ -34,6 +34,11 @@ interface EditPrintTemplateFormValues {
 	}[];
 }
 
+type EditTemplateKind =
+	| "AGGREGATION"
+	| "NOMENCLATURE"
+	| "NOMENCLATURE_DETAILS";
+
 interface PrintTemplateEditFormProps {
 	initialData: PrintTemplateData;
 }
@@ -104,6 +109,12 @@ const PrintTemplateEditForm = ({
 	const fields = watch("fields");
 	const canvasSize = watch("canvasSize");
 	const isDetailsLayout = isNomenclatureDetailsLayout(layout);
+	const templateKind: EditTemplateKind =
+		templateType === "AGGREGATION"
+			? "AGGREGATION"
+			: isDetailsLayout
+				? "NOMENCLATURE_DETAILS"
+				: "NOMENCLATURE";
 
 	const buildFixedDetailFields = useCallback(() => {
 		const existingFields = new Map(
@@ -159,14 +170,14 @@ const PrintTemplateEditForm = ({
 			const nextFields: EditPrintTemplateFormValues["fields"] = Array.from(
 				{ length: 4 },
 				(_, index) => ({
-				id: defaultValues.fields[index]?.id || "",
-				fieldType:
-					(defaultValues.fields[index]?.fieldType as
-						| EditableTemplateField
-						| "") || "",
-				isBold: defaultValues.fields[index]?.isBold || false,
-				fontSize: defaultValues.fields[index]?.fontSize || 14,
-				order: defaultValues.fields[index]?.order || index + 1,
+					id: defaultValues.fields[index]?.id || "",
+					fieldType:
+						(defaultValues.fields[index]?.fieldType as
+							| EditableTemplateField
+							| "") || "",
+					isBold: defaultValues.fields[index]?.isBold || false,
+					fontSize: defaultValues.fields[index]?.fontSize || 14,
+					order: defaultValues.fields[index]?.order || index + 1,
 				}),
 			);
 			setValue("fields", nextFields);
@@ -195,6 +206,23 @@ const PrintTemplateEditForm = ({
 			),
 		);
 	}, [fields, getValues, isDetailsLayout, qrPosition]);
+
+	const handleTemplateKindChange = (nextTemplateKind: EditTemplateKind) => {
+		if (nextTemplateKind === "AGGREGATION") {
+			setValue("type", "AGGREGATION");
+			setValue("layout", "STANDARD");
+			return;
+		}
+
+		if (nextTemplateKind === "NOMENCLATURE_DETAILS") {
+			setValue("type", "NOMENCLATURE");
+			setValue("layout", "NOMENCLATURE_DETAILS");
+			return;
+		}
+
+		setValue("type", "NOMENCLATURE");
+		setValue("layout", "STANDARD");
+	};
 
 	const onSubmit = async (data: EditPrintTemplateFormValues) => {
 		const payload = isNomenclatureDetailsLayout(data.layout)
@@ -245,22 +273,17 @@ const PrintTemplateEditForm = ({
 				{errors.name && <p className="text-red-500">{errors.name.message}</p>}
 
 				<label className="font-bold">Тип этикетки:</label>
-				<select {...register("type")} className="border rounded p-2 w-full">
+				<select
+					value={templateKind}
+					onChange={(e) =>
+						handleTemplateKindChange(e.target.value as EditTemplateKind)
+					}
+					className="border rounded p-2 w-full"
+				>
 					<option value="AGGREGATION">Агрегация</option>
 					<option value="NOMENCLATURE">Номенклатура</option>
+					<option value="NOMENCLATURE_DETAILS">Условно номенклатура</option>
 				</select>
-
-				{templateType === "NOMENCLATURE" && (
-					<>
-						<label className="font-bold">Вариант макета:</label>
-						<select {...register("layout")} className="border rounded p-2 w-full">
-							<option value="STANDARD">Стандартный</option>
-							<option value="NOMENCLATURE_DETAILS">
-								Условно номенклатура
-							</option>
-						</select>
-					</>
-				)}
 
 				<label className="font-bold">Тип кода:</label>
 				<select {...register("qrType")} className="border rounded p-2 w-full">
