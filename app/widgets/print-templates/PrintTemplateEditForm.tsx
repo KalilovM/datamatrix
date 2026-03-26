@@ -131,12 +131,6 @@ const PrintTemplateEditForm = ({
 	}, [getValues]);
 
 	useEffect(() => {
-		if (templateType !== "NOMENCLATURE" && layout !== "STANDARD") {
-			setValue("layout", "STANDARD");
-		}
-	}, [layout, setValue, templateType]);
-
-	useEffect(() => {
 		if (isDetailsLayout) {
 			if (qrPosition !== "RIGHT") {
 				setValue("qrPosition", "RIGHT");
@@ -208,20 +202,33 @@ const PrintTemplateEditForm = ({
 	}, [fields, getValues, isDetailsLayout, qrPosition]);
 
 	const handleTemplateKindChange = (nextTemplateKind: EditTemplateKind) => {
+		const updateTemplateMeta = (
+			nextType: EditPrintTemplateFormValues["type"],
+			nextLayout: EditPrintTemplateFormValues["layout"],
+		) => {
+			setValue("type", nextType, {
+				shouldDirty: true,
+				shouldTouch: true,
+				shouldValidate: true,
+			});
+			setValue("layout", nextLayout, {
+				shouldDirty: true,
+				shouldTouch: true,
+				shouldValidate: true,
+			});
+		};
+
 		if (nextTemplateKind === "AGGREGATION") {
-			setValue("type", "AGGREGATION");
-			setValue("layout", "STANDARD");
+			updateTemplateMeta("AGGREGATION", "STANDARD");
 			return;
 		}
 
 		if (nextTemplateKind === "NOMENCLATURE_DETAILS") {
-			setValue("type", "NOMENCLATURE");
-			setValue("layout", "NOMENCLATURE_DETAILS");
+			updateTemplateMeta("NOMENCLATURE", "NOMENCLATURE_DETAILS");
 			return;
 		}
 
-		setValue("type", "NOMENCLATURE");
-		setValue("layout", "STANDARD");
+		updateTemplateMeta("NOMENCLATURE", "STANDARD");
 	};
 
 	const onSubmit = async (data: EditPrintTemplateFormValues) => {
@@ -263,6 +270,8 @@ const PrintTemplateEditForm = ({
 			className="flex flex-col gap-4 p-4 w-full"
 			onSubmit={handleSubmit(onSubmit)}
 		>
+			<input type="hidden" {...register("type")} />
+			<input type="hidden" {...register("layout")} />
 			<h1 className="text-xl font-bold">Редактировать шаблон печати</h1>
 
 			<div className="p-4 border rounded-lg bg-white border-blue-600 space-y-4">
