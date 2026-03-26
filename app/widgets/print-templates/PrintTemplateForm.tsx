@@ -5,7 +5,6 @@ import { printTemplateSchema } from "@/entities/print-template/model/schema";
 import {
 	fixedNomenclatureDetailsFields,
 	getFixedNomenclatureDetailsTextFields,
-	isNomenclatureDetailsLayout,
 	templateFieldOptions,
 	type EditableTemplateField,
 } from "@/shared/lib/printingTemplate";
@@ -19,11 +18,16 @@ import PrintingPreview from "./PrintingPreview";
 type PreviewField = "" | EditableTemplateField;
 type TemplateKind = "aggregation" | "nomenclature" | "nomenclatureDetails";
 
-const DEFAULT_TEXT_FIELDS = Array.from({ length: 4 }, () => ({
-	field: "",
-	bold: false,
-	size: 14,
-}));
+const DEFAULT_TEXT_FIELDS: NonNullable<PrintTemplateFormValues["textFields"]> =
+	Array.from({ length: 4 }, () => ({
+		field: "",
+		bold: false,
+		size: 14,
+	}));
+
+const CENTER_TEXT_FIELDS: NonNullable<PrintTemplateFormValues["textFields"]> = [
+	{ field: "name", bold: false, size: 14 },
+];
 
 function hasSameTextFields(
 	left: Array<{ field?: string; bold: boolean; size: number }>,
@@ -42,6 +46,7 @@ function hasSameTextFields(
 
 const PrintTemplateForm = () => {
 	const [availableFields, setAvailableFields] = useState(templateFieldOptions);
+	const [templateKind, setTemplateKind] = useState<TemplateKind>("aggregation");
 	const router = useRouter();
 
 	const {
@@ -65,19 +70,11 @@ const PrintTemplateForm = () => {
 		},
 	});
 
-	const templateType = watch("type");
-	const layout = watch("layout");
 	const qrPosition = watch("qrPosition");
 	const watchedTextFields = watch("textFields");
 	const textFields = useMemo(() => watchedTextFields ?? [], [watchedTextFields]);
 	const canvasSize = watch("canvasSize") ?? { width: "58mm", height: "40mm" };
-	const isDetailsLayout = isNomenclatureDetailsLayout(layout);
-	const templateKind: TemplateKind =
-		templateType === "aggregation"
-			? "aggregation"
-			: isDetailsLayout
-				? "nomenclatureDetails"
-				: "nomenclature";
+	const isDetailsLayout = templateKind === "nomenclatureDetails";
 
 	const previewTextFields = textFields.map((field) => ({
 		...field,
@@ -87,19 +84,18 @@ const PrintTemplateForm = () => {
 	useEffect(() => {
 		if (isDetailsLayout) {
 			const nextFields = getFixedNomenclatureDetailsTextFields();
-			if (qrPosition !== "right") {
-				setValue("qrPosition", "right");
-			}
 			if (!hasSameTextFields(getValues("textFields") ?? [], nextFields)) {
 				setValue("textFields", nextFields);
+			}
+			if (qrPosition !== "right") {
+				setValue("qrPosition", "right");
 			}
 			return;
 		}
 
 		if (qrPosition === "center") {
-			const centerFields = [{ field: "name", bold: false, size: 14 }];
-			if (!hasSameTextFields(getValues("textFields") ?? [], centerFields)) {
-				setValue("textFields", centerFields);
+			if (!hasSameTextFields(getValues("textFields") ?? [], CENTER_TEXT_FIELDS)) {
+				setValue("textFields", CENTER_TEXT_FIELDS);
 			}
 			return;
 		}
@@ -114,7 +110,9 @@ const PrintTemplateForm = () => {
 			return;
 		}
 
-		const selectedFields = (getValues("textFields") ?? []).map((field) => field.field);
+		const selectedFields = (getValues("textFields") ?? []).map(
+			(field) => field.field,
+		);
 		setAvailableFields(
 			templateFieldOptions.filter(
 				(option) => !selectedFields.includes(option.value),
@@ -122,44 +120,58 @@ const PrintTemplateForm = () => {
 		);
 	}, [getValues, isDetailsLayout, qrPosition, textFields]);
 
-	const handleTemplateKindChange = (nextTemplateKind: TemplateKind) => {
-		const updateTemplateMeta = (
-			nextType: PrintTemplateFormValues["type"],
-			nextLayout: PrintTemplateFormValues["layout"],
-		) => {
-			setValue("type", nextType, {
-				shouldDirty: true,
-				shouldTouch: true,
-				shouldValidate: true,
-			});
-			setValue("layout", nextLayout, {
-				shouldDirty: true,
-				shouldTouch: true,
-				shouldValidate: true,
-			});
-		};
+	const applyTemplateKind = (nextTemplateKind: TemplateKind) => {
+		setTemplateKind(nextTemplateKind);
 
 		if (nextTemplateKind === "aggregation") {
-			updateTemplateMeta("aggregation", "standard");
+			setValue("type", "aggregation", { shouldDirty: true, shouldValidate: true });
+			setValue("layout", "standard", { shouldDirty: true, shouldValidate: true });
+			setValue("qrPosition", "right", { shouldDirty: true, shouldValidate: true });
+			setValue("textFields", DEFAULT_TEXT_FIELDS, {
+				shouldDirty: true,
+				shouldValidate: true,
+			});
 			return;
 		}
 
-		if (nextTemplateKind === "nomenclatureDetails") {
-			updateTemplateMeta("nomenclature", "nomenclatureDetails");
+		if (nextTemplateKind === "nomenclature") {
+			setValue("type", "nomenclature", { shouldDirty: true, shouldValidate: true });
+			setValue("layout", "standard", { shouldDirty: true, shouldValidate: true });
+			setValue("qrPosition", "right", { shouldDirty: true, shouldValidate: true });
+			setValue("textFields", DEFAULT_TEXT_FIELDS, {
+				shouldDirty: true,
+				shouldValidate: true,
+			});
 			return;
 		}
 
-		updateTemplateMeta("nomenclature", "standard");
+		setValue("type", "nomenclature", { shouldDirty: true, shouldValidate: true });
+		setValue("layout", "nomenclatureDetails", {
+			shouldDirty: true,
+			shouldValidate: true,
+		});
+		setValue("qrPosition", "right", { shouldDirty: true, shouldValidate: true });
+		setValue("textFields", getFixedNomenclatureDetailsTextFields(), {
+			shouldDirty: true,
+			shouldValidate: true,
+		});
 	};
 
 	const onSubmit = async (data: PrintTemplateFormValues) => {
-		const payload: PrintTemplateFormValues = isNomenclatureDetailsLayout(data.layout)
-			? {
-					...data,
-					qrPosition: "right",
-					textFields: getFixedNomenclatureDetailsTextFields(),
-				}
-			: data;
+		const payload: PrintTemplateFormValues =
+			templateKind === "nomenclatureDetails"
+				? {
+						...data,
+						type: "nomenclature",
+						layout: "nomenclatureDetails",
+						qrPosition: "right",
+						textFields: getFixedNomenclatureDetailsTextFields(),
+					}
+				: {
+						...data,
+						type: templateKind === "aggregation" ? "aggregation" : "nomenclature",
+						layout: "standard",
+					};
 
 		try {
 			const res = await fetch("/api/printing-templates", {
@@ -207,9 +219,7 @@ const PrintTemplateForm = () => {
 				<label className="font-bold">Тип этикетки:</label>
 				<select
 					value={templateKind}
-					onChange={(e) =>
-						handleTemplateKindChange(e.target.value as TemplateKind)
-					}
+					onChange={(e) => applyTemplateKind(e.target.value as TemplateKind)}
 					className="border rounded p-2 w-full"
 				>
 					<option value="aggregation">Агрегация</option>
@@ -357,7 +367,7 @@ const PrintTemplateForm = () => {
 					textFields={previewTextFields}
 					qrPosition={qrPosition}
 					canvasSize={canvasSize}
-					layout={layout}
+					layout={isDetailsLayout ? "nomenclatureDetails" : "standard"}
 				/>
 			</div>
 
