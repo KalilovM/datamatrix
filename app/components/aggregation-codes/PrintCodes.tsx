@@ -449,7 +449,6 @@ const PrintCodes: React.FC<Props> = ({
 						display: "flex",
 						flexDirection: "column",
 						justifyContent: "space-between",
-						borderTop: "0.2mm solid #111",
 						paddingTop: "1mm",
 					}}
 				>
@@ -458,7 +457,7 @@ const PrintCodes: React.FC<Props> = ({
 						nomenclatureLayoutStaticContent.manufacturer,
 					)}
 					{renderDetailRow("Адрес", nomenclatureLayoutStaticContent.address)}
-					<div style={{ fontSize: "9px" }}>
+					<div style={{ fontSize: "9px", lineHeight: 1.05 }}>
 						{nomenclatureLayoutStaticContent.countryOfOrigin}
 					</div>
 					{renderDetailRow(

@@ -47,13 +47,13 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 	);
 
 	const renderQRCode = (compact = false) => (
-		<div className="flex items-center justify-center border w-full h-full rounded-sm bg-gray-50">
+		<div className="flex h-full w-full items-center justify-center rounded-sm border bg-gray-50">
 			<span className={compact ? "text-xs" : "text-sm"}>QR</span>
 		</div>
 	);
 
 	const renderTextFields = () => (
-		<div className="flex flex-col gap-2 p-2 w-full h-full">
+		<div className="flex h-full w-full flex-col gap-2 p-2">
 			{textFields.map((field, index) => {
 				if (!field.field) return null;
 
@@ -64,7 +64,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 							fontSize: `${field.size}px`,
 							fontWeight: field.bold ? "bold" : "normal",
 						}}
-						className="w-full h-full flex items-center"
+						className="flex h-full w-full items-center"
 					>
 						{templateFieldLabels[field.field]}
 					</div>
@@ -86,6 +86,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 		const valueStyle = {
 			fontSize: `${fieldStyle?.size ?? options?.defaultSize ?? 9}px`,
 			fontWeight: fieldStyle?.bold ? "bold" : "normal",
+			lineHeight: 1.05,
 		} as const;
 
 		if (options?.hideLabel) {
@@ -100,9 +101,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 
 		return (
 			<div className="flex items-baseline gap-1 leading-tight">
-				<span className="text-[8px]">
-					{label}:
-				</span>
+				<span className="text-[8px]">{label}:</span>
 				<span style={valueStyle} className="truncate">
 					{value}
 				</span>
@@ -114,31 +113,31 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 		return (
 			<div
 				style={containerStyle}
-				className="border p-1 bg-white mx-auto flex flex-col gap-1"
+				className="mx-auto flex flex-col gap-1 border bg-white p-1"
 			>
-				<div className="flex gap-2 h-[60%]">
-					<div className="w-[62%] flex flex-col justify-between overflow-hidden">
-						{renderDetailRow("Дата", "20.03.2026")}
-						{renderDetailRow("Наименование", "Номенклатура", {
+				<div className="flex h-[60%] gap-2">
+					<div className="flex w-[62%] flex-col justify-between overflow-hidden">
+						{renderDetailRow("Дата", "05.03.2026")}
+						{renderDetailRow("Наименование", "Блузка женская", {
 							field: "name",
 							hideLabel: true,
 						})}
 						{renderDetailRow("Бренд", nomenclatureLayoutStaticContent.brand)}
-						{renderDetailRow("Модель", "Модель", {
+						{renderDetailRow("Модель", "Артикул 7777", {
 							field: "modelArticle",
 						})}
-						{renderDetailRow("Размер", "42", {
+						{renderDetailRow("Размер", "46", {
 							field: "size",
 						})}
-						{renderDetailRow("Цвет", "Черный", {
+						{renderDetailRow("Цвет", "Пудра", {
 							field: "color",
 						})}
 					</div>
-					<div className="w-[38%] flex items-center justify-center">
-						<div className="w-full h-[75%]">{renderQRCode(true)}</div>
+					<div className="flex w-[38%] items-center justify-center">
+						<div className="h-[75%] w-full">{renderQRCode(true)}</div>
 					</div>
 				</div>
-				<div className="h-[40%] flex flex-col justify-between overflow-hidden border-t pt-1">
+				<div className="flex h-[40%] flex-col justify-between overflow-hidden pt-1">
 					{renderDetailRow(
 						"Изготовитель",
 						nomenclatureLayoutStaticContent.manufacturer,
@@ -147,7 +146,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 					<div className="text-[9px] leading-tight">
 						{nomenclatureLayoutStaticContent.countryOfOrigin}
 					</div>
-					{renderDetailRow("Состав", "100% хлопок", {
+					{renderDetailRow("Состав", "Вискоза 60%,ПЭ 35%,Эл 5%", {
 						field: "composition",
 					})}
 				</div>
@@ -159,9 +158,9 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 		return (
 			<div
 				style={containerStyle}
-				className="border p-1 flex flex-col items-center bg-white mx-auto gap-2"
+				className="mx-auto flex flex-col items-center gap-2 border bg-white p-1"
 			>
-				<div className="w-1/2 h-full">{renderQRCode()}</div>
+				<div className="h-full w-1/2">{renderQRCode()}</div>
 				<div>{renderTextFields()}</div>
 			</div>
 		);
@@ -169,7 +168,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 
 	if (normalizedQrPosition === "left") {
 		return (
-			<div style={containerStyle} className="border p-1 flex bg-white mx-auto">
+			<div style={containerStyle} className="mx-auto flex border bg-white p-1">
 				<div className="w-1/2">{renderQRCode()}</div>
 				<div className="w-1/2">{renderTextFields()}</div>
 			</div>
@@ -177,7 +176,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 	}
 
 	return (
-		<div style={containerStyle} className="border p-1 flex bg-white mx-auto">
+		<div style={containerStyle} className="mx-auto flex border bg-white p-1">
 			<div className="w-1/2">{renderTextFields()}</div>
 			<div className="w-1/2">{renderQRCode()}</div>
 		</div>
