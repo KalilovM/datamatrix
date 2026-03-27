@@ -97,13 +97,13 @@ Branch mapping:
 
 ## GitHub Actions pipeline
 
-The repo now includes `.github/workflows/deploy.yml`.
+The repo includes `.github/workflows/deploy.yml`, but deployment is now manual-only.
 
 Flow:
 
-1. Push to `dev` to deploy `dm.smartlogistics.com`.
-2. Test there.
-3. Merge or promote to `main` to deploy `dm.alonamoda.com`.
+1. Open GitHub Actions.
+2. Run the `Deploy` workflow manually.
+3. Choose `dev` or `prod` as the target environment.
 
 Required GitHub repository secrets:
 

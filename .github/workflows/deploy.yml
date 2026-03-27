@@ -1,14 +1,20 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - dev
-      - main
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Deployment target
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - prod
 
 jobs:
   deploy-dev:
-    if: github.ref == 'refs/heads/dev'
+    if: github.event.inputs.target == 'dev'
     runs-on: ubuntu-latest
     environment: development
     env:
@@ -17,6 +23,7 @@ jobs:
       SSH_USER: ${{ secrets.DEV_SSH_USER }}
       SSHPASS: ${{ secrets.DEV_SSH_PASSWORD }}
       REPO_URL: https://github.com/${{ github.repository }}.git
+      DEPLOY_BRANCH: dev
     steps:
       - name: Install SSH tools
         run: |
@@ -30,7 +37,7 @@ jobs:
 
       - name: Deploy development
         run: |
-          sshpass -e ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "REPO_URL='$REPO_URL' DEPLOY_BRANCH='dev' bash -s" <<'EOF'
+          sshpass -e ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "REPO_URL='$REPO_URL' DEPLOY_BRANCH='$DEPLOY_BRANCH' bash -s" <<'EOF'
           set -euo pipefail
           APP_DIR="/var/www/datamatrix-dev"
 
@@ -45,7 +52,7 @@ jobs:
           EOF
 
   deploy-prod:
-    if: github.ref == 'refs/heads/main'
+    if: github.event.inputs.target == 'prod'
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -54,6 +61,7 @@ jobs:
       SSH_USER: ${{ secrets.PROD_SSH_USER }}
       SSHPASS: ${{ secrets.PROD_SSH_PASSWORD }}
       REPO_URL: https://github.com/${{ github.repository }}.git
+      DEPLOY_BRANCH: main
     steps:
       - name: Install SSH tools
         run: |
@@ -67,7 +75,7 @@ jobs:
 
       - name: Deploy production
         run: |
-          sshpass -e ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "REPO_URL='$REPO_URL' DEPLOY_BRANCH='main' bash -s" <<'EOF'
+          sshpass -e ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "REPO_URL='$REPO_URL' DEPLOY_BRANCH='$DEPLOY_BRANCH' bash -s" <<'EOF'
           set -euo pipefail
           APP_DIR="/var/www/datamatrix"
 

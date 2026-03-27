@@ -86,7 +86,11 @@ export function toPrismaTemplateFieldType(
 export function normalizeEditableTemplateLayout(
 	value: string | null | undefined,
 ): EditableTemplateLayout {
-	return (value ?? "").toUpperCase() === "NOMENCLATURE_DETAILS"
+	const normalizedValue = (value ?? "")
+		.replace(/[\s_-]/g, "")
+		.toLowerCase();
+
+	return normalizedValue === "nomenclaturedetails"
 		? "nomenclatureDetails"
 		: "standard";
 }
