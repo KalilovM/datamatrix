@@ -459,7 +459,6 @@ const PrintCodes: React.FC<Props> = ({
 								text={code}
 								size={72}
 								type={printTemplate.qrType}
-								showText={false}
 							/>
 						</div>
 					</div>
