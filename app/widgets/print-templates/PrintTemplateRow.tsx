@@ -28,7 +28,7 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 
 	const makeDefaultMutation = useMutation({
 		mutationFn: async (id: string) => {
-			const response = await fetch("api/printing-templates/default", {
+			const response = await fetch("/api/printing-templates/default", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -94,10 +94,8 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 						id={`default-checkbox-${template.id}`}
 						type="checkbox"
 						checked={template.isDefault}
-						onChange={(e) => {
-							if (e.target.checked && !template.isDefault) {
-								makeDefaultMutation.mutate(template.id);
-							}
+						onChange={() => {
+							makeDefaultMutation.mutate(template.id);
 						}}
 						disabled={makeDefaultMutation.isPending || deleteMutation.isPending}
 						className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
