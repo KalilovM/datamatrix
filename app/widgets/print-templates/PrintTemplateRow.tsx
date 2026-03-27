@@ -12,9 +12,14 @@ interface PrintTemplateRowProps {
 	template: PrintTemplate;
 }
 
-const PRINT_TEMPLATE_TYPES = {
+const PRINT_TEMPLATE_TYPES: Record<PrintTemplate["type"], string> = {
 	AGGREGATION: "Агрегация",
 	NOMENCLATURE: "Номенклатура",
+};
+
+const PRINT_TEMPLATE_LAYOUTS: Record<PrintTemplate["layout"], string> = {
+	NOMENCLATURE_DETAILS: "Условно номенклатура",
+	STANDARD: "Номенклатура",
 };
 
 const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
@@ -28,7 +33,7 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ id: id, templateType: template.type }),
+				body: JSON.stringify({ id }),
 			});
 			if (!response.ok) {
 				throw new Error((await response.json()).error);
@@ -47,6 +52,11 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 		mutation.mutate(template.id);
 	};
 
+	const templatePurpose =
+		template.type === "NOMENCLATURE"
+			? PRINT_TEMPLATE_LAYOUTS[template.layout]
+			: PRINT_TEMPLATE_TYPES[template.type];
+
 	return (
 		<>
 			<tr className="bg-white border-b border-gray-200 hover:bg-gray-50">
@@ -56,14 +66,13 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 				<td className="px-8 py-4">
 					{new Date(template.createdAt).toLocaleDateString("ru-RU")}
 				</td>
-				<td className="px-8 py-4">{PRINT_TEMPLATE_TYPES[template.type]}</td>
+				<td className="px-8 py-4">{templatePurpose}</td>
 				<td className="px-8 py-4 text-center">
 					<input
 						id={`default-checkbox-${template.id}`}
 						type="checkbox"
 						checked={template.isDefault}
 						onChange={(e) => {
-							// Trigger mutation only if the checkbox is being checked and it is not already default
 							if (e.target.checked && !template.isDefault) {
 								handleMakeDefault();
 							}
@@ -94,7 +103,6 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 					message="Вы уверены, что хотите удалить этот шаблон?"
 					onConfirm={() => {
 						setModalOpen(false);
-						// Handle delete logic
 					}}
 					isOpen={modalOpen}
 					onCancel={() => setModalOpen(false)}

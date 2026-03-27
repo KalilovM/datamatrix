@@ -2,6 +2,8 @@ import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { getServerSession } from "next-auth";
 
+const AGGREGATION_PRINT_TYPE = "AGGREGATION";
+
 export async function getAggregatedCodes() {
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
@@ -134,7 +136,7 @@ export async function getDefaultPrintTemplate() {
 	if (!companyId) return [];
 
 	return await prisma.printingTemplate.findFirst({
-		where: { companyId, isDefault: true },
+		where: { companyId, isDefault: true, type: AGGREGATION_PRINT_TYPE },
 		include: {
 			fields: true,
 		},
