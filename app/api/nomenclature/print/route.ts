@@ -40,6 +40,7 @@ export async function GET() {
 			type: PRINT_TYPE,
 			isDefault: true,
 		},
+		orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
 		select: {
 			width: true,
 			height: true,

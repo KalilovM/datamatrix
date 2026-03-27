@@ -26,6 +26,13 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 	const [modalOpen, setModalOpen] = useState(false);
 	const queryClient = useQueryClient();
 
+	const invalidateTemplateQueries = () => {
+		queryClient.invalidateQueries({ queryKey: ["printTemplates"] });
+		queryClient.invalidateQueries({ queryKey: ["printTemplateNomenclature"] });
+		queryClient.invalidateQueries({ queryKey: ["printTemplate"] });
+		queryClient.invalidateQueries({ queryKey: ["aggregatedCodesPrintTemplate"] });
+	};
+
 	const makeDefaultMutation = useMutation({
 		mutationFn: async (id: string) => {
 			const response = await fetch("/api/printing-templates/default", {
@@ -41,7 +48,7 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 			}
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["printTemplates"] });
+			invalidateTemplateQueries();
 			toast.success("Шаблон успешно установлен по умолчанию");
 		},
 		onError: () => {
@@ -63,7 +70,7 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 			}
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["printTemplates"] });
+			invalidateTemplateQueries();
 			toast.success("Шаблон печати успешно удален");
 		},
 		onError: (error: Error) => {
