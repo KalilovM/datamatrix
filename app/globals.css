@@ -51,7 +51,7 @@
     body {
         margin: 0;
         padding: 0;
-        width: auto;
+        width: 58mm;
         height: auto;
         overflow: visible;
         background: white;
@@ -61,24 +61,11 @@
         display: none;
     }
 
-    body * {
-        visibility: hidden;
-        border: none;
-    }
-
-    .print-container,
-    .print-container * {
-        visibility: visible;
-    }
-
     .print-container {
-        position: fixed;
-        left: 0;
-        top: 0;
         display: block !important;
         margin: 0;
         padding: 0;
-        width: auto;
+        width: 58mm;
         height: auto;
         background: white;
     }
@@ -89,6 +76,8 @@
         text-align: center;
         margin: 0;
         overflow: hidden;
+        break-after: page;
+        break-inside: avoid;
     }
 
     .print-page:last-child {

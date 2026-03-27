@@ -37,7 +37,9 @@ export default function Page() {
 
 	return (
 		<Layout>
-			<NomenclatureEditForm nomenclature={nomenclatureData} />
+			<div className="print:hidden">
+				<NomenclatureEditForm nomenclature={nomenclatureData} />
+			</div>
 			{printTemplateData && (
 				<PrintCodes
 					printTemplate={printTemplateData}

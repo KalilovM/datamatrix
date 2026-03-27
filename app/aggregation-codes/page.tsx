@@ -40,11 +40,13 @@ export default function Page() {
 	return (
 		<Layout className="print:block print:h-auto print:w-auto printable">
 			<>
-                               <TableContent
-                                       aggregatedCodes={aggregatedCodes}
-                                       filters={filters}
-                                       onApply={(newFilters) => setFilters(newFilters)}
-                               />
+				<div className="print:hidden">
+					<TableContent
+						aggregatedCodes={aggregatedCodes}
+						filters={filters}
+						onApply={(newFilters) => setFilters(newFilters)}
+					/>
+				</div>
 				<PrintCodes
 					printTemplate={defaultTemplate}
 					selectedNomenclature={nomenclature}
