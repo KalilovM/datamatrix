@@ -2,10 +2,12 @@
 
 import type { PrintTemplate } from "@/aggregation/model/types";
 import {
+	fixedNomenclatureDetailsFields,
 	isNomenclatureDetailsLayout,
 	nomenclatureLayoutStaticContent,
 	normalizeEditableFieldType,
 	templateFieldLabels,
+	toPrismaTemplateFieldType,
 	type EditableTemplateField,
 } from "@/shared/lib/printingTemplate";
 import { usePrintStore } from "@/shared/store/printStore";
@@ -326,10 +328,14 @@ const PrintCodes: React.FC<Props> = ({
 
 	const renderDetailsLayout = (code: string, index: number) => {
 		const printDate = new Intl.DateTimeFormat("ru-RU").format(new Date());
-		const sortedFields = [...printTemplate.fields].sort(
-			(a, b) => a.order - b.order,
+		const fixedFieldStyles = fixedNomenclatureDetailsFields.map((field) => ({
+			fieldType: toPrismaTemplateFieldType(field.field),
+			fontSize: field.size,
+			isBold: field.bold,
+		}));
+		const fieldStyleMap = new Map(
+			fixedFieldStyles.map((field) => [field.fieldType, field]),
 		);
-		const fieldStyleMap = new Map(sortedFields.map((field) => [field.fieldType, field]));
 
 		const renderDetailRow = (
 			label: string,

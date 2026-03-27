@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	fixedNomenclatureDetailsFields,
 	isNomenclatureDetailsLayout,
 	nomenclatureLayoutStaticContent,
 	templateFieldLabels,
@@ -38,6 +39,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 	};
 
 	const normalizedQrPosition = String(qrPosition).toLowerCase();
+	const isDetailsLayout = isNomenclatureDetailsLayout(layout);
 	const textFieldMap = new Map(
 		textFields
 			.filter((field): field is TextField & { field: EditableTemplateField } =>
@@ -45,6 +47,10 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 			)
 			.map((field) => [field.field, field]),
 	);
+	const detailsTextFieldMap = new Map(
+		fixedNomenclatureDetailsFields.map((field) => [field.field, field]),
+	);
+	const activeTextFieldMap = isDetailsLayout ? detailsTextFieldMap : textFieldMap;
 
 	const renderQRCode = (compact = false) => (
 		<div className="flex h-full w-full items-center justify-center rounded-sm border bg-gray-50">
@@ -82,7 +88,9 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 			hideLabel?: boolean;
 		},
 	) => {
-		const fieldStyle = options?.field ? textFieldMap.get(options.field) : undefined;
+		const fieldStyle = options?.field
+			? activeTextFieldMap.get(options.field)
+			: undefined;
 		const valueStyle = {
 			fontSize: `${fieldStyle?.size ?? options?.defaultSize ?? 9}px`,
 			fontWeight: fieldStyle?.bold ? "bold" : "normal",
@@ -109,7 +117,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 		);
 	};
 
-	if (isNomenclatureDetailsLayout(layout)) {
+	if (isDetailsLayout) {
 		return (
 			<div
 				style={containerStyle}
