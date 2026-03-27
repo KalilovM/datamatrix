@@ -463,6 +463,9 @@ const PrintCodes: React.FC<Props> = ({
 									fontSize: "9px",
 									fontWeight: "normal",
 									lineHeight: 1.05,
+									textAlign: "center",
+									width: "100%",
+									display: "block",
 								}}
 							/>
 						</div>
