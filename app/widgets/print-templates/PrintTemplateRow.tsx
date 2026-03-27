@@ -26,7 +26,7 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 	const [modalOpen, setModalOpen] = useState(false);
 	const queryClient = useQueryClient();
 
-	const mutation = useMutation({
+	const makeDefaultMutation = useMutation({
 		mutationFn: async (id: string) => {
 			const response = await fetch("api/printing-templates/default", {
 				method: "POST",
@@ -35,6 +35,7 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 				},
 				body: JSON.stringify({ id }),
 			});
+
 			if (!response.ok) {
 				throw new Error((await response.json()).error);
 			}
@@ -48,9 +49,30 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 		},
 	});
 
-	const handleMakeDefault = () => {
-		mutation.mutate(template.id);
-	};
+	const deleteMutation = useMutation({
+		mutationFn: async () => {
+			const response = await fetch(`/api/printing-templates/${template.id}`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				const data = (await response.json().catch(() => null)) as
+					| { error?: string }
+					| null;
+				throw new Error(data?.error || "Ошибка при удалении шаблона печати");
+			}
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["printTemplates"] });
+			toast.success("Шаблон печати успешно удален");
+		},
+		onError: (error: Error) => {
+			toast.error(error.message || "Ошибка при удалении шаблона печати");
+		},
+		onSettled: () => {
+			setModalOpen(false);
+		},
+	});
 
 	const templatePurpose =
 		template.type === "NOMENCLATURE"
@@ -74,10 +96,10 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 						checked={template.isDefault}
 						onChange={(e) => {
 							if (e.target.checked && !template.isDefault) {
-								handleMakeDefault();
+								makeDefaultMutation.mutate(template.id);
 							}
 						}}
-						disabled={mutation.isPending}
+						disabled={makeDefaultMutation.isPending || deleteMutation.isPending}
 						className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
 					/>
 				</td>
@@ -91,7 +113,8 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 					<button
 						type="button"
 						onClick={() => setModalOpen(true)}
-						className="bg-red-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer"
+						disabled={deleteMutation.isPending}
+						className="bg-red-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<BinIcon className="size-5" />
 					</button>
@@ -100,12 +123,16 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 			{modalOpen && (
 				<ConfirmModal
 					title="Удаление шаблона"
-					message="Вы уверены, что хотите удалить этот шаблон?"
+					message={`Вы уверены, что хотите удалить шаблон "${template.name}"?`}
 					onConfirm={() => {
-						setModalOpen(false);
+						deleteMutation.mutate();
 					}}
 					isOpen={modalOpen}
-					onCancel={() => setModalOpen(false)}
+					onCancel={() => {
+						if (!deleteMutation.isPending) {
+							setModalOpen(false);
+						}
+					}}
 				/>
 			)}
 		</>
