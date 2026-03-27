@@ -220,7 +220,8 @@ const PrintCodes: React.FC<Props> = ({
 		const qrColumn = (
 			<div
 				style={{
-					width: "50%",
+					flex: "0 0 50%",
+					minWidth: 0,
 					display: "flex",
 					flexDirection: "column" as const,
 					alignItems: "center",
@@ -238,24 +239,35 @@ const PrintCodes: React.FC<Props> = ({
 		const fieldsColumn = (
 			<div
 				style={{
-					width: "50%",
+					flex: "0 0 50%",
+					minWidth: 0,
 					display: "flex",
 					flexDirection: "column" as const,
 					justifyContent: "center",
-					alignItems: "center",
+					alignItems: "stretch",
 					padding: "0",
 				}}
 			>
 				{sortedFields.map((field) => (
 					<div
 						key={field.order}
-						className="w-full h-full flex flex-col items-start text-start centered"
-						style={{ marginBottom: "1mm" }}
+						style={{
+							width: "100%",
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "flex-start",
+							justifyContent: "flex-start",
+							marginBottom: "1mm",
+							lineHeight: 1.05,
+							textAlign: "left",
+						}}
 					>
 						{field.fieldType !== "NAME" && (
 							<p
 								style={{
 									fontSize: "8px",
+									textAlign: "left",
+									width: "100%",
 								}}
 							>
 								{templateFieldLabels[
@@ -269,6 +281,9 @@ const PrintCodes: React.FC<Props> = ({
 								fontSize: `${field.fontSize}px`,
 								fontWeight: field.isBold ? "bold" : "normal",
 								marginLeft: "0.5mm",
+								textAlign: "left",
+								width: "100%",
+								lineHeight: 1.05,
 							}}
 						>
 							{selectedNomenclature
