@@ -34,11 +34,11 @@ export const nomenclatureLayoutStaticContent = {
 } as const;
 
 export const fixedNomenclatureDetailsFields = [
-	{ field: "name", bold: true, size: 12 },
-	{ field: "modelArticle", bold: false, size: 10 },
-	{ field: "size", bold: false, size: 10 },
-	{ field: "color", bold: false, size: 10 },
-	{ field: "composition", bold: false, size: 10 },
+	{ field: "name", bold: false, size: 9 },
+	{ field: "modelArticle", bold: false, size: 9 },
+	{ field: "size", bold: false, size: 9 },
+	{ field: "color", bold: false, size: 9 },
+	{ field: "composition", bold: false, size: 9 },
 ] as const satisfies ReadonlyArray<{
 	field: EditableTemplateField;
 	bold: boolean;

@@ -330,7 +330,6 @@ const PrintCodes: React.FC<Props> = ({
 			(a, b) => a.order - b.order,
 		);
 		const fieldStyleMap = new Map(sortedFields.map((field) => [field.fieldType, field]));
-		const compositionField = fieldStyleMap.get("COMPOSITION");
 
 		const renderDetailRow = (
 			label: string,
@@ -338,23 +337,33 @@ const PrintCodes: React.FC<Props> = ({
 			options?: {
 				fieldType?: "NAME" | "MODEL_ARTICLE" | "SIZE" | "COLOR" | "COMPOSITION";
 				defaultSize?: number;
-				isAccent?: boolean;
+				hideLabel?: boolean;
 			},
 		) => {
 			const fieldStyle = options?.fieldType
 				? fieldStyleMap.get(options.fieldType)
 				: undefined;
+			const valueStyle = {
+				fontSize: `${fieldStyle?.fontSize ?? options?.defaultSize ?? 9}px`,
+				fontWeight: fieldStyle?.isBold ? "bold" : "normal",
+				lineHeight: 1.05,
+			} as const;
+
+			if (options?.hideLabel) {
+				return <div style={valueStyle}>{value}</div>;
+			}
 
 			return (
-				<div style={{ display: "flex", gap: "1mm", alignItems: "baseline" }}>
-					<span style={{ fontSize: "8px", fontWeight: "bold" }}>{label}:</span>
-					<span
-						style={{
-							fontSize: `${fieldStyle?.fontSize ?? options?.defaultSize ?? 9}px`,
-							fontWeight:
-								fieldStyle?.isBold || options?.isAccent ? "bold" : "normal",
-						}}
-					>
+				<div
+					style={{
+						display: "flex",
+						gap: "1mm",
+						alignItems: "baseline",
+						lineHeight: 1.05,
+					}}
+				>
+					<span style={{ fontSize: "8px" }}>{label}:</span>
+					<span style={valueStyle}>
 						{value}
 					</span>
 				</div>
@@ -395,7 +404,7 @@ const PrintCodes: React.FC<Props> = ({
 						{renderDetailRow(
 							"Наименование",
 							selectedNomenclature?.name || "",
-							{ fieldType: "NAME", defaultSize: 11, isAccent: true },
+							{ fieldType: "NAME", hideLabel: true },
 						)}
 						{renderDetailRow("Бренд", nomenclatureLayoutStaticContent.brand)}
 						{renderDetailRow(
@@ -449,20 +458,16 @@ const PrintCodes: React.FC<Props> = ({
 						nomenclatureLayoutStaticContent.manufacturer,
 					)}
 					{renderDetailRow("Адрес", nomenclatureLayoutStaticContent.address)}
-					<div style={{ fontSize: "9px", fontWeight: "bold" }}>
+					<div style={{ fontSize: "9px" }}>
 						{nomenclatureLayoutStaticContent.countryOfOrigin}
 					</div>
-					<div style={{ display: "flex", gap: "1mm", alignItems: "baseline" }}>
-						<span style={{ fontSize: "8px", fontWeight: "bold" }}>Состав:</span>
-						<span
-							style={{
-								fontSize: `${compositionField?.fontSize ?? 9}px`,
-								fontWeight: compositionField?.isBold ? "bold" : "normal",
-							}}
-						>
-							{selectedNomenclature?.composition || ""}
-						</span>
-					</div>
+					{renderDetailRow(
+						templateFieldLabels.composition,
+						selectedNomenclature?.composition || "",
+						{
+							fieldType: "COMPOSITION",
+						},
+					)}
 				</div>
 			</div>
 		);

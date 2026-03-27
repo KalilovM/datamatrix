@@ -18,16 +18,17 @@ import PrintingPreview from "./PrintingPreview";
 type PreviewField = "" | EditableTemplateField;
 type TemplateKind = "aggregation" | "nomenclature" | "nomenclatureDetails";
 
-const DEFAULT_TEXT_FIELDS: NonNullable<PrintTemplateFormValues["textFields"]> =
-	Array.from({ length: 4 }, () => ({
+function createDefaultTextFields(): NonNullable<PrintTemplateFormValues["textFields"]> {
+	return Array.from({ length: 4 }, () => ({
 		field: "",
 		bold: false,
 		size: 14,
 	}));
+}
 
-const CENTER_TEXT_FIELDS: NonNullable<PrintTemplateFormValues["textFields"]> = [
-	{ field: "name", bold: false, size: 14 },
-];
+function createCenterTextFields(): NonNullable<PrintTemplateFormValues["textFields"]> {
+	return [{ field: "name", bold: false, size: 14 }];
+}
 
 function hasSameTextFields(
 	left: Array<{ field?: string; bold: boolean; size: number }>,
@@ -65,7 +66,7 @@ const PrintTemplateForm = () => {
 			layout: "standard",
 			qrType: "qr",
 			qrPosition: "right",
-			textFields: DEFAULT_TEXT_FIELDS,
+			textFields: createDefaultTextFields(),
 			canvasSize: { width: "58mm", height: "40mm" },
 		},
 	});
@@ -94,14 +95,15 @@ const PrintTemplateForm = () => {
 		}
 
 		if (qrPosition === "center") {
-			if (!hasSameTextFields(getValues("textFields") ?? [], CENTER_TEXT_FIELDS)) {
-				setValue("textFields", CENTER_TEXT_FIELDS);
+			const nextFields = createCenterTextFields();
+			if (!hasSameTextFields(getValues("textFields") ?? [], nextFields)) {
+				setValue("textFields", nextFields);
 			}
 			return;
 		}
 
 		if (textFields.length !== 4) {
-			setValue("textFields", DEFAULT_TEXT_FIELDS);
+			setValue("textFields", createDefaultTextFields());
 		}
 	}, [getValues, isDetailsLayout, qrPosition, setValue, textFields.length]);
 
@@ -127,7 +129,7 @@ const PrintTemplateForm = () => {
 			setValue("type", "aggregation", { shouldDirty: true, shouldValidate: true });
 			setValue("layout", "standard", { shouldDirty: true, shouldValidate: true });
 			setValue("qrPosition", "right", { shouldDirty: true, shouldValidate: true });
-			setValue("textFields", DEFAULT_TEXT_FIELDS, {
+			setValue("textFields", createDefaultTextFields(), {
 				shouldDirty: true,
 				shouldValidate: true,
 			});
@@ -138,7 +140,7 @@ const PrintTemplateForm = () => {
 			setValue("type", "nomenclature", { shouldDirty: true, shouldValidate: true });
 			setValue("layout", "standard", { shouldDirty: true, shouldValidate: true });
 			setValue("qrPosition", "right", { shouldDirty: true, shouldValidate: true });
-			setValue("textFields", DEFAULT_TEXT_FIELDS, {
+			setValue("textFields", createDefaultTextFields(), {
 				shouldDirty: true,
 				shouldValidate: true,
 			});

@@ -76,21 +76,34 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 	const renderDetailRow = (
 		label: string,
 		value: string,
-		options?: { field?: EditableTemplateField; isAccent?: boolean },
+		options?: {
+			field?: EditableTemplateField;
+			defaultSize?: number;
+			hideLabel?: boolean;
+		},
 	) => {
 		const fieldStyle = options?.field ? textFieldMap.get(options.field) : undefined;
+		const valueStyle = {
+			fontSize: `${fieldStyle?.size ?? options?.defaultSize ?? 9}px`,
+			fontWeight: fieldStyle?.bold ? "bold" : "normal",
+		} as const;
+
+		if (options?.hideLabel) {
+			return (
+				<div className="leading-tight">
+					<span style={valueStyle} className="truncate">
+						{value}
+					</span>
+				</div>
+			);
+		}
+
 		return (
 			<div className="flex items-baseline gap-1 leading-tight">
-				<span className="text-[8px] font-semibold uppercase tracking-tight">
+				<span className="text-[8px]">
 					{label}:
 				</span>
-				<span
-					style={{
-						fontSize: `${fieldStyle?.size ?? (options?.isAccent ? 11 : 9)}px`,
-						fontWeight: fieldStyle?.bold || options?.isAccent ? "bold" : "normal",
-					}}
-					className="truncate"
-				>
+				<span style={valueStyle} className="truncate">
 					{value}
 				</span>
 			</div>
@@ -108,7 +121,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 						{renderDetailRow("Дата", "20.03.2026")}
 						{renderDetailRow("Наименование", "Номенклатура", {
 							field: "name",
-							isAccent: true,
+							hideLabel: true,
 						})}
 						{renderDetailRow("Бренд", nomenclatureLayoutStaticContent.brand)}
 						{renderDetailRow("Модель", "Модель", {
@@ -131,7 +144,7 @@ const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 						nomenclatureLayoutStaticContent.manufacturer,
 					)}
 					{renderDetailRow("Адрес", nomenclatureLayoutStaticContent.address)}
-					<div className="text-[9px] font-semibold">
+					<div className="text-[9px] leading-tight">
 						{nomenclatureLayoutStaticContent.countryOfOrigin}
 					</div>
 					{renderDetailRow("Состав", "100% хлопок", {
