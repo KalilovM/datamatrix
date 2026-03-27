@@ -459,6 +459,11 @@ const PrintCodes: React.FC<Props> = ({
 								text={code}
 								size={72}
 								type={printTemplate.qrType}
+								textStyle={{
+									fontSize: "9px",
+									fontWeight: "normal",
+									lineHeight: 1.05,
+								}}
 							/>
 						</div>
 					</div>
