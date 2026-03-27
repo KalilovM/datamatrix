@@ -14,6 +14,50 @@ type TemplateFieldInput = {
 	size: number;
 };
 
+type PrintingTemplateListItem = Awaited<
+	ReturnType<typeof prisma.printingTemplate.findMany>
+>[number];
+
+const normalizeDefaultTemplates = async (
+	templates: PrintingTemplateListItem[],
+) => {
+	const seenDefaultGroups = new Set<string>();
+	const duplicateDefaultIds: string[] = [];
+
+	const normalizedTemplates = templates.map((template) => {
+		if (!template.isDefault) {
+			return template;
+		}
+
+		const groupKey = `${template.companyId}:${template.type}`;
+		if (seenDefaultGroups.has(groupKey)) {
+			duplicateDefaultIds.push(template.id);
+			return {
+				...template,
+				isDefault: false,
+			};
+		}
+
+		seenDefaultGroups.add(groupKey);
+		return template;
+	});
+
+	if (duplicateDefaultIds.length > 0) {
+		await prisma.printingTemplate.updateMany({
+			where: {
+				id: {
+					in: duplicateDefaultIds,
+				},
+			},
+			data: {
+				isDefault: false,
+			},
+		});
+	}
+
+	return normalizedTemplates;
+};
+
 export async function GET() {
 	try {
 		const session = await getServerSession(authOptions);
@@ -45,16 +89,21 @@ export async function GET() {
 		const { role, companyId } = user;
 		if (role === "ADMIN") {
 			const printingTemplates = await prisma.printingTemplate.findMany({
-				orderBy: [{ type: "asc" }, { createdAt: "desc" }],
+				orderBy: [{ type: "asc" }, { updatedAt: "desc" }, { createdAt: "desc" }],
 			});
-			return NextResponse.json(printingTemplates, { status: 200 });
+			return NextResponse.json(
+				await normalizeDefaultTemplates(printingTemplates),
+				{ status: 200 },
+			);
 		}
 
 		const printingTemplates = await prisma.printingTemplate.findMany({
 			where: { companyId },
-			orderBy: { type: "asc" },
+			orderBy: [{ type: "asc" }, { updatedAt: "desc" }, { createdAt: "desc" }],
 		});
-		return NextResponse.json(printingTemplates, { status: 200 });
+		return NextResponse.json(await normalizeDefaultTemplates(printingTemplates), {
+			status: 200,
+		});
 	} catch (error: unknown) {
 		console.error("Ошибка при получении шаблонов печати:", error);
 		return NextResponse.json(
