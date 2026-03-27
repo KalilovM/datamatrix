@@ -9,7 +9,7 @@ import {
 	type EditableTemplateField,
 } from "@/shared/lib/printingTemplate";
 import { usePrintStore } from "@/shared/store/printStore";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import BarcodeComponent from "../BarcodeComponent";
 
 type PrintableNomenclature = {
@@ -29,13 +29,152 @@ const PrintCodes: React.FC<Props> = ({
 	selectedNomenclature,
 }: Props) => {
 	const { printCodes: codes, size, shouldPrint, resetPrint } = usePrintStore();
+	const printContainerRef = useRef<HTMLDivElement>(null);
+
+	const printInIframe = useCallback(async () => {
+		if (!printTemplate || !printContainerRef.current) {
+			resetPrint();
+			return;
+		}
+
+		const iframe = document.createElement("iframe");
+		iframe.style.position = "fixed";
+		iframe.style.right = "0";
+		iframe.style.bottom = "0";
+		iframe.style.width = "0";
+		iframe.style.height = "0";
+		iframe.style.border = "0";
+		iframe.setAttribute("aria-hidden", "true");
+		document.body.appendChild(iframe);
+
+		const iframeWindow = iframe.contentWindow;
+		const iframeDocument = iframeWindow?.document;
+		if (!iframeWindow || !iframeDocument) {
+			iframe.remove();
+			resetPrint();
+			return;
+		}
+
+		iframeDocument.open();
+		iframeDocument.write(`
+			<!doctype html>
+			<html>
+				<head>
+					<meta charset="utf-8" />
+					<title>Print labels</title>
+					<style>
+						@page {
+							size: ${printTemplate.width}mm ${printTemplate.height}mm;
+							margin: 0;
+						}
+
+						html,
+						body {
+							margin: 0;
+							padding: 0;
+							width: ${printTemplate.width}mm;
+							height: auto;
+							overflow: visible;
+							background: white;
+							-webkit-print-color-adjust: exact;
+							print-color-adjust: exact;
+						}
+
+						.print-root {
+							display: block;
+							width: ${printTemplate.width}mm;
+							margin: 0;
+							padding: 0;
+							background: white;
+						}
+
+						.print-page {
+							width: ${printTemplate.width}mm !important;
+							height: ${printTemplate.height}mm !important;
+							margin: 0;
+							overflow: hidden;
+							page-break-after: always;
+							page-break-inside: avoid;
+							break-after: page;
+							break-inside: avoid;
+							box-sizing: border-box;
+						}
+
+						.print-page:last-child {
+							page-break-after: auto;
+							break-after: auto;
+						}
+
+						img,
+						canvas {
+							display: block;
+							max-width: 100%;
+						}
+
+						p {
+							margin: 0;
+						}
+					</style>
+				</head>
+				<body></body>
+			</html>
+		`);
+		iframeDocument.close();
+
+		const printRoot = printContainerRef.current;
+		const clonedRoot = printRoot.cloneNode(true) as HTMLDivElement;
+		clonedRoot.className = "print-root";
+
+		const sourceCanvases = Array.from(printRoot.querySelectorAll("canvas"));
+		const clonedCanvases = Array.from(clonedRoot.querySelectorAll("canvas"));
+		sourceCanvases.forEach((canvas, index) => {
+			const replacementImage = iframeDocument.createElement("img");
+			replacementImage.src = canvas.toDataURL("image/png");
+			replacementImage.width = canvas.width;
+			replacementImage.height = canvas.height;
+			replacementImage.style.width = `${canvas.width}px`;
+			replacementImage.style.height = "auto";
+			clonedCanvases[index]?.replaceWith(replacementImage);
+		});
+
+		iframeDocument.body.appendChild(clonedRoot);
+
+		const iframeImages = Array.from(iframeDocument.images);
+		await Promise.all(
+			iframeImages.map(
+				(image) =>
+					new Promise<void>((resolve) => {
+						if (image.complete) {
+							resolve();
+							return;
+						}
+						image.onload = () => resolve();
+						image.onerror = () => resolve();
+					}),
+			),
+		);
+
+		let cleanedUp = false;
+		const cleanup = () => {
+			if (cleanedUp) {
+				return;
+			}
+			cleanedUp = true;
+			iframe.remove();
+			resetPrint();
+		};
+
+		iframeWindow.addEventListener("afterprint", cleanup, { once: true });
+		iframeWindow.focus();
+		iframeWindow.print();
+		window.setTimeout(cleanup, 1000);
+	}, [printTemplate, resetPrint]);
 
 	useEffect(() => {
 		if (shouldPrint) {
-			window.print();
-			resetPrint();
+			void printInIframe();
 		}
-	}, [shouldPrint, resetPrint]);
+	}, [printInIframe, shouldPrint]);
 
 	if (!printTemplate) {
 		return null;
@@ -330,7 +469,10 @@ const PrintCodes: React.FC<Props> = ({
 	};
 
 	return (
-		<div className="print-container printable hidden print:block text:black">
+		<div
+			ref={printContainerRef}
+			className="print-container printable hidden print:block text:black"
+		>
 			{codes?.map((code, index) =>
 				isNomenclatureDetailsLayout(printTemplate.layout)
 					? renderDetailsLayout(code, index)
