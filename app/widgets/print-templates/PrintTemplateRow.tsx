@@ -18,7 +18,7 @@ const PRINT_TEMPLATE_TYPES: Record<PrintTemplate["type"], string> = {
 };
 
 const PRINT_TEMPLATE_LAYOUTS: Record<PrintTemplate["layout"], string> = {
-	NOMENCLATURE_DETAILS: "Условно номенклатура",
+	NOMENCLATURE_DETAILS: "Готовый шаблон",
 	STANDARD: "Номенклатура",
 };
 

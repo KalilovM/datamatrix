@@ -329,7 +329,7 @@ const PrintTemplateEditForm = ({
 				>
 					<option value="AGGREGATION">Агрегация</option>
 					<option value="NOMENCLATURE">Номенклатура</option>
-					<option value="NOMENCLATURE_DETAILS">Условно номенклатура</option>
+					<option value="NOMENCLATURE_DETAILS">Готовый шаблон</option>
 				</select>
 
 				<label className="font-bold">Тип кода:</label>

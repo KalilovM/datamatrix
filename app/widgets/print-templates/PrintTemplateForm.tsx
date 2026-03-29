@@ -213,7 +213,7 @@ const PrintTemplateForm = () => {
 					{...register("name")}
 					className="border rounded p-2 w-full"
 					placeholder={
-						isDetailsLayout ? "Условно номенклатура" : "Название шаблона"
+						isDetailsLayout ? "Готовый шаблон" : "Название шаблона"
 					}
 				/>
 				{errors.name && <p className="text-red-500">{errors.name.message}</p>}
@@ -226,7 +226,7 @@ const PrintTemplateForm = () => {
 				>
 					<option value="aggregation">Агрегация</option>
 					<option value="nomenclature">Номенклатура</option>
-					<option value="nomenclatureDetails">Условно номенклатура</option>
+					<option value="nomenclatureDetails">Готовый шаблон</option>
 				</select>
 
 				<label className="font-bold">Тип кода:</label>
