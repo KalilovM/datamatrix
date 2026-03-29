@@ -18,9 +18,11 @@ export default function AggregationForm() {
 
 	return (
 		<div className="flex flex-col w-full h-full gap-4 print:gap-0">
-			<AggregationSelectors options={options || []} />
-			<div className="flex flex-row w-full gap-4 h-full print:hidden">
-				<PackInputsSection />
+			<div className="print:hidden">
+				<AggregationSelectors options={options || []} />
+				<div className="flex flex-row w-full gap-4 h-full">
+					<PackInputsSection />
+				</div>
 			</div>
 			<PrintCodes
 				printTemplate={printTemplate}

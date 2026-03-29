@@ -12,30 +12,43 @@ interface PrintTemplateRowProps {
 	template: PrintTemplate;
 }
 
-const PRINT_TEMPLATE_TYPES = {
+const PRINT_TEMPLATE_TYPES: Record<PrintTemplate["type"], string> = {
 	AGGREGATION: "Агрегация",
 	NOMENCLATURE: "Номенклатура",
+};
+
+const PRINT_TEMPLATE_LAYOUTS: Record<PrintTemplate["layout"], string> = {
+	NOMENCLATURE_DETAILS: "Готовый шаблон",
+	STANDARD: "Номенклатура",
 };
 
 const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 	const [modalOpen, setModalOpen] = useState(false);
 	const queryClient = useQueryClient();
 
-	const mutation = useMutation({
+	const invalidateTemplateQueries = () => {
+		queryClient.invalidateQueries({ queryKey: ["printTemplates"] });
+		queryClient.invalidateQueries({ queryKey: ["printTemplateNomenclature"] });
+		queryClient.invalidateQueries({ queryKey: ["printTemplate"] });
+		queryClient.invalidateQueries({ queryKey: ["aggregatedCodesPrintTemplate"] });
+	};
+
+	const makeDefaultMutation = useMutation({
 		mutationFn: async (id: string) => {
-			const response = await fetch("api/printing-templates/default", {
+			const response = await fetch("/api/printing-templates/default", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ id: id, templateType: template.type }),
+				body: JSON.stringify({ id }),
 			});
+
 			if (!response.ok) {
 				throw new Error((await response.json()).error);
 			}
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["printTemplates"] });
+			invalidateTemplateQueries();
 			toast.success("Шаблон успешно установлен по умолчанию");
 		},
 		onError: () => {
@@ -43,9 +56,35 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 		},
 	});
 
-	const handleMakeDefault = () => {
-		mutation.mutate(template.id);
-	};
+	const deleteMutation = useMutation({
+		mutationFn: async () => {
+			const response = await fetch(`/api/printing-templates/${template.id}`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				const data = (await response.json().catch(() => null)) as
+					| { error?: string }
+					| null;
+				throw new Error(data?.error || "Ошибка при удалении шаблона печати");
+			}
+		},
+		onSuccess: () => {
+			invalidateTemplateQueries();
+			toast.success("Шаблон печати успешно удален");
+		},
+		onError: (error: Error) => {
+			toast.error(error.message || "Ошибка при удалении шаблона печати");
+		},
+		onSettled: () => {
+			setModalOpen(false);
+		},
+	});
+
+	const templatePurpose =
+		template.type === "NOMENCLATURE"
+			? PRINT_TEMPLATE_LAYOUTS[template.layout]
+			: PRINT_TEMPLATE_TYPES[template.type];
 
 	return (
 		<>
@@ -56,19 +95,16 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 				<td className="px-8 py-4">
 					{new Date(template.createdAt).toLocaleDateString("ru-RU")}
 				</td>
-				<td className="px-8 py-4">{PRINT_TEMPLATE_TYPES[template.type]}</td>
+				<td className="px-8 py-4">{templatePurpose}</td>
 				<td className="px-8 py-4 text-center">
 					<input
 						id={`default-checkbox-${template.id}`}
 						type="checkbox"
 						checked={template.isDefault}
-						onChange={(e) => {
-							// Trigger mutation only if the checkbox is being checked and it is not already default
-							if (e.target.checked && !template.isDefault) {
-								handleMakeDefault();
-							}
+						onChange={() => {
+							makeDefaultMutation.mutate(template.id);
 						}}
-						disabled={mutation.isPending}
+						disabled={makeDefaultMutation.isPending || deleteMutation.isPending}
 						className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
 					/>
 				</td>
@@ -82,7 +118,8 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 					<button
 						type="button"
 						onClick={() => setModalOpen(true)}
-						className="bg-red-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer"
+						disabled={deleteMutation.isPending}
+						className="bg-red-500 px-2.5 py-2.5 text-white rounded-md cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<BinIcon className="size-5" />
 					</button>
@@ -91,13 +128,16 @@ const PrintTemplateRow: React.FC<PrintTemplateRowProps> = ({ template }) => {
 			{modalOpen && (
 				<ConfirmModal
 					title="Удаление шаблона"
-					message="Вы уверены, что хотите удалить этот шаблон?"
+					message={`Вы уверены, что хотите удалить шаблон "${template.name}"?`}
 					onConfirm={() => {
-						setModalOpen(false);
-						// Handle delete logic
+						deleteMutation.mutate();
 					}}
 					isOpen={modalOpen}
-					onCancel={() => setModalOpen(false)}
+					onCancel={() => {
+						if (!deleteMutation.isPending) {
+							setModalOpen(false);
+						}
+					}}
 				/>
 			)}
 		</>

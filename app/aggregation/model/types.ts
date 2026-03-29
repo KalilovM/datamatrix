@@ -10,6 +10,7 @@ export interface NomenclatureOption {
 	name: string;
 	color: string;
 	modelArticle: string;
+	composition?: string;
 	size: string;
 	codes: string[];
 }
@@ -23,11 +24,17 @@ export interface PackPage {
 export interface PrintTemplate {
 	width: number;
 	height: number;
+	layout: "STANDARD" | "NOMENCLATURE_DETAILS";
 	qrPosition: "LEFT" | "RIGHT" | "CENTER";
 	qrType: "QR" | "DATAMATRIX";
 	fields: {
 		order: number;
-		fieldType: "NAME" | "MODEL_ARTICLE" | "COLOR" | "SIZE";
+		fieldType:
+			| "NAME"
+			| "MODEL_ARTICLE"
+			| "COLOR"
+			| "SIZE"
+			| "COMPOSITION";
 		isBold: boolean;
 		fontSize: number;
 	}[];

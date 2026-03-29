@@ -5,7 +5,7 @@
 # Usage: make <target>
 # =============================================================================
 
-.PHONY: help dev build start lint test clean install db-migrate db-push db-studio db-reset deploy
+.PHONY: help dev build start lint test clean install db-migrate db-push db-studio db-reset deploy deploy-dev deploy-prod vps-setup-dev vps-setup-prod vps-setup-all
 
 # Default target
 help:
@@ -29,10 +29,17 @@ help:
 	@echo "  make db-seed     - Seed the database"
 	@echo ""
 	@echo "Production:"
-	@echo "  make deploy      - Deploy to production VPS"
+	@echo "  make deploy      - Deploy production on the VPS"
+	@echo "  make deploy-dev  - Deploy development on the VPS"
+	@echo "  make deploy-prod - Deploy production on the VPS"
 	@echo "  make pm2-start   - Start with PM2"
 	@echo "  make pm2-restart - Restart PM2 process"
 	@echo "  make pm2-logs    - View PM2 logs"
+	@echo ""
+	@echo "Server setup:"
+	@echo "  make vps-setup-all  - Bootstrap dev + prod on the VPS"
+	@echo "  make vps-setup-dev  - Bootstrap dev on the VPS"
+	@echo "  make vps-setup-prod - Bootstrap prod on the VPS"
 	@echo ""
 
 # =============================================================================
@@ -102,7 +109,13 @@ build-prod:
 	NODE_ENV=production npm run build
 
 deploy:
-	./scripts/deploy.sh
+	./scripts/deploy.sh prod
+
+deploy-dev:
+	./scripts/deploy.sh dev
+
+deploy-prod:
+	./scripts/deploy.sh prod
 
 pm2-start:
 	pm2 start ecosystem.config.cjs --env production
@@ -135,3 +148,12 @@ setup-dev:
 	@echo "Edit .env.local with your local settings, then run:"
 	@echo "  make db-push   # to create tables"
 	@echo "  make dev       # to start development"
+
+vps-setup-all:
+	sudo bash scripts/vps-setup.sh all
+
+vps-setup-dev:
+	sudo bash scripts/vps-setup.sh dev
+
+vps-setup-prod:
+	sudo bash scripts/vps-setup.sh prod

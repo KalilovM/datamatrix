@@ -19,15 +19,17 @@ function CodeLinksPage() {
 
 	return (
 		<Layout className="flex-col">
-			<CodeLinksTable
-				onLinkedCodes={setCodes}
-				onNomenclature={setNomenclature}
-			/>
-			<LinkedCodesTable
-				linkedCodes={codes}
-				nomenclature={nomenclature}
-				setTemplate={setPrintTemplate}
-			/>
+			<div className="print:hidden">
+				<CodeLinksTable
+					onLinkedCodes={setCodes}
+					onNomenclature={setNomenclature}
+				/>
+				<LinkedCodesTable
+					linkedCodes={codes}
+					nomenclature={nomenclature}
+					setTemplate={setPrintTemplate}
+				/>
+			</div>
 
 			{printTemplate && (
 				<PrintCodes

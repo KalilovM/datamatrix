@@ -1,16 +1,24 @@
 "use client";
 
-import type {
-	PrintTemplate,
-} from "@/aggregation/model/types";
+import type { PrintTemplate } from "@/aggregation/model/types";
+import {
+	fixedNomenclatureDetailsFields,
+	isNomenclatureDetailsLayout,
+	nomenclatureLayoutStaticContent,
+	normalizeEditableFieldType,
+	templateFieldLabels,
+	toPrismaTemplateFieldType,
+	type EditableTemplateField,
+} from "@/shared/lib/printingTemplate";
 import { usePrintStore } from "@/shared/store/printStore";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import BarcodeComponent from "../BarcodeComponent";
 
 type PrintableNomenclature = {
 	name?: string | null;
 	modelArticle?: string | null;
 	color?: string | null;
+	composition?: string | null;
 };
 
 interface Props {
@@ -23,14 +31,152 @@ const PrintCodes: React.FC<Props> = ({
 	selectedNomenclature,
 }: Props) => {
 	const { printCodes: codes, size, shouldPrint, resetPrint } = usePrintStore();
+	const printContainerRef = useRef<HTMLDivElement>(null);
 
-	// Trigger printing when the print flag is set
+	const printInIframe = useCallback(async () => {
+		if (!printTemplate || !printContainerRef.current) {
+			resetPrint();
+			return;
+		}
+
+		const iframe = document.createElement("iframe");
+		iframe.style.position = "fixed";
+		iframe.style.right = "0";
+		iframe.style.bottom = "0";
+		iframe.style.width = "0";
+		iframe.style.height = "0";
+		iframe.style.border = "0";
+		iframe.setAttribute("aria-hidden", "true");
+		document.body.appendChild(iframe);
+
+		const iframeWindow = iframe.contentWindow;
+		const iframeDocument = iframeWindow?.document;
+		if (!iframeWindow || !iframeDocument) {
+			iframe.remove();
+			resetPrint();
+			return;
+		}
+
+		iframeDocument.open();
+		iframeDocument.write(`
+			<!doctype html>
+			<html>
+				<head>
+					<meta charset="utf-8" />
+					<title>Print labels</title>
+					<style>
+						@page {
+							size: ${printTemplate.width}mm ${printTemplate.height}mm;
+							margin: 0;
+						}
+
+						html,
+						body {
+							margin: 0;
+							padding: 0;
+							width: ${printTemplate.width}mm;
+							height: auto;
+							overflow: visible;
+							background: white;
+							-webkit-print-color-adjust: exact;
+							print-color-adjust: exact;
+						}
+
+						.print-root {
+							display: block;
+							width: ${printTemplate.width}mm;
+							margin: 0;
+							padding: 0;
+							background: white;
+						}
+
+						.print-page {
+							width: ${printTemplate.width}mm !important;
+							height: ${printTemplate.height}mm !important;
+							margin: 0;
+							overflow: hidden;
+							page-break-after: always;
+							page-break-inside: avoid;
+							break-after: page;
+							break-inside: avoid;
+							box-sizing: border-box;
+						}
+
+						.print-page:last-child {
+							page-break-after: auto;
+							break-after: auto;
+						}
+
+						img,
+						canvas {
+							display: block;
+							max-width: 100%;
+						}
+
+						p {
+							margin: 0;
+						}
+					</style>
+				</head>
+				<body></body>
+			</html>
+		`);
+		iframeDocument.close();
+
+		const printRoot = printContainerRef.current;
+		const clonedRoot = printRoot.cloneNode(true) as HTMLDivElement;
+		clonedRoot.className = "print-root";
+
+		const sourceCanvases = Array.from(printRoot.querySelectorAll("canvas"));
+		const clonedCanvases = Array.from(clonedRoot.querySelectorAll("canvas"));
+		sourceCanvases.forEach((canvas, index) => {
+			const replacementImage = iframeDocument.createElement("img");
+			replacementImage.src = canvas.toDataURL("image/png");
+			replacementImage.width = canvas.width;
+			replacementImage.height = canvas.height;
+			replacementImage.style.width = `${canvas.width}px`;
+			replacementImage.style.height = "auto";
+			clonedCanvases[index]?.replaceWith(replacementImage);
+		});
+
+		iframeDocument.body.appendChild(clonedRoot);
+
+		const iframeImages = Array.from(iframeDocument.images);
+		await Promise.all(
+			iframeImages.map(
+				(image) =>
+					new Promise<void>((resolve) => {
+						if (image.complete) {
+							resolve();
+							return;
+						}
+						image.onload = () => resolve();
+						image.onerror = () => resolve();
+					}),
+			),
+		);
+
+		let cleanedUp = false;
+		const cleanup = () => {
+			if (cleanedUp) {
+				return;
+			}
+			cleanedUp = true;
+			iframe.remove();
+			resetPrint();
+		};
+
+		iframeWindow.addEventListener("afterprint", cleanup, { once: true });
+		iframeWindow.focus();
+		iframeWindow.print();
+		window.setTimeout(cleanup, 1000);
+	}, [printTemplate, resetPrint]);
+
 	useEffect(() => {
 		if (shouldPrint) {
-			window.print();
-			resetPrint();
+			void printInIframe();
 		}
-	}, [shouldPrint, resetPrint]);
+	}, [printInIframe, shouldPrint]);
 
 	if (!printTemplate) {
 		return null;
@@ -49,146 +195,321 @@ const PrintCodes: React.FC<Props> = ({
 				return nomenclature?.color || "";
 			case "SIZE":
 				return size || "";
+			case "COMPOSITION":
+				return nomenclature?.composition || "";
 			default:
 				return "";
 		}
 	};
 
-	const fieldLabels = {
-		NAME: "Наименование",
-		MODEL_ARTICLE: "Модель",
-		COLOR: "Цвет",
-		SIZE: "Размер",
-	};
+	const renderStandardLayout = (code: string, index: number) => {
+		const sortedFields = [...printTemplate.fields].sort(
+			(a, b) => a.order - b.order,
+		);
 
-	return (
-		<div className="print-container printable hidden print:block text:black">
-			{codes?.map((code, index) => {
-				// Sort fields based on the 'order' property from the template
-				const sortedFields = [...printTemplate.fields].sort(
-					(a, b) => a.order - b.order,
-				);
+		const containerStyle = {
+			width: `${printTemplate.width}mm`,
+			height: `${printTemplate.height}mm`,
+			display: "flex",
+			flexDirection: "row" as const,
+			boxSizing: "border-box" as const,
+			paddingLeft: "4mm",
+			paddingTop: "2mm",
+		};
 
-				// Use template values for the container dimensions
-				const containerStyle = {
-					width: `${printTemplate.width}mm`,
-					height: `${printTemplate.height}mm`,
+		const qrColumn = (
+			<div
+				style={{
+					flex: "0 0 50%",
+					minWidth: 0,
 					display: "flex",
-					flexDirection: "row" as const,
-					boxSizing: "border-box" as const,
-					paddingLeft: "4mm",
-					paddingTop: "2mm",
-				};
+					flexDirection: "column" as const,
+					alignItems: "center",
+					justifyContent: "center",
+				}}
+			>
+				<BarcodeComponent
+					text={code}
+					size={80}
+					type={printTemplate.qrType}
+				/>
+			</div>
+		);
 
-				// QR Column styling
-				const qrColumn = (
+		const fieldsColumn = (
+			<div
+				style={{
+					flex: "0 0 50%",
+					minWidth: 0,
+					display: "flex",
+					flexDirection: "column" as const,
+					justifyContent: "center",
+					alignItems: "stretch",
+					padding: "0",
+				}}
+			>
+				{sortedFields.map((field) => (
+					<div
+						key={field.order}
+						style={{
+							width: "100%",
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "flex-start",
+							justifyContent: "flex-start",
+							marginBottom: "1mm",
+							lineHeight: 1.05,
+							textAlign: "left",
+						}}
+					>
+						{field.fieldType !== "NAME" && (
+							<p
+								style={{
+									fontSize: "8px",
+									textAlign: "left",
+									width: "100%",
+								}}
+							>
+								{templateFieldLabels[
+									normalizeEditableFieldType(field.fieldType) as EditableTemplateField
+								] || field.fieldType}
+								:
+							</p>
+						)}
+						<p
+							style={{
+								fontSize: `${field.fontSize}px`,
+								fontWeight: field.isBold ? "bold" : "normal",
+								marginLeft: "0.5mm",
+								textAlign: "left",
+								width: "100%",
+								lineHeight: 1.05,
+							}}
+						>
+							{selectedNomenclature
+								? getFieldValue(selectedNomenclature, field.fieldType)
+								: ""}
+						</p>
+					</div>
+				))}
+			</div>
+		);
+
+		return (
+			<div key={index} className="print-page" style={containerStyle}>
+				{printTemplate.qrPosition === "CENTER" ? (
 					<div
 						style={{
-							width: "50%",
 							display: "flex",
-							flexDirection: "column" as const,
+							flexDirection: "column",
 							alignItems: "center",
 							justifyContent: "center",
+							width: "100%",
 						}}
 					>
 						<BarcodeComponent
 							text={code}
-							size={80}
+							size={100}
 							type={printTemplate.qrType}
 						/>
+						<span
+							style={{
+								fontSize: `${sortedFields[0].fontSize}px`,
+								fontWeight: sortedFields[0].isBold ? "bold" : "normal",
+							}}
+						>
+							{selectedNomenclature
+								? getFieldValue(
+										selectedNomenclature,
+										sortedFields[0].fieldType,
+									)
+								: ""}
+						</span>
 					</div>
-				);
+				) : printTemplate.qrPosition === "LEFT" ? (
+					<>
+						{qrColumn}
+						{fieldsColumn}
+					</>
+				) : (
+					<>
+						{fieldsColumn}
+						{qrColumn}
+					</>
+				)}
+			</div>
+		);
+	};
 
-				// Fields column: each field uses the fontSize and isBold properties from the template
-				const fieldsColumn = (
+	const renderDetailsLayout = (code: string, index: number) => {
+		const printDate = new Intl.DateTimeFormat("ru-RU").format(new Date());
+		const fixedFieldStyles = fixedNomenclatureDetailsFields.map((field) => ({
+			fieldType: toPrismaTemplateFieldType(field.field),
+			fontSize: field.size,
+			isBold: field.bold,
+		}));
+		const fieldStyleMap = new Map(
+			fixedFieldStyles.map((field) => [field.fieldType, field]),
+		);
+
+		const renderDetailRow = (
+			label: string,
+			value: string,
+			options?: {
+				fieldType?: "NAME" | "MODEL_ARTICLE" | "SIZE" | "COLOR" | "COMPOSITION";
+				defaultSize?: number;
+				hideLabel?: boolean;
+			},
+		) => {
+			const fieldStyle = options?.fieldType
+				? fieldStyleMap.get(options.fieldType)
+				: undefined;
+			const valueStyle = {
+				fontSize: `${fieldStyle?.fontSize ?? options?.defaultSize ?? 9}px`,
+				fontWeight: fieldStyle?.isBold ? "bold" : "normal",
+				lineHeight: 1.05,
+			} as const;
+
+			if (options?.hideLabel) {
+				return <div style={valueStyle}>{value}</div>;
+			}
+
+			return (
+				<div
+					style={{
+						display: "flex",
+						gap: "1mm",
+						alignItems: "baseline",
+						lineHeight: 1.05,
+					}}
+				>
+					<span style={{ fontSize: "8px" }}>{label}:</span>
+					<span style={valueStyle}>
+						{value}
+					</span>
+				</div>
+			);
+		};
+
+		return (
+			<div
+				key={index}
+				className="print-page"
+				style={{
+					width: `${printTemplate.width}mm`,
+					height: `${printTemplate.height}mm`,
+					display: "flex",
+					flexDirection: "column",
+					boxSizing: "border-box",
+					padding: "2mm",
+					gap: "1mm",
+				}}
+			>
+				<div
+					style={{
+						height: "60%",
+						display: "flex",
+						gap: "2mm",
+					}}
+				>
 					<div
 						style={{
-							width: "50%",
+							width: "62%",
 							display: "flex",
-							flexDirection: "column" as const,
-							justifyContent: "center",
-							alignItems: "center",
-							padding: "0",
+							flexDirection: "column",
+							justifyContent: "space-between",
+							overflow: "hidden",
 						}}
 					>
-						{sortedFields.map((field) => (
-							<div
-								key={field.order}
-								className="w-full h-full flex flex-col items-start text-start centered"
-								style={{ marginBottom: "1mm" }}
-							>
-								{field.fieldType !== "NAME" && (
-									<p
-										style={{
-											fontSize: "8px",
-										}}
-									>
-										{fieldLabels[field.fieldType] || field.fieldType}:
-									</p>
-								)}
-								<p
-									style={{
-										fontSize: `${field.fontSize}px`,
-										fontWeight: field.isBold ? "bold" : "normal",
-										marginLeft: "0.5mm",
-									}}
-								>
-									{selectedNomenclature
-										? getFieldValue(selectedNomenclature, field.fieldType)
-										: ""}
-								</p>
-							</div>
-						))}
-					</div>
-				);
-
-				// Layout based on qrPosition setting
-				return (
-					<div key={index} className="print-page" style={containerStyle}>
-						{printTemplate.qrPosition === "CENTER" ? (
-							<div
-								style={{
-									display: "flex",
-									flexDirection: "column",
-									alignItems: "center",
-									justifyContent: "center",
-									width: "100%",
-								}}
-							>
-								<BarcodeComponent
-									text={code}
-									size={100}
-									type={printTemplate.qrType}
-								/>
-								<span
-									style={{
-										fontSize: `${sortedFields[0].fontSize}px`,
-										fontWeight: sortedFields[0].isBold ? "bold" : "normal",
-									}}
-								>
-									{selectedNomenclature
-										? getFieldValue(
-											selectedNomenclature,
-											sortedFields[0].fieldType,
-										)
-										: ""}
-								</span>
-							</div>
-						) : printTemplate.qrPosition === "LEFT" ? (
-							<>
-								{qrColumn}
-								{fieldsColumn}
-							</>
-						) : (
-							// If not CENTER or LEFT, we assume RIGHT
-							<>
-								{fieldsColumn}
-								{qrColumn}
-							</>
+						{renderDetailRow("Дата", printDate)}
+						{renderDetailRow(
+							"Наименование",
+							selectedNomenclature?.name || "",
+							{ fieldType: "NAME", hideLabel: true },
 						)}
+						{renderDetailRow("Бренд", nomenclatureLayoutStaticContent.brand)}
+						{renderDetailRow(
+							"Модель",
+							selectedNomenclature?.modelArticle || "",
+							{ fieldType: "MODEL_ARTICLE" },
+						)}
+						{renderDetailRow("Размер", size || "", { fieldType: "SIZE" })}
+						{renderDetailRow("Цвет", selectedNomenclature?.color || "", {
+							fieldType: "COLOR",
+						})}
 					</div>
-				);
-			})}
+					<div
+						style={{
+							width: "38%",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+						}}
+					>
+						<div
+							style={{
+								width: "100%",
+								height: "75%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
+							<BarcodeComponent
+								text={code}
+								size={72}
+								type={printTemplate.qrType}
+								textStyle={{
+									fontSize: "9px",
+									fontWeight: "normal",
+									lineHeight: 1.05,
+									textAlign: "center",
+									width: "100%",
+									display: "block",
+								}}
+							/>
+						</div>
+					</div>
+				</div>
+				<div
+					style={{
+						height: "40%",
+						display: "flex",
+						flexDirection: "column",
+						justifyContent: "space-between",
+						paddingTop: "1mm",
+					}}
+				>
+					{renderDetailRow(
+						"Изготовитель",
+						nomenclatureLayoutStaticContent.manufacturer,
+					)}
+					{renderDetailRow("Адрес", nomenclatureLayoutStaticContent.address)}
+					<div style={{ fontSize: "9px", lineHeight: 1.05 }}>
+						{nomenclatureLayoutStaticContent.countryOfOrigin}
+					</div>
+					{renderDetailRow(
+						templateFieldLabels.composition,
+						selectedNomenclature?.composition || "",
+						{
+							fieldType: "COMPOSITION",
+						},
+					)}
+				</div>
+			</div>
+		);
+	};
+
+	return (
+		<div
+			ref={printContainerRef}
+			className="print-container printable hidden print:block text:black"
+		>
+			{codes?.map((code, index) =>
+				isNomenclatureDetailsLayout(printTemplate.layout)
+					? renderDetailsLayout(code, index)
+					: renderStandardLayout(code, index),
+			)}
 		</div>
 	);
 };

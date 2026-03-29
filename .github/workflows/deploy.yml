@@ -1,0 +1,90 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Deployment target
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - prod
+
+jobs:
+  deploy-dev:
+    if: github.event.inputs.target == 'dev'
+    runs-on: ubuntu-latest
+    environment: development
+    env:
+      SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+      SSH_PORT: ${{ secrets.DEV_SSH_PORT }}
+      SSH_USER: ${{ secrets.DEV_SSH_USER }}
+      SSHPASS: ${{ secrets.DEV_SSH_PASSWORD }}
+      REPO_URL: https://github.com/${{ github.repository }}.git
+      DEPLOY_BRANCH: dev
+    steps:
+      - name: Install SSH tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Trust VPS host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy development
+        run: |
+          sshpass -e ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "REPO_URL='$REPO_URL' DEPLOY_BRANCH='$DEPLOY_BRANCH' bash -s" <<'EOF'
+          set -euo pipefail
+          APP_DIR="/var/www/datamatrix-dev"
+
+          if [ ! -d "${APP_DIR}/.git" ]; then
+            mkdir -p "${APP_DIR}"
+            git clone --branch "${DEPLOY_BRANCH}" --single-branch "${REPO_URL}" "${APP_DIR}"
+          fi
+
+          cd "${APP_DIR}"
+          export DEPLOY_BRANCH
+          bash scripts/deploy.sh dev
+          EOF
+
+  deploy-prod:
+    if: github.event.inputs.target == 'prod'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+      SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+      SSH_USER: ${{ secrets.PROD_SSH_USER }}
+      SSHPASS: ${{ secrets.PROD_SSH_PASSWORD }}
+      REPO_URL: https://github.com/${{ github.repository }}.git
+      DEPLOY_BRANCH: main
+    steps:
+      - name: Install SSH tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Trust VPS host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy production
+        run: |
+          sshpass -e ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "REPO_URL='$REPO_URL' DEPLOY_BRANCH='$DEPLOY_BRANCH' bash -s" <<'EOF'
+          set -euo pipefail
+          APP_DIR="/var/www/datamatrix"
+
+          if [ ! -d "${APP_DIR}/.git" ]; then
+            mkdir -p "${APP_DIR}"
+            git clone --branch "${DEPLOY_BRANCH}" --single-branch "${REPO_URL}" "${APP_DIR}"
+          fi
+
+          cd "${APP_DIR}"
+          export DEPLOY_BRANCH
+          bash scripts/deploy.sh prod
+          EOF

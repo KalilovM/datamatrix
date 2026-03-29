@@ -1,5 +1,9 @@
 import { prisma } from "@/shared/lib/prisma";
-import type { TemplateFieldType } from "@prisma/client";
+import {
+	isNomenclatureDetailsLayout,
+	toPrismaTemplateFieldType,
+	toPrismaTemplateLayout,
+} from "@/shared/lib/printingTemplate";
 import { NextResponse } from "next/server";
 
 type PrintTemplateFieldInput = {
@@ -12,27 +16,23 @@ type PrintTemplateFieldInput = {
 
 type UpdatePrintTemplatePayload = {
 	name: string;
-	type: "AGGREGATION" | "NOMENCLATURE";
-	qrType: "QR" | "DATAMATRIX";
-	qrPosition: "LEFT" | "RIGHT" | "CENTER";
+	type: "AGGREGATION" | "NOMENCLATURE" | "aggregation" | "nomenclature";
+	layout?: "STANDARD" | "NOMENCLATURE_DETAILS" | "standard" | "nomenclatureDetails";
+	qrType: "QR" | "DATAMATRIX" | "qr" | "datamatrix";
+	qrPosition: "LEFT" | "RIGHT" | "CENTER" | "left" | "right" | "center";
 	canvasSize: {
-		width: number;
-		height: number;
+		width: number | string;
+		height: number | string;
 	};
 	fields: PrintTemplateFieldInput[];
 };
 
-const toTemplateFieldType = (value: string): TemplateFieldType => {
-	const normalized = value.toUpperCase();
-	if (
-		normalized === "NAME" ||
-		normalized === "MODEL_ARTICLE" ||
-		normalized === "COLOR" ||
-		normalized === "SIZE"
-	) {
-		return normalized;
-	}
-	throw new Error(`Unsupported fieldType: ${value}`);
+const normalizeTemplateType = (
+	value: UpdatePrintTemplatePayload["type"],
+): "AGGREGATION" | "NOMENCLATURE" => {
+	return String(value).toUpperCase() === "NOMENCLATURE"
+		? "NOMENCLATURE"
+		: "AGGREGATION";
 };
 
 export async function GET(
@@ -46,6 +46,7 @@ export async function GET(
 			id: true,
 			name: true,
 			type: true,
+			layout: true,
 			qrType: true,
 			qrPosition: true,
 			width: true,
@@ -72,6 +73,7 @@ export async function PUT(
 	const {
 		name,
 		type,
+		layout = "standard",
 		qrType,
 		qrPosition,
 		canvasSize: { width, height },
@@ -79,33 +81,56 @@ export async function PUT(
 	} = (await req.json()) as UpdatePrintTemplatePayload;
 	const { id } = await params;
 
-	// Filter out fields with empty fieldType.
-	const filteredFields = fields.filter((field) => field.fieldType !== "");
+	const normalizedType = normalizeTemplateType(type);
+	const normalizedLayout = toPrismaTemplateLayout(layout);
 
-	// For fields with an id, use upsert.
+	if (
+		normalizedLayout === "NOMENCLATURE_DETAILS" &&
+		normalizedType !== "NOMENCLATURE"
+	) {
+		return NextResponse.json(
+			{ error: "Этот макет доступен только для номенклатуры" },
+			{ status: 400 },
+		);
+	}
+
+	const filteredFields = (fields ?? []).filter((field) => field.fieldType !== "");
+	const existingFieldIds = filteredFields
+		.map((field) => field.id)
+		.filter((fieldId): fieldId is string => Boolean(fieldId));
+	const normalizedQrPosition: "LEFT" | "RIGHT" | "CENTER" =
+		isNomenclatureDetailsLayout(layout)
+			? "RIGHT"
+			: String(qrPosition).toUpperCase() === "LEFT"
+				? "LEFT"
+				: String(qrPosition).toUpperCase() === "CENTER"
+					? "CENTER"
+					: "RIGHT";
+	const normalizedQrType: "QR" | "DATAMATRIX" =
+		String(qrType).toUpperCase() === "DATAMATRIX" ? "DATAMATRIX" : "QR";
+
 	const upsertOperations = filteredFields
-		.filter((field) => field.id && field.id !== "")
+		.filter((field) => field.id)
 		.map((field) => ({
-			where: { id: field.id },
+			where: { id: field.id as string },
 			update: {
-				fieldType: toTemplateFieldType(field.fieldType),
+				fieldType: toPrismaTemplateFieldType(field.fieldType),
 				isBold: field.isBold,
 				fontSize: field.fontSize,
 				order: field.order,
 			},
 			create: {
-				fieldType: toTemplateFieldType(field.fieldType),
+				fieldType: toPrismaTemplateFieldType(field.fieldType),
 				isBold: field.isBold,
 				fontSize: field.fontSize,
 				order: field.order,
 			},
 		}));
 
-	// For fields with an empty id, create new ones.
 	const createOperations = filteredFields
-		.filter((field) => !field.id || field.id === "")
+		.filter((field) => !field.id)
 		.map((field) => ({
-			fieldType: toTemplateFieldType(field.fieldType),
+			fieldType: toPrismaTemplateFieldType(field.fieldType),
 			isBold: field.isBold,
 			fontSize: field.fontSize,
 			order: field.order,
@@ -114,16 +139,23 @@ export async function PUT(
 	const updatedPrintTemplate = await prisma.printingTemplate.update({
 		where: { id },
 		data: {
-			name: name,
-			type: type,
-			qrType: qrType,
-			qrPosition: qrPosition,
-			width: width,
-			height: height,
+			name,
+			type: normalizedType,
+			layout: normalizedLayout,
+			qrType: normalizedQrType,
+			qrPosition: normalizedQrPosition,
+			width: Number(width),
+			height: Number(height),
 			fields: {
-				// Upsert existing fields.
+				deleteMany: existingFieldIds.length
+					? {
+							templateId: id,
+							id: {
+								notIn: existingFieldIds,
+							},
+						}
+					: { templateId: id },
 				upsert: upsertOperations,
-				// Create new fields.
 				create: createOperations,
 			},
 		},

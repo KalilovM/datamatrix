@@ -37,6 +37,7 @@ export async function GET(
 			name: true,
 			modelArticle: true,
 			color: true,
+			composition: true,
 			configurations: true,
 			codePacks: {
 				select: {
@@ -82,6 +83,7 @@ export async function GET(
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
+		composition: nomenclature.composition || "",
 		GTIN: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.gtin),
 		size: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.size),
 		gtinSize,

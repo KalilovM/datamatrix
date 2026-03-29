@@ -1,25 +1,23 @@
 #!/usr/bin/env bash
 # =============================================================================
-# DataMatrix - Production VPS Bootstrap (Ubuntu 22.04/24.04)
+# DataMatrix VPS Bootstrap (Ubuntu 22.04/24.04)
 # =============================================================================
-# Run once on the server:
-#   sudo bash scripts/vps-setup.sh
+# Run on the server:
+#   sudo bash scripts/vps-setup.sh all
+#   sudo bash scripts/vps-setup.sh dev
+#   sudo bash scripts/vps-setup.sh prod
 # =============================================================================
 
 set -euo pipefail
 
-DOMAIN="dm.alonamoda.com"
-SERVER_IP="193.124.33.151"
-SSL_EMAIL="admin@alonamoda.com"
-DEPLOY_USER="deploy"
-APP_DIR="/var/www/datamatrix"
-ENV_DIR="/etc/datamatrix"
-ENV_FILE="${ENV_DIR}/.env"
-BACKUP_DIR="/var/www/datamatrix-backups"
-LOG_DIR="/var/log/datamatrix"
-DB_NAME="datamatrix_prod"
-DB_USER="datamatrix_user"
-NODE_VERSION="20"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./lib/deploy-targets.sh
+source "${SCRIPT_DIR}/lib/deploy-targets.sh"
+
+TARGET="${1:-all}"
+NODE_VERSION="${NODE_VERSION:-20}"
+DEPLOY_USER="${DEPLOY_USER:-marlen}"
+SSL_EMAIL="${SSL_EMAIL:-admin@alonamoda.com}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -121,41 +119,67 @@ setup_firewall_and_services() {
     ufw --force reset
     ufw default deny incoming
     ufw default allow outgoing
-    ufw allow OpenSSH
+    ufw allow "${SSH_PORT}/tcp"
     ufw allow 'Nginx Full'
     ufw --force enable
 }
 
 setup_directories() {
-    log_info "Creating directories..."
+    log_info "Creating directories for ${TARGET_LABEL}..."
     mkdir -p "${APP_DIR}" "${BACKUP_DIR}" "${LOG_DIR}" "${ENV_DIR}" /var/www/certbot
     chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "${APP_DIR}" "${BACKUP_DIR}" "${LOG_DIR}" /var/www/certbot
     chown root:"${DEPLOY_USER}" "${ENV_DIR}"
     chmod 750 "${ENV_DIR}"
 }
 
+database_exists() {
+    sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" | grep -q 1
+}
+
+database_user_exists() {
+    sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'" | grep -q 1
+}
+
 setup_postgres() {
-    log_info "Configuring PostgreSQL database/user..."
+    log_info "Configuring PostgreSQL database/user for ${TARGET_LABEL}..."
+
+    if [ -f "${ENV_FILE}" ]; then
+        log_info "Existing environment file found at ${ENV_FILE}; keeping current database credentials"
+        return
+    fi
+
     DB_PASSWORD="$(openssl rand -hex 24)"
 
-    sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'" | grep -q 1 \
-        || sudo -u postgres psql -c "CREATE USER ${DB_USER} WITH PASSWORD '${DB_PASSWORD}';"
+    if database_user_exists; then
+        sudo -u postgres psql -c "ALTER USER ${DB_USER} WITH PASSWORD '${DB_PASSWORD}';"
+    else
+        sudo -u postgres psql -c "CREATE USER ${DB_USER} WITH PASSWORD '${DB_PASSWORD}';"
+    fi
 
-    sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" | grep -q 1 \
-        || sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME} OWNER ${DB_USER};"
+    if ! database_exists; then
+        sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME} OWNER ${DB_USER};"
+    fi
 
     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};"
 }
 
 write_env_file() {
+    if [ -f "${ENV_FILE}" ]; then
+        log_info "Skipping env creation for ${TARGET_LABEL}; ${ENV_FILE} already exists"
+        return
+    fi
+
     log_info "Creating ${ENV_FILE}..."
     NEXTAUTH_SECRET="$(openssl rand -base64 32)"
     SESSION_SECRET="$(openssl rand -base64 32)"
 
     cat > "${ENV_FILE}" <<EOF
 NODE_ENV=production
-PORT=3000
-HOSTNAME=127.0.0.1
+APP_ENV=${TARGET_ENV}
+PORT=${DEFAULT_PORT}
+HOSTNAME=${APP_HOST}
+DATAMATRIX_PM2_APP_NAME=${PM2_APP_NAME}
+DATAMATRIX_LOG_DIR=${LOG_DIR}
 
 DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}?schema=public"
 
@@ -175,13 +199,13 @@ NEXT_PUBLIC_APP_NAME="DataMatrix"
 NEXT_PUBLIC_API_URL="https://${DOMAIN}"
 EOF
 
-    chmod 600 "${ENV_FILE}"
+    chmod 640 "${ENV_FILE}"
     chown root:"${DEPLOY_USER}" "${ENV_FILE}"
 }
 
 write_nginx_http_bootstrap() {
-    log_info "Writing initial HTTP Nginx config..."
-    cat > /etc/nginx/sites-available/datamatrix <<EOF
+    log_info "Writing initial HTTP Nginx config for ${TARGET_LABEL}..."
+    cat > "/etc/nginx/sites-available/${NGINX_SITE_NAME}" <<EOF
 server {
         listen 80;
         listen [::]:80;
@@ -192,7 +216,7 @@ server {
         }
 
         location / {
-                proxy_pass http://127.0.0.1:3000;
+                proxy_pass http://${APP_HOST}:${DEFAULT_PORT};
                 proxy_http_version 1.1;
                 proxy_set_header Upgrade \$http_upgrade;
                 proxy_set_header Connection "upgrade";
@@ -206,7 +230,7 @@ server {
 EOF
 
     rm -f /etc/nginx/sites-enabled/default
-    ln -sf /etc/nginx/sites-available/datamatrix /etc/nginx/sites-enabled/datamatrix
+    ln -sf "/etc/nginx/sites-available/${NGINX_SITE_NAME}" "/etc/nginx/sites-enabled/${NGINX_SITE_NAME}"
     nginx -t
     systemctl reload nginx
 }
@@ -224,10 +248,10 @@ issue_ssl_certificate() {
 }
 
 write_nginx_https_production() {
-    log_info "Writing hardened HTTPS Nginx config..."
+    log_info "Writing hardened HTTPS Nginx config for ${TARGET_LABEL}..."
 
-    cat > /etc/nginx/sites-available/datamatrix <<EOF
-limit_req_zone \$binary_remote_addr zone=api_limit:10m rate=20r/s;
+    cat > "/etc/nginx/sites-available/${NGINX_SITE_NAME}" <<EOF
+limit_req_zone \$binary_remote_addr zone=${NGINX_SITE_NAME}_api_limit:10m rate=20r/s;
 
 server {
         listen 80;
@@ -263,8 +287,8 @@ server {
         client_max_body_size 20M;
 
         location /api/ {
-                limit_req zone=api_limit burst=40 nodelay;
-                proxy_pass http://127.0.0.1:3000;
+                limit_req zone=${NGINX_SITE_NAME}_api_limit burst=40 nodelay;
+                proxy_pass http://${APP_HOST}:${DEFAULT_PORT};
                 proxy_http_version 1.1;
                 proxy_set_header Upgrade \$http_upgrade;
                 proxy_set_header Connection "upgrade";
@@ -275,7 +299,7 @@ server {
         }
 
         location / {
-                proxy_pass http://127.0.0.1:3000;
+                proxy_pass http://${APP_HOST}:${DEFAULT_PORT};
                 proxy_http_version 1.1;
                 proxy_set_header Upgrade \$http_upgrade;
                 proxy_set_header Connection "upgrade";
@@ -303,12 +327,17 @@ EOF
 
     systemctl enable certbot.timer
     systemctl restart certbot.timer
-    certbot renew --dry-run
+
+    if find /etc/letsencrypt/renewal -maxdepth 1 -name '*.conf' -print -quit | grep -q .; then
+        certbot renew --dry-run
+    else
+        log_warn "Skipping certbot dry-run because no certificates have been issued yet"
+    fi
 }
 
 setup_logrotate() {
-    log_info "Configuring log rotation..."
-    cat > /etc/logrotate.d/datamatrix <<EOF
+    log_info "Configuring log rotation for ${TARGET_LABEL}..."
+    cat > "${LOGROTATE_FILE}" <<EOF
 ${LOG_DIR}/*.log {
     daily
     rotate 14
@@ -327,28 +356,28 @@ EOF
 
 show_summary() {
     log_info "=========================================="
-    log_info "VPS bootstrap completed"
+    log_info "VPS bootstrap completed for ${TARGET_LABEL}"
     log_info "=========================================="
     echo "Domain: ${DOMAIN}"
     echo "Server IP (expected): ${SERVER_IP}"
     echo "App dir: ${APP_DIR}"
     echo "Env file: ${ENV_FILE}"
+    echo "PM2 app: ${PM2_APP_NAME}"
+    echo "Branch: ${DEPLOY_BRANCH}"
     echo ""
     echo "Next steps:"
     echo "1) As ${DEPLOY_USER}, clone project into ${APP_DIR}"
-    echo "2) Run deployment: sudo -u ${DEPLOY_USER} bash ${APP_DIR}/scripts/deploy.sh"
+    echo "2) Run deployment: sudo -u ${DEPLOY_USER} DEPLOY_BRANCH=${DEPLOY_BRANCH} bash ${APP_DIR}/scripts/deploy.sh ${TARGET_ENV}"
     echo "3) Enable PM2 startup once app is running:"
     echo "   sudo -u ${DEPLOY_USER} pm2 save"
     echo "   sudo env PATH=\$PATH:/usr/bin pm2 startup systemd -u ${DEPLOY_USER} --hp /home/${DEPLOY_USER}"
 }
 
-main() {
-    require_root
+setup_target() {
+    local target="$1"
+
+    load_target_config "$target"
     check_dns
-    install_base_packages
-    install_node_pm2
-    setup_deploy_user
-    setup_firewall_and_services
     setup_directories
     setup_postgres
     write_env_file
@@ -359,6 +388,32 @@ main() {
     setup_certbot_auto_renew
     setup_logrotate
     show_summary
+}
+
+main() {
+    require_root
+    BOOTSTRAP_TARGET="$(normalize_target "$TARGET")"
+
+    if [ "$BOOTSTRAP_TARGET" = "all" ]; then
+        SSH_PORT="${SSH_PORT:-22}"
+    else
+        load_target_config "$BOOTSTRAP_TARGET"
+    fi
+
+    install_base_packages
+    install_node_pm2
+    setup_deploy_user
+    setup_firewall_and_services
+
+    case "$BOOTSTRAP_TARGET" in
+        all)
+            setup_target prod
+            setup_target dev
+            ;;
+        prod|dev)
+            setup_target "$TARGET"
+            ;;
+    esac
 }
 
 main "$@"

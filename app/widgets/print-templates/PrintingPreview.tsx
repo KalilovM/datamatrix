@@ -1,9 +1,16 @@
 "use client";
 
+import {
+	fixedNomenclatureDetailsFields,
+	isNomenclatureDetailsLayout,
+	nomenclatureLayoutStaticContent,
+	templateFieldLabels,
+	type EditableTemplateField,
+} from "@/shared/lib/printingTemplate";
 import type React from "react";
 
 interface TextField {
-	field: TextFieldKey | "";
+	field: EditableTemplateField | "";
 	bold: boolean;
 	size: number;
 }
@@ -17,86 +24,168 @@ interface PrintingPreviewProps {
 	textFields: TextField[];
 	qrPosition: "left" | "right" | "center" | string;
 	canvasSize: CanvasSize;
+	layout?: string;
 }
-
-type TextFieldKey = "name" | "modelArticle" | "color" | "size";
-
-const TEXT_FIELD_LABEL: Record<TextFieldKey, string> = {
-	name: "Имя",
-	modelArticle: "Модель",
-	color: "Цвет",
-	size: "Размер",
-};
 
 const PrintingPreview: React.FC<PrintingPreviewProps> = ({
 	textFields,
 	qrPosition,
 	canvasSize,
+	layout,
 }) => {
-	// Prepare the container style based on canvasSize
 	const containerStyle = {
 		width: canvasSize.width,
 		height: canvasSize.height,
 	};
 
-	// Renders a simple QR placeholder.
-	const renderQRCode = () => (
-		<div className="flex items-center justify-center border p-4 w-full h-full">
-			<span>QR Code</span>
+	const normalizedQrPosition = String(qrPosition).toLowerCase();
+	const isDetailsLayout = isNomenclatureDetailsLayout(layout);
+	const textFieldMap = new Map(
+		textFields
+			.filter((field): field is TextField & { field: EditableTemplateField } =>
+				Boolean(field.field),
+			)
+			.map((field) => [field.field, field]),
+	);
+	const detailsTextFieldMap = new Map(
+		fixedNomenclatureDetailsFields.map((field) => [field.field, field]),
+	);
+	const activeTextFieldMap = isDetailsLayout ? detailsTextFieldMap : textFieldMap;
+
+	const renderQRCode = (compact = false) => (
+		<div className="flex h-full w-full items-center justify-center rounded-sm border bg-gray-50">
+			<span className={compact ? "text-xs" : "text-sm"}>QR</span>
 		</div>
 	);
 
-	// Renders text fields as previewed text with the given font size and weight.
 	const renderTextFields = () => (
-		<div className="flex flex-col gap-2 p-2 w-full h-full">
-			{textFields.map((tf, index) => {
-				if (!tf.field) return null;
+		<div className="flex h-full w-full flex-col gap-2 p-2">
+			{textFields.map((field, index) => {
+				if (!field.field) return null;
+
 				return (
 					<div
-						key={index}
+						key={`${field.field}-${index}`}
 						style={{
-							fontSize: `${tf.size}px`,
-							fontWeight: tf.bold ? "bold" : "normal",
+							fontSize: `${field.size}px`,
+							fontWeight: field.bold ? "bold" : "normal",
 						}}
-						className="w-full h-full flex items-center"
+						className="flex h-full w-full items-center"
 					>
-						{TEXT_FIELD_LABEL[tf.field]}
+						{templateFieldLabels[field.field]}
 					</div>
 				);
 			})}
 		</div>
 	);
 
-	if (qrPosition === "center") {
+	const renderDetailRow = (
+		label: string,
+		value: string,
+		options?: {
+			field?: EditableTemplateField;
+			defaultSize?: number;
+			hideLabel?: boolean;
+		},
+	) => {
+		const fieldStyle = options?.field
+			? activeTextFieldMap.get(options.field)
+			: undefined;
+		const valueStyle = {
+			fontSize: `${fieldStyle?.size ?? options?.defaultSize ?? 9}px`,
+			fontWeight: fieldStyle?.bold ? "bold" : "normal",
+			lineHeight: 1.05,
+		} as const;
+
+		if (options?.hideLabel) {
+			return (
+				<div className="leading-tight">
+					<span style={valueStyle} className="truncate">
+						{value}
+					</span>
+				</div>
+			);
+		}
+
+		return (
+			<div className="flex items-baseline gap-1 leading-tight">
+				<span className="text-[8px]">{label}:</span>
+				<span style={valueStyle} className="truncate">
+					{value}
+				</span>
+			</div>
+		);
+	};
+
+	if (isDetailsLayout) {
 		return (
 			<div
 				style={containerStyle}
-				className="border p-1 flex flex-col items-center bg-white mx-auto gap-2"
+				className="mx-auto flex flex-col gap-1 border bg-white p-1"
 			>
-				{/* QR code centered and taking 50% of the width */}
-				<div className="w-1/2 h-full">{renderQRCode()}</div>
+				<div className="flex h-[60%] gap-2">
+					<div className="flex w-[62%] flex-col justify-between overflow-hidden">
+						{renderDetailRow("Дата", "05.03.2026")}
+						{renderDetailRow("Наименование", "Блузка женская", {
+							field: "name",
+							hideLabel: true,
+						})}
+						{renderDetailRow("Бренд", nomenclatureLayoutStaticContent.brand)}
+						{renderDetailRow("Модель", "Артикул 7777", {
+							field: "modelArticle",
+						})}
+						{renderDetailRow("Размер", "46", {
+							field: "size",
+						})}
+						{renderDetailRow("Цвет", "Пудра", {
+							field: "color",
+						})}
+					</div>
+					<div className="flex w-[38%] items-center justify-center">
+						<div className="h-[75%] w-full">{renderQRCode(true)}</div>
+					</div>
+				</div>
+				<div className="flex h-[40%] flex-col justify-between overflow-hidden pt-1">
+					{renderDetailRow(
+						"Изготовитель",
+						nomenclatureLayoutStaticContent.manufacturer,
+					)}
+					{renderDetailRow("Адрес", nomenclatureLayoutStaticContent.address)}
+					<div className="text-[9px] leading-tight">
+						{nomenclatureLayoutStaticContent.countryOfOrigin}
+					</div>
+					{renderDetailRow("Состав", "Вискоза 60%,ПЭ 35%,Эл 5%", {
+						field: "composition",
+					})}
+				</div>
+			</div>
+		);
+	}
+
+	if (normalizedQrPosition === "center") {
+		return (
+			<div
+				style={containerStyle}
+				className="mx-auto flex flex-col items-center gap-2 border bg-white p-1"
+			>
+				<div className="h-full w-1/2">{renderQRCode()}</div>
 				<div>{renderTextFields()}</div>
 			</div>
 		);
 	}
 
-	if (qrPosition === "left") {
+	if (normalizedQrPosition === "left") {
 		return (
-			<div style={containerStyle} className="border p-1 flex bg-white mx-auto">
-				{/* Left side: QR code (50% width) */}
+			<div style={containerStyle} className="mx-auto flex border bg-white p-1">
 				<div className="w-1/2">{renderQRCode()}</div>
-				{/* Right side: Text fields */}
 				<div className="w-1/2">{renderTextFields()}</div>
 			</div>
 		);
 	}
 
-	// Default to "right" if not center or left.
 	return (
-		<div style={containerStyle} className="border p-1 flex bg-white mx-auto">
-			{/* Left side: Text fields */}
+		<div style={containerStyle} className="mx-auto flex border bg-white p-1">
 			<div className="w-1/2">{renderTextFields()}</div>
-			{/* Right side: QR code (50% width) */}
 			<div className="w-1/2">{renderQRCode()}</div>
 		</div>
 	);

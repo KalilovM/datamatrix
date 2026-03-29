@@ -115,6 +115,7 @@ export async function fetchNomenclatureById(
 			name: true,
 			modelArticle: true,
 			color: true,
+			composition: true,
 			sizeGtin: {
 				select: {
 					id: true,
@@ -142,6 +143,7 @@ export async function fetchNomenclatureById(
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
+		composition: nomenclature.composition || "",
 		GTIN: nomenclature.sizeGtin[0]?.gtin || "",
 		gtinSize,
 		configurations: nomenclature.configurations.map((cfg) => ({
@@ -166,7 +168,15 @@ export async function fetchNomenclatureById(
 }
 
 export async function createNomenclature(data: NomenclatureFormData) {
-	const { name, modelArticle, color, configurations, codes, gtinSize } = data;
+	const {
+		name,
+		modelArticle,
+		color,
+		composition,
+		configurations,
+		codes,
+		gtinSize,
+	} = data;
 
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
@@ -198,6 +208,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 					name,
 					modelArticle,
 					color,
+					composition: composition?.trim() || null,
 					companyId,
 					configurations: { create: configCreateData },
 				},
@@ -301,8 +312,16 @@ export async function createNomenclature(data: NomenclatureFormData) {
 
 export async function updateNomenclature(data: NomenclatureEditData) {
 	try {
-		const { id, name, modelArticle, color, configurations, codes, gtinSize } =
-			data;
+		const {
+			id,
+			name,
+			modelArticle,
+			color,
+			composition,
+			configurations,
+			codes,
+			gtinSize,
+		} = data;
 
 		const session = await getServerSession(authOptions);
 		if (!session?.user) {
@@ -319,7 +338,12 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 
 		await prisma.nomenclature.update({
 			where: { id },
-			data: { name, modelArticle, color },
+			data: {
+				name,
+				modelArticle,
+				color,
+				composition: composition?.trim() || null,
+			},
 		});
 
 		await syncSizeGtin(id, gtinSize ?? []);
