@@ -22,6 +22,13 @@ const nextConfig: NextConfig = {
   // Production optimizations
   poweredByHeader: false, // Remove X-Powered-By header for security
 
+  // Allow larger Server Action form submissions for nomenclature edits.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "3mb",
+    },
+  },
+
   // Output configuration for production
   output: "standalone", // Optimized for self-hosting, creates minimal deployment
 
