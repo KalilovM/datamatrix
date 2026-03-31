@@ -29,7 +29,7 @@ export const templateFieldLabels: Record<EditableTemplateField, string> = {
 export const nomenclatureLayoutStaticContent = {
 	brand: "Alona",
 	manufacturer: "ИП Петренко ОА",
-	address: "КР, г.Бишкек,ул.ДенСяопина 34",
+	address: "КР, г.Бишкек, ул.ДенСяопина 34",
 	countryOfOrigin: "Сделано в Кыргызстане",
 } as const;
 
