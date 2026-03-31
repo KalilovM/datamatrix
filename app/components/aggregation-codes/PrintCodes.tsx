@@ -343,6 +343,8 @@ const PrintCodes: React.FC<Props> = ({
 
 	const renderDetailsLayout = (code: string, index: number) => {
 		const printDate = new Intl.DateTimeFormat("ru-RU").format(new Date());
+		const detailsDefaultFontWeight = 500;
+		const detailsEmphasisFontWeight = 600;
 		const fixedFieldStyles = fixedNomenclatureDetailsFields.map((field) => ({
 			fieldType: toPrismaTemplateFieldType(field.field),
 			fontSize: field.size,
@@ -366,7 +368,9 @@ const PrintCodes: React.FC<Props> = ({
 				: undefined;
 			const valueStyle = {
 				fontSize: `${fieldStyle?.fontSize ?? options?.defaultSize ?? 9}px`,
-				fontWeight: fieldStyle?.isBold ? "bold" : "normal",
+				fontWeight: fieldStyle?.isBold
+					? detailsEmphasisFontWeight
+					: detailsDefaultFontWeight,
 				lineHeight: 1.05,
 			} as const;
 
@@ -403,6 +407,7 @@ const PrintCodes: React.FC<Props> = ({
 					boxSizing: "border-box",
 					padding: "2mm",
 					gap: "1mm",
+					fontWeight: detailsDefaultFontWeight,
 				}}
 			>
 				<div
@@ -461,7 +466,7 @@ const PrintCodes: React.FC<Props> = ({
 								type={printTemplate.qrType}
 								textStyle={{
 									fontSize: "9px",
-									fontWeight: "normal",
+									fontWeight: detailsDefaultFontWeight,
 									lineHeight: 1.05,
 									textAlign: "center",
 									width: "100%",
