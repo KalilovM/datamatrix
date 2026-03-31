@@ -1,5 +1,6 @@
 "use client";
 
+import { useCompositions } from "@/features/compositions/hooks/useCompositions";
 import { useGtinSizeStore } from "@/nomenclature/stores/sizegtinStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -35,6 +36,8 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 	const { setGtinSize, reset: resetSizes, gtinSize } = useGtinSizeStore();
 	const { reset } = useNomenclatureStore();
 	const router = useRouter();
+	const { data: compositions = [], isLoading: isCompositionsLoading } =
+		useCompositions();
 	const {
 		register,
 		handleSubmit,
@@ -142,7 +145,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 
 	return (
 		<form
-			className="flex flex-col w-full h-full gap-4 print:hidden"
+			className="print:hidden flex h-full w-full flex-col gap-4"
 			onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
 		>
 			<div className="table-layout h-auto">
@@ -155,14 +158,14 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 					<div className="flex gap-3">
 						<button
 							type="button"
-							className="bg-neutral-500 px-2.5 py-1.5 text-white rounded-md cursor-pointer"
+							className="cursor-pointer rounded-md bg-neutral-500 px-2.5 py-1.5 text-white"
 							onClick={handleCancel}
 						>
 							Отмена
 						</button>
 						<button
 							type="submit"
-							className="bg-blue-500 px-2.5 py-1.5 text-white rounded-md cursor-pointer"
+							className="cursor-pointer rounded-md bg-blue-500 px-2.5 py-1.5 text-white"
 							disabled={mutation.isPending}
 							onClick={() => {
 								console.info("[NomenclatureEditForm] save button clicked", {
@@ -193,7 +196,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 					</div>
 
 					<div className="flex flex-row gap-4">
-						<div className="flex flex-col flex-1">
+						<div className="flex flex-1 flex-col">
 							<label htmlFor="modelArticle">Модель</label>
 							<input
 								{...register("modelArticle")}
@@ -209,7 +212,7 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 							)}
 						</div>
 
-						<div className="flex flex-col flex-1">
+						<div className="flex flex-1 flex-col">
 							<label htmlFor="color">Цвет</label>
 							<input
 								{...register("color")}
@@ -225,17 +228,25 @@ export default function NomenclatureEditForm({ nomenclature }: Props) {
 					</div>
 
 					<div className="flex flex-col">
-						<label htmlFor="composition">Состав</label>
-						<input
-							{...register("composition")}
-							type="text"
+						<label htmlFor="compositionId">Состав</label>
+						<select
+							{...register("compositionId")}
 							className="w-full rounded-lg border border-gray-300 px-3 py-2"
-							placeholder="Необязательно"
-						/>
+							disabled={isCompositionsLoading}
+						>
+							<option value="">
+								{isCompositionsLoading ? "Загрузка составов..." : "Не выбрано"}
+							</option>
+							{compositions.map((composition) => (
+								<option key={composition.id} value={composition.id}>
+									{composition.name}
+								</option>
+							))}
+						</select>
 					</div>
 				</div>
 			</div>
-			<div className="flex flex-row w-full gap-4 h-full flex-1 min-h-[400px] max-h-[400px]">
+			<div className="flex h-full min-h-[400px] max-h-[400px] w-full flex-1 flex-row gap-4">
 				<Controller
 					control={control}
 					name="configurations"

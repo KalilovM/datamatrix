@@ -214,6 +214,28 @@ export const NomenclatureIcon = ({
 	</svg>
 );
 
+export const CompositionIcon = ({
+	fill = "none",
+	stroke = "currentColor",
+	strokeWidth = "1.5",
+	className = "size-6",
+}: IconProps) => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		fill={fill}
+		stroke={stroke}
+		strokeWidth={strokeWidth}
+		className={className}
+		viewBox="0 0 24 24"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M8.25 6.75h12m-12 5.25h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75Zm0 5.25h.008v.008H3.75V12Zm0 5.25h.008v.008H3.75v-.008Z"
+		></path>
+	</svg>
+);
+
 export const CloseIcon = ({
 	fill = "none",
 	stroke = "currentColor",
