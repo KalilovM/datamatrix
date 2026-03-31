@@ -1,10 +1,10 @@
 "use client";
 
+import { useCompositions } from "@/features/compositions/hooks/useCompositions";
 import { useConfigurationsStore } from "@/nomenclature/stores/configurationsStore";
 import { useGtinSizeStore } from "@/nomenclature/stores/sizegtinStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -31,6 +31,8 @@ export default function NomenclatureForm() {
 	const resetConfigurations = useConfigurationsStore((state) => state.reset);
 	const queryClient = useQueryClient();
 	const router = useRouter();
+	const { data: compositions = [], isLoading: isCompositionsLoading } =
+		useCompositions();
 	const {
 		register,
 		handleSubmit,
@@ -70,6 +72,7 @@ export default function NomenclatureForm() {
 			toast.error("Произошла ошибка при выполнении запроса");
 		},
 	});
+
 	useEffect(() => {
 		resetConfigurations();
 	}, [resetConfigurations]);
@@ -85,6 +88,7 @@ export default function NomenclatureForm() {
 		};
 		mutation.mutate(payloadWithGtinSize);
 	};
+
 	const handleCancel = () => {
 		reset();
 		resetSizes();
@@ -121,7 +125,7 @@ export default function NomenclatureForm() {
 
 	return (
 		<form
-			className="flex flex-col w-full gap-4"
+			className="flex w-full flex-col gap-4"
 			onSubmit={handleSubmit(onSubmit)}
 		>
 			<div className="table-layout h-auto">
@@ -130,14 +134,14 @@ export default function NomenclatureForm() {
 					<div className="flex gap-3">
 						<button
 							type="button"
-							className="bg-neutral-500 px-2.5 py-1.5 text-white rounded-md cursor-pointer"
+							className="cursor-pointer rounded-md bg-neutral-500 px-2.5 py-1.5 text-white"
 							onClick={handleCancel}
 						>
 							Отмена
 						</button>
 						<button
 							type="submit"
-							className="bg-blue-500 px-2 py-1 text-white rounded-md cursor-pointer"
+							className="cursor-pointer rounded-md bg-blue-500 px-2 py-1 text-white"
 							disabled={mutation.isPending}
 						>
 							{mutation.isPending ? "Сохранение..." : "Сохранить"}
@@ -146,30 +150,29 @@ export default function NomenclatureForm() {
 				</div>
 
 				<div className="flex flex-col gap-4 px-8 py-3">
-					{/* Наименование */}
 					<div className="flex flex-col">
 						<label htmlFor="name">Наименование</label>
 						<input
 							{...register("name")}
 							type="text"
-							className={`w-full rounded-lg border px-2 py-1 ${errors.name ? "border-red-500" : "border-gray-300"
-								}`}
+							className={`w-full rounded-lg border px-2 py-1 ${
+								errors.name ? "border-red-500" : "border-gray-300"
+							}`}
 						/>
 						{errors.name && (
 							<p className="text-sm text-red-500">{errors.name.message}</p>
 						)}
 					</div>
 
-					{/* Row for Модель/Артикул, Цвет, and Размер */}
 					<div className="flex flex-row gap-4">
-						{/* Модель/Артикул */}
-						<div className="flex flex-col flex-1">
+						<div className="flex flex-1 flex-col">
 							<label htmlFor="modelArticle">Модель</label>
 							<input
 								{...register("modelArticle")}
 								type="text"
-								className={`w-full rounded-lg border px-2 py-1 ${errors.modelArticle ? "border-red-500" : "border-gray-300"
-									}`}
+								className={`w-full rounded-lg border px-2 py-1 ${
+									errors.modelArticle ? "border-red-500" : "border-gray-300"
+								}`}
 							/>
 							{errors.modelArticle && (
 								<p className="text-sm text-red-500">
@@ -178,14 +181,14 @@ export default function NomenclatureForm() {
 							)}
 						</div>
 
-						{/* Цвет */}
-						<div className="flex flex-col flex-1">
+						<div className="flex flex-1 flex-col">
 							<label htmlFor="color">Цвет</label>
 							<input
 								{...register("color")}
 								type="text"
-								className={`w-full rounded-lg border px-2 py-1 ${errors.color ? "border-red-500" : "border-gray-300"
-									}`}
+								className={`w-full rounded-lg border px-2 py-1 ${
+									errors.color ? "border-red-500" : "border-gray-300"
+								}`}
 							/>
 							{errors.color && (
 								<p className="text-sm text-red-500">{errors.color.message}</p>
@@ -194,19 +197,26 @@ export default function NomenclatureForm() {
 					</div>
 
 					<div className="flex flex-col">
-						<label htmlFor="composition">Состав</label>
-						<input
-							{...register("composition")}
-							type="text"
+						<label htmlFor="compositionId">Состав</label>
+						<select
+							{...register("compositionId")}
 							className="w-full rounded-lg border border-gray-300 px-2 py-1"
-							placeholder="Необязательно"
-						/>
+							disabled={isCompositionsLoading}
+						>
+							<option value="">
+								{isCompositionsLoading ? "Загрузка составов..." : "Не выбрано"}
+							</option>
+							{compositions.map((composition) => (
+								<option key={composition.id} value={composition.id}>
+									{composition.name}
+								</option>
+							))}
+						</select>
 					</div>
 				</div>
-
-				{/* Tables for Configurations and Codes */}
 			</div>
-			<div className="flex flex-row w-full gap-4 h-full flex-1 min-h-[300px] max-h-[300px]">
+
+			<div className="flex h-full min-h-[300px] max-h-[300px] w-full flex-1 flex-row gap-4">
 				<Controller
 					control={control}
 					name="configurations"

@@ -61,6 +61,7 @@ model Company {
   isActive         Boolean            @default(true)
   users            User[]
   nomenclatures    Nomenclature[]
+  compositions     Composition[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   counteragents    Counteragent[] // Renamed from "Counteragent"
@@ -68,12 +69,25 @@ model Company {
   printingTemplate PrintingTemplate[]
 }
 
+model Composition {
+  id            String         @id @default(uuid())
+  name          String
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId     String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  nomenclatures Nomenclature[]
+
+  @@unique([companyId, name])
+}
+
 model Nomenclature {
   id                   String                @id @default(uuid())
   name                 String
   modelArticle         String?
   color                String?
-  composition          String?
+  composition          Composition?          @relation(fields: [compositionId], references: [id], onDelete: Restrict)
+  compositionId        String?
   configurations       Configuration[]
   codePacks            CodePack[]
   company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)

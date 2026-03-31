@@ -3,6 +3,7 @@ import {
 	AggregationIcon,
 	CodeLinksIcon,
 	CompanyIcon,
+	CompositionIcon,
 	DisaggregationIcon,
 	NomenclatureIcon,
 	OrderIcon,
@@ -16,7 +17,12 @@ export const sidebarItems: Array<{
 	icon: ReactNode;
 }> = [
 	{ name: "Компания", href: "/companies", icon: <CompanyIcon /> },
-	{ name: "Номенклатура", href: "/nomenclature", icon: <NomenclatureIcon /> },
+	{
+		name: "Номенклатура",
+		href: "/nomenclature",
+		icon: <NomenclatureIcon />,
+	},
+	{ name: "Составы", href: "/compositions", icon: <CompositionIcon /> },
 	{ name: "Агрегация", href: "/aggregation", icon: <AggregationIcon /> },
 	{
 		name: "Агрегированные коды",

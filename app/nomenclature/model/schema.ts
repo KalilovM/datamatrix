@@ -26,6 +26,7 @@ export const NomenclatureSchema = z.object({
 	modelArticle: z.string().min(1, "Модель обязательна"),
 	color: z.string().min(1, "Цвет обязателен"),
 	composition: z.string().optional(),
+	compositionId: z.string().optional(),
 	configurations: z.array(ConfigurationSchema).optional(),
 	codes: z.array(CodeSchema).optional(),
 	gtinSize: z
@@ -74,6 +75,7 @@ export const NomenclatureEditSchema = z.object({
 	modelArticle: z.string().min(1, "Модель обязательна"),
 	color: z.string().min(1, "Цвет обязателен"),
 	composition: z.string().optional(),
+	compositionId: z.string().optional(),
 	configurations: z.array(ConfigurationEditSchema).optional(),
 	codes: z.array(CodeEditSchema).optional(),
 	gtinSize: z

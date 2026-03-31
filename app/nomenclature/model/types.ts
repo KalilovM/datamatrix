@@ -4,6 +4,7 @@ export interface Nomenclature {
 	modelArticle: string;
 	color: string;
 	composition?: string;
+	compositionId?: string;
 	GTIN: string[];
 	codeCount: number;
 }

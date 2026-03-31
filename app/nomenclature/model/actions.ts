@@ -13,6 +13,33 @@ import type { ProcessedCodeFile } from "../model/types";
 import { syncCodePacks, syncConfigurations, syncSizeGtin } from "./helpers";
 import type { NomenclatureEditData, NomenclatureFormData } from "./schema";
 
+async function getValidatedCompositionId(
+	companyId: string,
+	compositionId?: string | null,
+) {
+	const normalizedCompositionId = compositionId?.trim();
+
+	if (!normalizedCompositionId) {
+		return null;
+	}
+
+	const composition = await prisma.composition.findFirst({
+		where: {
+			id: normalizedCompositionId,
+			companyId,
+		},
+		select: {
+			id: true,
+		},
+	});
+
+	if (!composition) {
+		throw new Error("Выбранный состав не найден");
+	}
+
+	return composition.id;
+}
+
 export async function fetchNomenclatures() {
 	const session = await getServerSession(authOptions);
 	if (!session?.user) {
@@ -42,6 +69,11 @@ export async function fetchNomenclatures() {
 				name: true,
 				modelArticle: true,
 				color: true,
+				composition: {
+					select: {
+						name: true,
+					},
+				},
 				sizeGtin: {
 					select: { gtin: true },
 				},
@@ -66,6 +98,11 @@ export async function fetchNomenclatures() {
 				name: true,
 				modelArticle: true,
 				color: true,
+				composition: {
+					select: {
+						name: true,
+					},
+				},
 				sizeGtin: {
 					select: { gtin: true },
 				},
@@ -86,6 +123,7 @@ export async function fetchNomenclatures() {
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
+		composition: nomenclature.composition?.name || "",
 		GTIN: nomenclature.sizeGtin.map((item) => item.gtin),
 		codeCount: nomenclature.codePacks.reduce(
 			(total, codePack) => total + codePack.codes.length,
@@ -115,7 +153,12 @@ export async function fetchNomenclatureById(
 			name: true,
 			modelArticle: true,
 			color: true,
-			composition: true,
+			compositionId: true,
+			composition: {
+				select: {
+					name: true,
+				},
+			},
 			sizeGtin: {
 				select: {
 					id: true,
@@ -143,7 +186,8 @@ export async function fetchNomenclatureById(
 		name: nomenclature.name,
 		modelArticle: nomenclature.modelArticle || "",
 		color: nomenclature.color || "",
-		composition: nomenclature.composition || "",
+		composition: nomenclature.composition?.name || "",
+		compositionId: nomenclature.compositionId || "",
 		GTIN: nomenclature.sizeGtin[0]?.gtin || "",
 		gtinSize,
 		configurations: nomenclature.configurations.map((cfg) => ({
@@ -172,7 +216,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 		name,
 		modelArticle,
 		color,
-		composition,
+		compositionId,
 		configurations,
 		codes,
 		gtinSize,
@@ -192,6 +236,10 @@ export async function createNomenclature(data: NomenclatureFormData) {
 		return { success: false, error: "Не установлен ID компании" };
 
 	const { companyId } = user;
+	const validatedCompositionId = await getValidatedCompositionId(
+		companyId,
+		compositionId,
+	);
 
 	const configCreateData =
 		configurations?.map((cfg) => ({
@@ -208,7 +256,7 @@ export async function createNomenclature(data: NomenclatureFormData) {
 					name,
 					modelArticle,
 					color,
-					composition: composition?.trim() || null,
+					compositionId: validatedCompositionId,
 					companyId,
 					configurations: { create: configCreateData },
 				},
@@ -317,7 +365,7 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 			name,
 			modelArticle,
 			color,
-			composition,
+			compositionId,
 			configurations,
 			codes,
 			gtinSize,
@@ -336,13 +384,18 @@ export async function updateNomenclature(data: NomenclatureEditData) {
 			return { success: false, error: "Не установлен ID компании" };
 		}
 
+		const validatedCompositionId = await getValidatedCompositionId(
+			user.companyId,
+			compositionId,
+		);
+
 		await prisma.nomenclature.update({
 			where: { id },
 			data: {
 				name,
 				modelArticle,
 				color,
-				composition: composition?.trim() || null,
+				compositionId: validatedCompositionId,
 			},
 		});
 

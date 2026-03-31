@@ -66,7 +66,11 @@ export async function GET(req: Request) {
 			name: true,
 			color: true,
 			modelArticle: true,
-			composition: true,
+			composition: {
+				select: {
+					name: true,
+				},
+			},
 			sizeGtin: true,
 			codePacks: {
 				select: {
@@ -91,7 +95,7 @@ export async function GET(req: Request) {
 		name: nomenclature.name,
 		color: nomenclature.color,
 		modelArticle: nomenclature.modelArticle,
-		composition: nomenclature.composition,
+		composition: nomenclature.composition?.name || "",
 		size: nomenclature.sizeGtin.map((sizeGtin) => sizeGtin.size),
 		GTIN: nomenclature.sizeGtin.map(
 			(sizeGtin) => `${sizeGtin.size} - ${sizeGtin.gtin}`,
