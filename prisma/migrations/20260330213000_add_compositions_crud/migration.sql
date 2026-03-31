@@ -34,6 +34,19 @@ DROP COLUMN "composition";
 CREATE UNIQUE INDEX "Composition_companyId_name_key" ON "Composition"("companyId", "name");
 CREATE INDEX "Nomenclature_compositionId_idx" ON "Nomenclature"("compositionId");
 
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conrelid = '"Company"'::regclass
+          AND conname = 'Company_id_unique_for_compositions'
+    ) THEN
+        ALTER TABLE "Company"
+        ADD CONSTRAINT "Company_id_unique_for_compositions" UNIQUE ("id");
+    END IF;
+END $$;
+
 ALTER TABLE "Composition"
 ADD CONSTRAINT "Composition_companyId_fkey"
 FOREIGN KEY ("companyId") REFERENCES "Company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
