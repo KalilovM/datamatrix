@@ -343,8 +343,8 @@ const PrintCodes: React.FC<Props> = ({
 
 	const renderDetailsLayout = (code: string, index: number) => {
 		const printDate = new Intl.DateTimeFormat("ru-RU").format(new Date());
-		const detailsDefaultFontWeight = 500;
-		const detailsEmphasisFontWeight = 600;
+		const detailsDefaultFontWeight = 600;
+		const detailsEmphasisFontWeight = 700;
 		const fixedFieldStyles = fixedNomenclatureDetailsFields.map((field) => ({
 			fieldType: toPrismaTemplateFieldType(field.field),
 			fontSize: field.size,
