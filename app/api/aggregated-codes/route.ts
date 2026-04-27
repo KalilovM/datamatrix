@@ -1,4 +1,7 @@
-import { AGGREGATED_CODES_PAGE_SIZE, type IAggregatedCode } from "@/aggregation-codes/definitions";
+import {
+	AGGREGATED_CODES_PAGE_SIZE,
+	type IAggregatedCode,
+} from "@/aggregation-codes/definitions";
 import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { Prisma } from "@prisma/client";
@@ -71,13 +74,19 @@ type PalletWithRelations = Prisma.GeneratedCodePalletGetPayload<{
 	include: typeof palletInclude;
 }>;
 
-const formatPack = (
-	pack: PackWithRelations,
-): IAggregatedCode => ({
+const formatModelArticle = (
+	modelArticle: string | null,
+	color: string | null,
+) => [modelArticle, color].filter((value): value is string => Boolean(value)).join("-");
+
+const formatPack = (pack: PackWithRelations): IAggregatedCode => ({
 	name: pack.nomenclature.name,
-	modelArticle: `${pack.nomenclature.modelArticle}-${pack.nomenclature.color}`,
+	modelArticle: formatModelArticle(
+		pack.nomenclature.modelArticle,
+		pack.nomenclature.color,
+	),
 	size: pack.nomenclature.sizeGtin.map((size) => size.size).join(", "),
-	color: pack.nomenclature.color,
+	color: pack.nomenclature.color ?? "",
 	generatedCode: pack.value,
 	configuration: `1-${pack.configuration.pieceInPack}-${pack.configuration.packInPallet}`,
 	codes: pack.codes.map((code) => code.value),
@@ -85,13 +94,14 @@ const formatPack = (
 	createdAt: pack.createdAt,
 });
 
-const formatPallet = (
-	pallet: PalletWithRelations,
-): IAggregatedCode => ({
+const formatPallet = (pallet: PalletWithRelations): IAggregatedCode => ({
 	name: pallet.nomenclature.name,
-	modelArticle: `${pallet.nomenclature.modelArticle}-${pallet.nomenclature.color}`,
+	modelArticle: formatModelArticle(
+		pallet.nomenclature.modelArticle,
+		pallet.nomenclature.color,
+	),
 	size: pallet.nomenclature.sizeGtin.map((size) => size.size).join(", "),
-	color: pallet.nomenclature.color,
+	color: pallet.nomenclature.color ?? "",
 	generatedCode: pallet.value,
 	configuration: `1-${pallet.configuration.pieceInPack}-${pallet.configuration.packInPallet}`,
 	type: "Паллет",
