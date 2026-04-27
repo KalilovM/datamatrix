@@ -232,14 +232,14 @@ export async function GET(req: Request) {
 			SELECT gp."id", 'pack' AS "recordType", gp."createdAt"
 			FROM "GeneratedCodePack" gp
 			INNER JOIN "Nomenclature" n ON n."id" = gp."nomenclatureId"
-			WHERE ${Prisma.join(packConditions, Prisma.sql` AND `)}
+			WHERE ${Prisma.join(packConditions, " AND ")}
 
 			UNION ALL
 
 			SELECT gpl."id", 'pallet' AS "recordType", gpl."createdAt"
 			FROM "GeneratedCodePallet" gpl
 			INNER JOIN "Nomenclature" n ON n."id" = gpl."nomenclatureId"
-			WHERE ${Prisma.join(palletConditions, Prisma.sql` AND `)}
+			WHERE ${Prisma.join(palletConditions, " AND ")}
 		) AS combined
 		ORDER BY combined."createdAt" DESC, combined."recordType" ASC, combined."id" DESC
 		LIMIT ${pageSize}
