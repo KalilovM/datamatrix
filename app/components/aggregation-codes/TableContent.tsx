@@ -1,27 +1,34 @@
-import type { IAggregatedCode, Filters } from "@/aggregation-codes/definitions";
+import type { Filters, IAggregatedCode } from "@/aggregation-codes/definitions";
 import { useEffect, useState } from "react";
-import { FilterIcon, SearchIcon, CloseIcon } from "../Icons";
+import { CloseIcon, FilterIcon, SearchIcon } from "../Icons";
 import AggregationCodesRow from "./AggregationCodesRow";
-
-const PAGE_SIZE = 10;
 
 interface Props {
 	aggregatedCodes: IAggregatedCode[];
+	currentPage: number;
+	pageSize: number;
+	totalCount: number;
+	totalPages: number;
 	filters: Filters;
 	onApply: (filters: Filters) => void;
+	onPageChange: (page: number) => void;
 }
 
-export default function TableContent({ aggregatedCodes, filters, onApply }: Props) {
+export default function TableContent({
+	aggregatedCodes,
+	currentPage,
+	pageSize,
+	totalCount,
+	totalPages,
+	filters,
+	onApply,
+	onPageChange,
+}: Props) {
 	const [tempFilters, setTempFilters] = useState(filters);
 	const [showFilters, setShowFilters] = useState(false);
-	const [currentPage, setCurrentPage] = useState(1);
 
 	useEffect(() => {
 		setTempFilters(filters); // keep in sync when global filters change externally
-	}, [filters]);
-
-	useEffect(() => {
-		setCurrentPage(1);
 	}, [filters]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,19 +39,9 @@ export default function TableContent({ aggregatedCodes, filters, onApply }: Prop
 		setTempFilters((prev) => ({ ...prev, [field]: "" }));
 	};
 
-	const totalPages = Math.max(1, Math.ceil(aggregatedCodes.length / PAGE_SIZE));
-	const startItem = aggregatedCodes.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-	const endItem = Math.min(currentPage * PAGE_SIZE, aggregatedCodes.length);
-	const paginatedCodes = aggregatedCodes.slice(
-		(currentPage - 1) * PAGE_SIZE,
-		currentPage * PAGE_SIZE,
-	);
-
-	useEffect(() => {
-		if (currentPage > totalPages) {
-			setCurrentPage(totalPages);
-		}
-	}, [currentPage, totalPages]);
+	const hasRows = aggregatedCodes.length > 0;
+	const startItem = hasRows ? (currentPage - 1) * pageSize + 1 : 0;
+	const endItem = hasRows ? startItem + aggregatedCodes.length - 1 : 0;
 
 	return (
 		<div className="table-layout print:border-none print:rounded-none print:hidden">
@@ -91,7 +88,6 @@ export default function TableContent({ aggregatedCodes, filters, onApply }: Prop
 								<button
 									type="button"
 									onClick={() => {
-										setCurrentPage(1);
 										onApply(tempFilters);
 										setShowFilters(false);
 									}}
@@ -119,18 +115,18 @@ export default function TableContent({ aggregatedCodes, filters, onApply }: Prop
 			</div>
 
 			{/* Table Columns */}
-			<AggregationCodesRow aggregatedCodes={paginatedCodes} />
+			<AggregationCodesRow aggregatedCodes={aggregatedCodes} />
 
-			{aggregatedCodes.length > PAGE_SIZE && (
+			{totalPages > 1 && (
 				<div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
 					<p className="text-sm text-gray-500">
-						{`Показано ${startItem}-${endItem} из ${aggregatedCodes.length}`}
+						{`Показано ${startItem}-${endItem} из ${totalCount}`}
 					</p>
 					<div className="flex items-center gap-2">
 						<button
 							type="button"
 							disabled={currentPage === 1}
-							onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+							onClick={() => onPageChange(Math.max(1, currentPage - 1))}
 							className="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							Назад
@@ -141,9 +137,7 @@ export default function TableContent({ aggregatedCodes, filters, onApply }: Prop
 						<button
 							type="button"
 							disabled={currentPage === totalPages}
-							onClick={() =>
-								setCurrentPage((page) => Math.min(totalPages, page + 1))
-							}
+							onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
 							className="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							Вперед
