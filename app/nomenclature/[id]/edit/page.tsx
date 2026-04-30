@@ -10,42 +10,42 @@ import { useParams } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Page() {
-	const params = useParams<{ id: string | string[] }>();
-	const id = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
-	const { data: nomenclatureData, isLoading, error } = useNomenclatureById(id);
-	const {
-		data: printTemplateData,
-		isLoading: isPrintTemplateLoading,
-		error: printTemplateError,
-	} = usePrintTemplate();
-	const { nomenclature, setPrintTemplate } = useNomenclatureStore();
+  const params = useParams<{ id: string | string[] }>();
+  const id = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
+  const { data: nomenclatureData, isLoading, error } = useNomenclatureById(id);
+  const {
+    data: printTemplateData,
+    isLoading: isPrintTemplateLoading,
+    error: printTemplateError,
+  } = usePrintTemplate();
+  const { nomenclature, setPrintTemplate } = useNomenclatureStore();
 
-	useEffect(() => {
-		if (!isPrintTemplateLoading && !printTemplateError && printTemplateData) {
-			setPrintTemplate(printTemplateData);
-		}
-	}, [
-		isPrintTemplateLoading,
-		printTemplateError,
-		printTemplateData,
-		setPrintTemplate,
-	]);
+  useEffect(() => {
+    if (!isPrintTemplateLoading && !printTemplateError && printTemplateData) {
+      setPrintTemplate(printTemplateData);
+    }
+  }, [
+    isPrintTemplateLoading,
+    printTemplateError,
+    printTemplateData,
+    setPrintTemplate,
+  ]);
 
-	if (isLoading) return <Layout>Загрузка...</Layout>;
-	if (error || !nomenclatureData)
-		return <Layout>Номенклатура не найдена</Layout>;
+  if (isLoading) return <Layout>Загрузка...</Layout>;
+  if (error || !nomenclatureData)
+    return <Layout>Номенклатура не найдена</Layout>;
 
-	return (
-		<Layout>
-			<div className="print:hidden">
-				<NomenclatureEditForm nomenclature={nomenclatureData} />
-			</div>
-			{printTemplateData && (
-				<PrintCodes
-					printTemplate={printTemplateData}
-					selectedNomenclature={nomenclature}
-				/>
-			)}
-		</Layout>
-	);
+  return (
+    <Layout>
+      <div className="print:hidden w-full">
+        <NomenclatureEditForm nomenclature={nomenclatureData} />
+      </div>
+      {printTemplateData && (
+        <PrintCodes
+          printTemplate={printTemplateData}
+          selectedNomenclature={nomenclature}
+        />
+      )}
+    </Layout>
+  );
 }
