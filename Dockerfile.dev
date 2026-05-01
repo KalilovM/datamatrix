@@ -1,19 +1,16 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json* yarn.lock* ./
-RUN npm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci --include=optional
 
 # Copy the rest of the app
 COPY . .
 
-# Install nodemon for hot reload
-RUN npm install -g nodemon
-
 # Expose the app port
 EXPOSE 3000
 
-# Start the application with nodemon
-CMD ["npx", "nodemon", "--watch", ".", "--exec", "npm run dev"]
+# Start the application in Next.js dev mode
+CMD ["npm", "run", "dev"]

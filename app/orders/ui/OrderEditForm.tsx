@@ -2,6 +2,7 @@
 
 import type { ICounteragentOption } from "@/orders/create/definitions";
 import { useOrderStore } from "@/orders/stores/useOrderStore";
+import { saveAs } from "file-saver";
 import Papa from "papaparse";
 import { useState } from "react";
 import OrderCodesList from "./OrderCodesList";
@@ -45,6 +46,7 @@ export default function OrderCreationForm({
 		const formattedDate = `${day}.${month}.${year}`;
 
 		const filename = `${orderData.showId}-${selectedCounteragent.label}-от-${formattedDate}.csv`;
+		const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 
 		type WritableFileLike = {
 			write: (data: Blob) => Promise<void>;
@@ -76,18 +78,19 @@ export default function OrderCreationForm({
 					],
 				});
 				const writable = await fileHandle.createWritable();
-				await writable.write(
-					new Blob([csv], { type: "text/csv;charset=utf-8;" }),
-				);
+				await writable.write(csvBlob);
 				await writable.close();
 				return;
 			} catch (error) {
-				console.log("File save cancelled or failed", error);
+				if (error instanceof DOMException && error.name === "AbortError") {
+					return;
+				}
+
+				console.warn("File save picker failed, falling back to download", error);
 			}
 		}
 
-		// Fallback for unsupported browsers
-		// saveAs(new Blob([csv], { type: "text/csv;charset=utf-8;" }), filename);
+		saveAs(csvBlob, filename);
 	};
 
 	return (

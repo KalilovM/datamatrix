@@ -17,9 +17,8 @@ type UpdateOrderPayload = {
 	rows: OrderRowInput[];
 };
 
-function normalizeScannerInput(raw: string): string {
-	const GS = String.fromCharCode(29); // ASCII 29
-	return `�${raw.split(GS).join("\x1D")}`; // insert raw ASCII 29 back
+function formatScannedCode(raw: string): string {
+	return raw.trim().replace(/[^a-zA-Z0-9+=_]/g, "");
 }
 
 export async function DELETE(
@@ -236,6 +235,27 @@ export async function PUT(
 
 	// Re-attach updated data
 
+	const formattedCodes = Array.from(
+		new Set(codes.map(formatScannedCode).filter(Boolean)),
+	);
+	const codeRecords =
+		formattedCodes.length > 0
+			? await prisma.code.findMany({
+					where: {
+						formattedValue: { in: formattedCodes },
+						used: false,
+					},
+					select: { id: true },
+				})
+			: [];
+
+	if (codeRecords.length !== formattedCodes.length) {
+		return NextResponse.json(
+			{ message: "Один или несколько кодов не найдены или уже использованы" },
+			{ status: 400 },
+		);
+	}
+
 	const orderData: Parameters<typeof prisma.order.create>[0]["data"] = {
 		companyId: user.companyId,
 		counteragentId,
@@ -246,9 +266,7 @@ export async function PUT(
 
 	if (codes.length > 0) {
 		orderData.code = {
-			connect: codes.map((code: string) => ({
-				value: normalizeScannerInput(code),
-			})),
+			connect: codeRecords.map((code) => ({ id: code.id })),
 		};
 	}
 
@@ -270,7 +288,7 @@ export async function PUT(
 
 	await prisma.code.updateMany({
 		where: {
-			value: { in: codes.map((code: string) => normalizeScannerInput(code)) },
+			id: { in: codeRecords.map((code) => code.id) },
 		},
 		data: {
 			used: true,

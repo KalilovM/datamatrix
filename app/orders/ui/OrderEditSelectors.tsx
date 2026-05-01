@@ -9,6 +9,14 @@ import { useOrderStore } from "@/orders/stores/useOrderStore";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
+function getNomenclatureLabel(nomenclature: {
+	id?: string;
+	name?: string | null;
+	modelArticle?: string | null;
+}) {
+	return nomenclature.modelArticle ?? nomenclature.name ?? nomenclature.id ?? "";
+}
+
 function isUUID(str: string): boolean {
 	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
 		str,
@@ -71,14 +79,14 @@ export default function OrderEditSelectors({
 			const data = await response.json();
 			if (!response.ok) {
 				toast.error(data.error);
-			} else if (isCodeExists(aggregatedCode)) {
+			} else if (isCodeExists(data.code) || isCodeExists(aggregatedCode)) {
 				toast.error("Код уже загружен!");
 			} else {
 				toast.success("Код успешно загружен!");
 				addCodes({
-					generatedCode: aggregatedCode,
+					generatedCode: data.code,
 					codes: [data.code],
-					nomenclature: data.nomenclature,
+					nomenclature: getNomenclatureLabel(data.nomenclature),
 				});
 				setGeneratedCode("");
 				setTimeout(() => {
@@ -100,11 +108,10 @@ export default function OrderEditSelectors({
 					toast.error("Код уже загружен!");
 				} else {
 					toast.success("Коды успешно загружены!");
-					console.log(data, "data");
 					addCodes({
 						generatedCode: aggregatedCode,
 						codes: data.linkedCodes.map((code: string) => code),
-						nomenclature: data.nomenclature.modelArticle,
+						nomenclature: getNomenclatureLabel(data.nomenclature),
 					});
 					setGeneratedCode("");
 

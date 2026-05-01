@@ -30,9 +30,10 @@ export async function POST(req: Request) {
 			);
 		}
 
-		const linkedCodes = codePack
+		const linkedCodeRecords = codePack
 			? codePack.codes
 			: codePallet?.generatedCodePacks.flatMap((pack) => pack.codes) || [];
+		const linkedCodes = linkedCodeRecords.map((code) => code.value);
 
 		const nomenclature =
 			codePack?.nomenclature || codePallet?.generatedCodePacks[0].nomenclature;
