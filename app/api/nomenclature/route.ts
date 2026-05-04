@@ -1,8 +1,11 @@
+import { NOMENCLATURE_PAGE_SIZE } from "@/nomenclature/model/types";
 import { authOptions } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+
+const MAX_PAGE_SIZE = 100;
 
 export async function GET(req: Request) {
 	const session = await getServerSession(authOptions);
@@ -15,6 +18,18 @@ export async function GET(req: Request) {
 	const modelArticle = url.searchParams.get("modelArticle") || undefined;
 	const color = url.searchParams.get("color") || undefined;
 	const GTIN = url.searchParams.get("gtin") || undefined;
+	const requestedPage = Number.parseInt(url.searchParams.get("page") ?? "1", 10);
+	const requestedPageSize = Number.parseInt(
+		url.searchParams.get("pageSize") ?? String(NOMENCLATURE_PAGE_SIZE),
+		10,
+	);
+
+	const pageSize = Number.isNaN(requestedPageSize)
+		? NOMENCLATURE_PAGE_SIZE
+		: Math.min(Math.max(requestedPageSize, 1), MAX_PAGE_SIZE);
+	const initialPage = Number.isNaN(requestedPage)
+		? 1
+		: Math.max(requestedPage, 1);
 
 	const user = await prisma.user.findUnique({
 		where: { id: session.user.id },
@@ -56,11 +71,17 @@ export async function GET(req: Request) {
 		};
 	}
 
+	const totalCount = await prisma.nomenclature.count({ where });
+	const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+	const page = Math.min(initialPage, totalPages);
+
 	const nomenclatures = await prisma.nomenclature.findMany({
 		where,
 		orderBy: {
 			modelArticle: "asc",
 		},
+		skip: (page - 1) * pageSize,
+		take: pageSize,
 		select: {
 			id: true,
 			name: true,
@@ -106,5 +127,11 @@ export async function GET(req: Request) {
 		),
 	}));
 
-	return NextResponse.json(result);
+	return NextResponse.json({
+		items: result,
+		totalCount,
+		totalPages,
+		page,
+		pageSize,
+	});
 }

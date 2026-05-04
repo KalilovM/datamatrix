@@ -1,4 +1,5 @@
 import type { Filters, IAggregatedCode } from "@/aggregation-codes/definitions";
+import PaginationControls from "@/shared/ui/PaginationControls";
 import { useEffect, useState } from "react";
 import { CloseIcon, FilterIcon, SearchIcon } from "../Icons";
 import AggregationCodesRow from "./AggregationCodesRow";
@@ -122,27 +123,14 @@ export default function TableContent({
 					<p className="text-sm text-gray-500">
 						{`Показано ${startItem}-${endItem} из ${totalCount}`}
 					</p>
-					<div className="flex items-center gap-2">
-						<button
-							type="button"
-							disabled={currentPage === 1}
-							onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-							className="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							Назад
-						</button>
-						<span className="text-sm text-gray-600">
-							{`Страница ${currentPage} из ${totalPages}`}
-						</span>
-						<button
-							type="button"
-							disabled={currentPage === totalPages}
-							onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-							className="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							Вперед
-						</button>
-					</div>
+					<PaginationControls
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPageChange={onPageChange}
+						previousLabel="Назад"
+						nextLabel="Вперед"
+						pageLabel={(page) => `Страница ${page}`}
+					/>
 				</div>
 			)}
 		</div>

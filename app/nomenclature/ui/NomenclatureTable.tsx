@@ -1,6 +1,7 @@
 "use client";
 
 import { CloseIcon, FilterIcon } from "@/shared/ui/icons";
+import PaginationControls from "@/shared/ui/PaginationControls";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Nomenclature } from "../model/types";
@@ -15,14 +16,24 @@ interface Filters {
 
 interface Props {
 	nomenclatures: Nomenclature[];
+	currentPage: number;
+	pageSize: number;
+	totalCount: number;
+	totalPages: number;
 	filters: Filters;
 	onApply: (filters: Filters) => void;
+	onPageChange: (page: number) => void;
 }
 
 export default function NomenclatureTable({
 	nomenclatures,
+	currentPage,
+	pageSize,
+	totalCount,
+	totalPages,
 	filters,
 	onApply,
+	onPageChange,
 }: Props) {
 	const [tempFilters, setTempFilters] = useState(filters);
 	const [showFilters, setShowFilters] = useState(false);
@@ -38,6 +49,10 @@ export default function NomenclatureTable({
 	const clearField = (field: keyof Filters) => {
 		setTempFilters((prev) => ({ ...prev, [field]: "" }));
 	};
+
+	const hasRows = nomenclatures.length > 0;
+	const startItem = hasRows ? (currentPage - 1) * pageSize + 1 : 0;
+	const endItem = hasRows ? startItem + nomenclatures.length - 1 : 0;
 
 	return (
 		<div className="table-layout">
@@ -145,6 +160,22 @@ export default function NomenclatureTable({
 					</tbody>
 				</table>
 			</div>
+
+			{totalPages > 1 && (
+				<div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+					<p className="text-sm text-gray-500">
+						{`Показано ${startItem}-${endItem} из ${totalCount}`}
+					</p>
+					<PaginationControls
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPageChange={onPageChange}
+						previousLabel="Назад"
+						nextLabel="Вперед"
+						pageLabel={(page) => `Страница ${page}`}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }
