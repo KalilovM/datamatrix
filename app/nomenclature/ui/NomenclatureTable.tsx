@@ -55,7 +55,7 @@ export default function NomenclatureTable({
 	const endItem = hasRows ? startItem + nomenclatures.length - 1 : 0;
 
 	return (
-		<div className="table-layout">
+		<div className="table-layout flex flex-col overflow-hidden">
 			{/* Table Header */}
 			<div className="table-header">
 				<p className="table-header-title">Номенклатуры</p>
@@ -118,7 +118,7 @@ export default function NomenclatureTable({
 			</div>
 
 			{/* Table Rows */}
-			<div className="table-rows-layout relative w-full h-full">
+			<div className="relative w-full flex-1 overflow-x-auto overflow-y-auto">
 				<table className="w-full text-sm text-left text-gray-500">
 					<thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200 w-full">
 						<tr>
@@ -162,7 +162,7 @@ export default function NomenclatureTable({
 			</div>
 
 			{totalPages > 1 && (
-				<div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+				<div className="flex shrink-0 flex-col gap-3 border-t border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
 					<p className="text-sm text-gray-500">
 						{`Показано ${startItem}-${endItem} из ${totalCount}`}
 					</p>
